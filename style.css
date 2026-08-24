@@ -1,3 +1,17 @@
+:root {
+  --cap-help: #FF6B5B;
+  --cap-help-soft: #FFE3DE;
+  --cap-understand: #3FB6C9;
+  --cap-understand-soft: #D9F3F6;
+  --cap-say: #FFB648;
+  --cap-say-soft: #FFEDD1;
+  --cap-communicate: #5FC98D;
+  --cap-communicate-soft: #DFF6E8;
+  --locked: #D8CFC7;
+  --shadow-btn: 0 5px 0 rgba(58,46,42,0.14);
+  --shadow-card: 0 8px 24px rgba(58,46,42,0.10);
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
 html, body {
@@ -33,15 +47,22 @@ html, body {
 .home-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding: 8px 4px 16px;
 }
 
-.home-header h1 {
-  font-size: 1.6rem;
-  margin: 0;
-  flex: 1;
-  text-align: center;
+.home-mascot { flex: 0 0 auto; width: 48px; }
+.home-mascot svg { display: block; }
+
+.greeting { flex: 1; min-width: 0; }
+.greeting .hello { font-size: 0.85rem; color: #999; font-weight: 700; }
+.greeting h1 { font-size: 1.3rem; margin: 0; }
+
+.streak-badge {
+  display: flex; align-items: center; gap: 3px;
+  background: var(--cap-say-soft); color: #B85C00;
+  border-radius: 999px; padding: 6px 10px; font-weight: 800; font-size: 0.85rem;
+  flex: 0 0 auto;
 }
 
 .icon-btn {
@@ -51,44 +72,66 @@ html, body {
   padding: 8px;
   cursor: pointer;
   opacity: 0.55;
+  flex: 0 0 auto;
 }
 
-.session-btn {
+.mission-card {
   display: block;
   width: 100%;
+  text-align: left;
+  position: relative;
   background: linear-gradient(135deg, #FF6B6B, #FFB86B);
   color: #fff;
   border: none;
-  border-radius: 20px;
-  font-size: 1.15rem;
-  font-weight: 800;
-  padding: 18px 12px;
-  margin: 0 0 16px;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  border-radius: 24px;
+  padding: 18px 20px;
+  margin: 0 0 20px;
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 }
 
-.session-btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+.mission-card:active { transform: translateY(2px); }
+
+.mission-card .eyebrow { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; opacity: 0.9; text-transform: uppercase; }
+.mission-card h2 { font-size: 1.35rem; margin: 6px 0 2px; }
+.mission-card .meta { font-size: 0.82rem; opacity: 0.9; margin-bottom: 12px; }
+.play-pill {
+  display: inline-block;
+  background: #fff; color: #E8543F; font-weight: 800; font-size: 0.9rem;
+  border-radius: 999px; padding: 8px 20px;
 }
 
-.session-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.35);
-  border-radius: 12px;
-  padding: 2px 10px;
-  font-size: 0.85rem;
-  margin-left: 6px;
+.section-title {
+  font-size: 0.78rem; font-weight: 800; color: #999;
+  text-transform: uppercase; letter-spacing: 0.05em; margin: 4px 0 10px;
 }
+
+.journey-preview { display: flex; align-items: center; overflow-x: auto; padding: 2px 0 18px; gap: 0; }
+.journey-node { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; width: 72px; background: none; border: none; font-family: inherit; cursor: pointer; }
+.journey-dot {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+  background: #fff; box-shadow: var(--shadow-btn);
+}
+.journey-dot.done { background: var(--cap-communicate); color: #fff; }
+.journey-dot.progress { background: var(--cap-help); color: #fff; box-shadow: 0 0 0 4px var(--cap-help-soft); }
+.journey-line { flex: 0 0 20px; height: 3px; background: var(--locked); margin-top: -20px; }
+.journey-node .label { font-size: 0.62rem; text-align: center; color: #999; font-weight: 700; margin-top: 6px; }
+
+.avatar-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--cap-communicate-soft); border-radius: 20px;
+  padding: 12px 14px; margin-bottom: 20px; cursor: pointer; border: none; width: 100%; text-align: left;
+}
+.avatar-banner .voxel-avatar { width: 44px; flex: 0 0 auto; }
+.avatar-banner .txt { flex: 1; font-weight: 800; font-size: 0.85rem; color: #333; }
+.avatar-banner .txt small { display: block; font-weight: 600; color: #888; font-size: 0.7rem; }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   padding: 4px 4px 24px;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .cat-card {
@@ -468,3 +511,37 @@ html, body {
   color: #bbb;
   font-style: italic;
 }
+
+/* ===================== Mascote (quokka, SVG original) ===================== */
+.quokka .ear { fill: #C9987A; }
+.quokka .ear-inner { fill: #F3D9C4; }
+.quokka .body { fill: #C9987A; }
+.quokka .belly { fill: #F3D9C4; }
+.quokka .eye { fill: #3A2E2A; }
+
+/* ===================== AVATAR (voxel, customizável) ===================== */
+.avatar-hero {
+  background: #fff; border-radius: 24px;
+  padding: 20px; text-align: center; box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+.avatar-hero .voxel-avatar { width: 140px; height: auto; margin: 0 auto; }
+.avatar-hero .unlocked-count { font-size: 0.78rem; color: #999; font-weight: 700; margin-top: 8px; }
+
+.item-group { margin-bottom: 18px; }
+.item-group .label { font-size: 0.8rem; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.item-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.item-swatch {
+  flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
+  border: 3px solid transparent; position: relative; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+  box-shadow: var(--shadow-btn);
+}
+.item-swatch.selected { border-color: #333; }
+.item-swatch.locked { opacity: 0.55; }
+.item-swatch .lock-badge {
+  position: absolute; bottom: -4px; right: -4px; background: #333;
+  color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.unlock-hint { text-align: center; font-size: 0.75rem; font-weight: 700; color: #E8543F; min-height: 1.4em; margin-top: -8px; margin-bottom: 14px; }

@@ -19,6 +19,27 @@ const CATEGORY_META = {
   phrases: { namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1" },
 };
 
+// Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
+// isCategoryUnlockThresholdMet). Não depende de skills/situations (isso ainda não existe no motor real).
+const AVATAR_ITEMS = {
+  shirt: [
+    { id: "coral", color: "#FF6B5B", unlockedBy: null },
+    { id: "teal", color: "#3FB6C9", unlockedBy: "survival" },
+    { id: "yellow", color: "#FFB648", unlockedBy: "colors" },
+    { id: "green", color: "#5FC98D", unlockedBy: "animals" },
+    { id: "purple", color: "#B18CD9", unlockedBy: "school" },
+  ],
+  hat: [
+    { id: "none", type: null, unlockedBy: null },
+    { id: "cap", type: "cap", color: "#FF6B5B", unlockedBy: "numbers" },
+    { id: "party", type: "party", color: "#FFB648", unlockedBy: "phrases" },
+  ],
+  backpack: [
+    { id: "none", color: null, unlockedBy: null },
+    { id: "red", color: "#FF6B5B", unlockedBy: "food" },
+  ],
+};
+
 const CONTENT = [
   // ---- survival (sobrevivência escolar) ----
   { id: "survival_hello", contentType: "word", en: "hello", pt: "olá", emoji: "👋", category: "survival", difficulty: 1, prerequisites: [] },

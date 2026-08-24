@@ -215,6 +215,43 @@ function pickRoundType(item) {
   return "choice";
 }
 
+// ===================== Streak (dias seguidos de uso) =====================
+const STREAK_KEY = "meuIngles_streak_v1";
+function loadStreak() {
+  try {
+    return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count: 0, lastActiveDate: null };
+  } catch (e) {
+    return { count: 0, lastActiveDate: null };
+  }
+}
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+// Chamar uma vez quando o app abre. Não pune se o dia pular — só reseta pra 1, sem culpa/pressão.
+function touchStreak() {
+  const s = loadStreak();
+  const today = todayStr();
+  if (s.lastActiveDate === today) return s;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  s.count = s.lastActiveDate === yesterday ? s.count + 1 : 1;
+  s.lastActiveDate = today;
+  localStorage.setItem(STREAK_KEY, JSON.stringify(s));
+  return s;
+}
+
+// ===================== Progresso por categoria (usado na jornada + desbloqueio do avatar) =====================
+function getCategoryProgressRatio(categoryId) {
+  const items = CONTENT.filter((it) => it.category === categoryId);
+  if (!items.length) return 0;
+  const progressed = items.filter((it) => ["consolidating", "mastered"].includes(getLearningStage(it.id))).length;
+  return progressed / items.length;
+}
+const UNLOCK_THRESHOLD = 0.4; // 40% da categoria consolidada/dominada já libera o item de avatar ligado a ela
+function isCategoryUnlockThresholdMet(categoryId) {
+  if (!categoryId) return true; // itens sem categoria de desbloqueio ficam livres desde o início
+  return getCategoryProgressRatio(categoryId) >= UNLOCK_THRESHOLD;
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

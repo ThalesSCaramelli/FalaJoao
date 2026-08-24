@@ -7,6 +7,110 @@ function renderMedia(item) {
   return item.emoji;
 }
 
+// ===================== Mascote (quokka) e avatar (voxel customizável) — SVG original =====================
+function mascotSVG() {
+  return `<svg class="quokka" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse class="ear" cx="24" cy="26" rx="14" ry="16"/>
+    <ellipse class="ear" cx="76" cy="26" rx="14" ry="16"/>
+    <ellipse class="ear-inner" cx="24" cy="28" rx="7" ry="9"/>
+    <ellipse class="ear-inner" cx="76" cy="28" rx="7" ry="9"/>
+    <circle class="body" cx="50" cy="56" r="38"/>
+    <ellipse class="belly" cx="50" cy="66" rx="22" ry="18"/>
+    <circle class="eye" cx="38" cy="48" r="4.5"/>
+    <circle class="eye" cx="62" cy="48" r="4.5"/>
+    <path d="M35 62 Q50 74 65 62" stroke="#3A2E2A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+let avatarState = (() => {
+  try {
+    return JSON.parse(localStorage.getItem("meuIngles_avatar_v1")) || { shirt: "coral", hat: "none", backpack: "none" };
+  } catch (e) {
+    return { shirt: "coral", hat: "none", backpack: "none" };
+  }
+})();
+function saveAvatarState() {
+  localStorage.setItem("meuIngles_avatar_v1", JSON.stringify(avatarState));
+}
+
+function svgHat(item) {
+  if (!item || !item.type) return "";
+  if (item.type === "cap") return `<path d="M30 16 Q50 -2 70 16 L70 22 L30 22 Z" fill="${item.color}"/><rect x="26" y="20" width="48" height="6" rx="3" fill="${item.color}"/>`;
+  if (item.type === "party") return `<path d="M50 -4 L68 20 L32 20 Z" fill="${item.color}"/><circle cx="50" cy="-4" r="4" fill="#fff"/>`;
+  return "";
+}
+function svgBackpack(item) {
+  if (!item || !item.color) return "";
+  return `<rect x="6" y="62" width="14" height="32" rx="5" fill="${item.color}"/>`;
+}
+function avatarSVG(state) {
+  const shirt = AVATAR_ITEMS.shirt.find((i) => i.id === state.shirt);
+  const hat = AVATAR_ITEMS.hat.find((i) => i.id === state.hat);
+  const backpack = AVATAR_ITEMS.backpack.find((i) => i.id === state.backpack);
+  return `<svg class="voxel-avatar" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    ${svgBackpack(backpack)}
+    <rect x="34" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
+    <rect x="52" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
+    <rect x="14" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
+    <rect x="72" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
+    <rect x="26" y="58" width="48" height="42" rx="6" fill="${shirt.color}"/>
+    <rect x="30" y="14" width="40" height="40" rx="8" fill="#F3C79A"/>
+    <circle cx="42" cy="34" r="3.2" fill="#3A2E2A"/>
+    <circle cx="58" cy="34" r="3.2" fill="#3A2E2A"/>
+    <path d="M40 42 Q50 48 60 42" stroke="#3A2E2A" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    ${svgHat(hat)}
+  </svg>`;
+}
+function renderAllAvatarMounts() {
+  ["avatar-hero-mount", "home-avatar-mount"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = avatarSVG(avatarState);
+  });
+}
+
+function renderAvatarScreen() {
+  let totalUnlocked = 0, totalItems = 0;
+  Object.keys(AVATAR_ITEMS).forEach((cat) => {
+    const row = document.getElementById("row-" + cat);
+    row.innerHTML = "";
+    AVATAR_ITEMS[cat].forEach((item) => {
+      totalItems++;
+      const unlocked = isCategoryUnlockThresholdMet(item.unlockedBy);
+      if (unlocked) totalUnlocked++;
+      const btn = document.createElement("button");
+      btn.className = "item-swatch" + (unlocked ? "" : " locked") + (avatarState[cat] === item.id ? " selected" : "");
+      btn.style.background = item.color || "#EFE7DF";
+      btn.innerHTML = item.type ? (item.type === "cap" ? "🧢" : "🎉") : (cat === "backpack" && item.color ? "🎒" : (item.id === "none" ? "⛔" : ""));
+      if (!unlocked) btn.innerHTML += '<span class="lock-badge">🔒</span>';
+      btn.addEventListener("click", () => {
+        const hintEl = document.getElementById("avatar-unlock-hint");
+        if (!unlocked) {
+          const catMeta = CATEGORY_META[item.unlockedBy];
+          hintEl.textContent = `🔒 Continue praticando "${catMeta ? catMeta.namePt : item.unlockedBy}" pra desbloquear!`;
+          btn.style.animation = "none";
+          void btn.offsetWidth;
+          btn.style.animation = "shake 0.4s";
+          return;
+        }
+        avatarState[cat] = item.id;
+        saveAvatarState();
+        hintEl.textContent = "";
+        renderAvatarScreen();
+        renderAllAvatarMounts();
+      });
+      row.appendChild(btn);
+    });
+  });
+  document.getElementById("avatar-unlocked-count").textContent = `${totalUnlocked}/${totalItems} itens desbloqueados`;
+  const homeHint = document.getElementById("avatar-unlock-hint-home");
+  if (homeHint) homeHint.textContent = `${totalUnlocked}/${totalItems} itens`;
+}
+
+document.getElementById("btn-avatar-banner").addEventListener("click", () => {
+  renderAvatarScreen();
+  showScreen("avatar");
+});
+
 // ===================== Voz (TTS) =====================
 let voices = [];
 let chosenVoiceURI = localStorage.getItem("meuIngles_voice") || null;
@@ -104,6 +208,44 @@ document.getElementById("btn-settings").addEventListener("click", () => {
 
 // ===================== Home =====================
 function renderHome() {
+  document.getElementById("home-mascot").innerHTML = mascotSVG();
+  renderAllAvatarMounts();
+  renderAvatarScreen();
+
+  // streak
+  const streak = touchStreak();
+  document.getElementById("streak-badge").innerHTML = streak.count > 0 ? `🔥 ${streak.count}` : "👋";
+  document.getElementById("home-greeting").textContent = streak.count > 1 ? `${streak.count} dias seguidos!` : "Olá! 👋";
+
+  // missão do dia (sessão adaptativa, com carinha de missão)
+  const session = buildSession();
+  const catCounts = {};
+  session.forEach((r) => { catCounts[r.item.category] = (catCounts[r.item.category] || 0) + 1; });
+  const topCatId = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a])[0];
+  const topCat = topCatId ? CATEGORY_META[topCatId] : null;
+  const estMinutes = Math.max(1, Math.round(session.length / 3));
+  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${topCat.namePt}` : "🎉 Tudo em dia!";
+  document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
+
+  // jornada (prévia por categoria)
+  const journey = document.getElementById("journey-preview");
+  journey.innerHTML = "";
+  Object.keys(CATEGORY_META).slice(0, 7).forEach((catId) => {
+    const meta = CATEGORY_META[catId];
+    const items = CONTENT.filter((it) => it.category === catId);
+    const introducedCount = items.filter((it) => getState(it.id).introduced).length;
+    const ratio = getCategoryProgressRatio(catId);
+    const dotClass = ratio >= UNLOCK_THRESHOLD ? "done" : introducedCount > 0 ? "progress" : "";
+    const dotContent = ratio >= UNLOCK_THRESHOLD ? "✓" : meta.icon;
+    const node = document.createElement("button");
+    node.className = "journey-node";
+    node.innerHTML = `<div class="journey-dot ${dotClass}">${dotContent}</div><div class="label">${meta.namePt}</div>`;
+    node.addEventListener("click", () => openCategory(catId));
+    journey.appendChild(node);
+    journey.appendChild(document.createElement("div")).className = "journey-line";
+  });
+
+  // categorias (explorar livre)
   const grid = document.getElementById("category-grid");
   grid.innerHTML = "";
   Object.keys(CATEGORY_META).forEach((catId) => {
@@ -117,8 +259,6 @@ function renderHome() {
     btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
-  const dueCount = getDueItems().length;
-  document.getElementById("session-badge").textContent = dueCount > 0 ? `${dueCount} pra revisar` : "vamos começar!";
 }
 
 // ===================== Categoria (explorar) =====================

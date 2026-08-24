@@ -16,14 +16,61 @@
 
 <div id="app">
 
-  <!-- TELA INICIAL: categorias -->
+  <!-- TELA INICIAL -->
   <section id="screen-home" class="screen active">
     <header class="home-header">
-      <h1>🌟 Meu Inglês 🌟</h1>
+      <div id="home-mascot" class="home-mascot"></div>
+      <div class="greeting">
+        <div class="hello" id="home-greeting">Olá! 👋</div>
+        <h1>Meu Inglês</h1>
+      </div>
+      <div class="streak-badge" id="streak-badge"></div>
       <button id="btn-settings" class="icon-btn" aria-label="Configurações">⚙️</button>
     </header>
-    <button id="btn-session" class="session-btn">🚀 Sessão de hoje <span id="session-badge" class="session-badge"></span></button>
+
+    <button id="btn-session" class="mission-card">
+      <div class="eyebrow">Sessão de hoje</div>
+      <h2 id="mission-title">🎯 Vamos começar</h2>
+      <div class="meta" id="mission-meta"></div>
+      <span class="play-pill">▶ JOGAR</span>
+    </button>
+
+    <div class="section-title">Sua jornada</div>
+    <div id="journey-preview" class="journey-preview"></div>
+
+    <button id="btn-avatar-banner" class="avatar-banner">
+      <div id="home-avatar-mount" class="voxel-avatar"></div>
+      <div class="txt">Personalizar avatar<small id="avatar-unlock-hint-home"></small></div>
+      <span>›</span>
+    </button>
+
+    <div class="section-title">Explorar por categoria</div>
     <div id="category-grid" class="grid"></div>
+  </section>
+
+  <!-- TELA AVATAR -->
+  <section id="screen-avatar" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2>Meu Avatar</h2>
+    </header>
+    <div class="avatar-hero">
+      <div id="avatar-hero-mount" class="voxel-avatar"></div>
+      <div class="unlocked-count" id="avatar-unlocked-count"></div>
+    </div>
+    <div class="unlock-hint" id="avatar-unlock-hint">&nbsp;</div>
+    <div class="item-group">
+      <div class="label">👕 Camiseta</div>
+      <div class="item-row" id="row-shirt"></div>
+    </div>
+    <div class="item-group">
+      <div class="label">🧢 Chapéu</div>
+      <div class="item-row" id="row-hat"></div>
+    </div>
+    <div class="item-group">
+      <div class="label">🎒 Mochila</div>
+      <div class="item-row" id="row-backpack"></div>
+    </div>
   </section>
 
   <!-- TELA CATEGORIA: explorar palavras -->
