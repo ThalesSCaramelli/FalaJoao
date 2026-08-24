@@ -140,7 +140,26 @@ function pickDefaultVoice() {
   );
 }
 
-function speak(text) {
+// Voz neural pré-gravada (edge-tts, Natasha) quando o item tem id — muito mais natural que o TTS ao
+// vivo do navegador. Cai pro TTS ao vivo se não tiver id, se o arquivo não existir, ou se der erro.
+let currentAudio = null;
+function speak(text, itemId) {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  if (itemId) {
+    const audio = new Audio(`assets/audio/en/${itemId}.mp3`);
+    audio.playbackRate = speechRate / 0.85; // 0.85 é o ritmo natural gravado; ajusta proporcional ao slider
+    audio.addEventListener("error", () => speakLive(text), { once: true });
+    audio.play().catch(() => speakLive(text));
+    currentAudio = audio;
+    return;
+  }
+  speakLive(text);
+}
+
+function speakLive(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
@@ -274,7 +293,7 @@ function openCategory(catId) {
     card.className = "word-card";
     card.innerHTML = `<span class="word-emoji">${renderMedia(item)}</span><span class="word-en">${item.en}</span><span class="word-pt">${item.pt}</span>`;
     card.addEventListener("click", () => {
-      speak(item.en);
+      speak(item.en, item.id);
       markIntroduced(item.id);
       renderHome();
     });
@@ -309,7 +328,7 @@ function startQuiz(queue) {
 
 document.getElementById("btn-repeat-word").addEventListener("click", () => {
   const round = quizQueue[quizIndex];
-  if (round) speak(round.item.en);
+  if (round) speak(round.item.en, round.item.id);
 });
 
 function renderRound() {
@@ -334,8 +353,8 @@ function renderRound() {
         <span class="intro-hint">toque na imagem pra ouvir de novo</span>
         <button class="big-btn" id="intro-next">Já sei! →</button>
       </div>`;
-    speak(round.item.en);
-    container.querySelector(".word-emoji-big").addEventListener("click", () => speak(round.item.en));
+    speak(round.item.en, round.item.id);
+    container.querySelector(".word-emoji-big").addEventListener("click", () => speak(round.item.en, round.item.id));
     container.querySelector("#intro-next").addEventListener("click", () => {
       markIntroduced(round.item.id);
       quizIndex++;
@@ -353,7 +372,7 @@ function renderRound() {
         <span class="speak-status" id="speak-status">Toque no microfone e fale: "${round.item.en}"</span>
         <span class="speak-note">É só uma brincadeira de praticar a fala — não avalia a pronúncia dele.</span>
       </div>`;
-    speak(round.item.en);
+    speak(round.item.en, round.item.id);
     document.getElementById("mic-btn").addEventListener("click", () => startSpeakAttempt(round.item));
     return;
   }
@@ -371,7 +390,7 @@ function renderRound() {
     btn.addEventListener("click", () => handleChoice(btn, opt, round.item, container));
     container.appendChild(btn);
   });
-  speak(round.item.en);
+  speak(round.item.en, round.item.id);
 }
 
 function handleChoice(btn, opt, target, container) {
@@ -398,7 +417,7 @@ function handleChoice(btn, opt, target, container) {
       recordResult(target.id, false);
       const correctBtn = [...container.querySelectorAll(".quiz-option")].find((b) => b.dataset.itemId === target.id);
       if (correctBtn) correctBtn.classList.add("correct");
-      speak(target.en);
+      speak(target.en, target.id);
       setTimeout(() => {
         quizIndex++;
         renderRound();
@@ -432,7 +451,7 @@ function startSpeakAttempt(item) {
       playCheer();
     } else {
       statusEl.textContent = "Legal! Vamos ouvir de novo.";
-      speak(item.en);
+      speak(item.en, item.id);
     }
     setTimeout(() => {
       quizIndex++;
