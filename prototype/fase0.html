@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Meu Inglês — Protótipo Fase 0</title>
+<style>
+/* ===================== Design tokens ===================== */
+:root {
+  /* superfícies e texto */
+  --bg: #FFF8EC;
+  --surface: #FFFFFF;
+  --text: #3A2E2A;
+  --text-soft: #8A7A72;
+  --text-inverse: #FFFFFF;
+
+  /* cor de marca */
+  --brand: #FF6B5B;
+  --brand-dark: #E8543F;
+
+  /* uma cor por capacidade (as 4 do currículo) */
+  --cap-help: #FF6B5B;      /* 🆘 I Need Help */
+  --cap-help-soft: #FFE3DE;
+  --cap-understand: #3FB6C9; /* 👂 I Understand */
+  --cap-understand-soft: #D9F3F6;
+  --cap-say: #FFB648;        /* 🗣️ I Can Say It */
+  --cap-say-soft: #FFEDD1;
+  --cap-communicate: #5FC98D; /* 💬 I Communicate */
+  --cap-communicate-soft: #DFF6E8;
+
+  /* estados */
+  --success: #5FC98D;
+  --locked: #D8CFC7;
+
+  /* escala */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 14px;
+  --space-4: 20px;
+  --space-5: 28px;
+  --shadow-btn: 0 5px 0 rgba(58,46,42,0.14);
+  --shadow-card: 0 8px 24px rgba(58,46,42,0.10);
+  --font: "Baloo 2", "Segoe UI", "Comic Sans MS", -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+body { min-height: 100vh; }
+
+/* ===================== Chrome de protótipo (não é a IA final) ===================== */
+.proto-tabs {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; gap: var(--space-2);
+  padding: var(--space-3);
+  background: rgba(255,248,236,0.92);
+  backdrop-filter: blur(6px);
+  overflow-x: auto;
+}
+.proto-tab {
+  flex: 0 0 auto;
+  border: none; border-radius: 999px;
+  padding: 10px 16px;
+  font-family: var(--font); font-weight: 700; font-size: 0.85rem;
+  background: var(--surface); color: var(--text-soft);
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+}
+.proto-tab.active { background: var(--brand); color: var(--text-inverse); }
+.proto-note {
+  text-align: center; font-size: 0.72rem; color: var(--text-soft); padding: 0 var(--space-4) var(--space-2);
+}
+
+.screen { display: none; max-width: 480px; margin: 0 auto; padding: var(--space-4) var(--space-4) 60px; }
+.screen.active { display: block; }
+
+h1, h2, h3 { margin: 0; font-family: var(--font); }
+
+/* ===================== Mascote (quokka original, SVG) ===================== */
+.quokka { display: block; }
+.quokka .body { fill: #C9987A; }
+.quokka .belly { fill: #F3D9C4; }
+.quokka .ear { fill: #C9987A; }
+.quokka .ear-inner { fill: #F3D9C4; }
+.quokka .eye { fill: #3A2E2A; }
+.quokka .cheek { fill: #FFB6A3; opacity: 0.6; }
+
+/* ===================== HOME ===================== */
+.home-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.home-header .greeting { flex: 1; }
+.home-header .greeting .hello { font-size: 0.95rem; color: var(--text-soft); font-weight: 700; }
+.home-header .greeting h1 { font-size: 1.4rem; }
+.streak-badge {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--cap-say-soft); color: var(--brand-dark);
+  border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 0.9rem;
+}
+
+.mission-card {
+  background: linear-gradient(135deg, var(--brand), #FF8F6B);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-5);
+  position: relative;
+  overflow: hidden;
+}
+.speak-icon {
+  position: absolute; top: var(--space-3); right: var(--space-3);
+  width: 34px; height: 34px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.3); color: #fff; font-size: 1rem; cursor: pointer;
+}
+.mission-card .eyebrow { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; opacity: 0.9; text-transform: uppercase; }
+.mission-card h2 { font-size: 1.5rem; margin: 6px 0 2px; }
+.mission-card .meta { font-size: 0.85rem; opacity: 0.9; margin-bottom: var(--space-3); }
+.play-btn {
+  background: #fff; color: var(--brand-dark); border: none; border-radius: 999px;
+  font-family: var(--font); font-weight: 800; font-size: 1rem;
+  padding: 12px 26px; box-shadow: 0 4px 0 rgba(0,0,0,0.12); cursor: pointer;
+}
+
+.section-title { font-size: 0.8rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-3); }
+
+.journey-preview { display: flex; align-items: center; overflow-x: auto; padding: var(--space-2) 0 var(--space-4); gap: 0; }
+.journey-node { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; width: 74px; background: none; border: none; padding: 0; font-family: var(--font); cursor: pointer; }
+.journey-dot {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  background: var(--surface); box-shadow: var(--shadow-btn);
+}
+.journey-dot.done { background: var(--success); color: #fff; }
+.journey-dot.current { background: var(--cap-help); color: #fff; box-shadow: 0 0 0 5px var(--cap-help-soft); }
+.journey-dot.locked { background: var(--locked); color: #fff; }
+.journey-line { flex: 0 0 24px; height: 3px; background: var(--locked); margin-top: -20px; }
+.journey-node .label { font-size: 0.65rem; text-align: center; color: var(--text-soft); font-weight: 700; margin-top: 6px; }
+
+.quick-play { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-bottom: var(--space-4); }
+.quick-tile {
+  background: var(--surface); border: none; border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-1); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  box-shadow: var(--shadow-btn); font-family: var(--font); font-weight: 700; color: var(--text); font-size: 0.7rem;
+}
+.quick-tile .ic { font-size: 1.4rem; }
+
+.mascot-corner { position: absolute; right: -10px; bottom: -14px; width: 90px; opacity: 0.95; }
+
+/* ===================== MISSION / STORY MODE ===================== */
+.step-track { display: flex; justify-content: space-between; margin-bottom: var(--space-4); }
+.step-dot { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.62rem; color: var(--text-soft); font-weight: 700; }
+.step-circle { width: 30px; height: 30px; border-radius: 50%; background: var(--locked); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
+.step-dot.done .step-circle { background: var(--success); color: #fff; }
+.step-dot.current .step-circle { background: var(--cap-understand); color: #fff; box-shadow: 0 0 0 5px var(--cap-understand-soft); }
+
+.scene-card {
+  background: var(--cap-understand-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+.scene-emoji { font-size: 3.2rem; }
+.speech-bubble {
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: var(--space-3); margin-top: var(--space-3);
+  box-shadow: var(--shadow-btn); text-align: left;
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.speech-bubble .avatar { font-size: 1.6rem; }
+.speech-bubble .txt { font-size: 0.95rem; font-weight: 700; flex: 1; }
+.speech-bubble .speaker { font-size: 1.2rem; color: var(--cap-understand); cursor: pointer; }
+
+.prompt-line { text-align: center; font-weight: 800; font-size: 1.05rem; margin: var(--space-4) 0 var(--space-3); }
+
+.option-btn {
+  display: block; width: 100%; text-align: left;
+  background: var(--surface); border: 3px solid transparent; border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3); margin-bottom: var(--space-2);
+  font-family: var(--font); font-size: 0.95rem; font-weight: 700; color: var(--text);
+  box-shadow: var(--shadow-btn); cursor: pointer;
+}
+.option-btn.correct { border-color: var(--success); background: var(--cap-communicate-soft); }
+.option-btn.correct::after { content: " 🌟"; }
+.option-btn.wrong { opacity: 0.55; }
+.option-btn.reading { border-color: var(--cap-understand); animation: avatar-bounce 0.6s ease infinite; }
+.hear-again-btn {
+  display: block; margin: 0 auto var(--space-3); background: var(--surface); border: none; border-radius: 999px;
+  padding: 8px 16px; font-family: var(--font); font-weight: 700; font-size: 0.8rem; color: var(--cap-understand);
+  box-shadow: var(--shadow-btn); cursor: pointer;
+}
+
+/* ===================== LEARNING PATH ===================== */
+.path-wrap { display: flex; flex-direction: column; align-items: center; padding: var(--space-3) 0; }
+.path-node {
+  cursor: pointer;
+  display: flex; align-items: center; gap: var(--space-3);
+  width: 100%; max-width: 340px;
+  background: var(--surface); border-radius: var(--radius-md);
+  padding: var(--space-3); margin-bottom: 0; box-shadow: var(--shadow-btn);
+  position: relative;
+}
+.path-node + .path-node { margin-top: 22px; }
+.path-node + .path-node::before {
+  content: ""; position: absolute; top: -22px; left: 34px; width: 3px; height: 22px;
+  background: var(--locked);
+}
+.path-node.alt { flex-direction: row-reverse; text-align: right; }
+.path-stone {
+  width: 46px; height: 46px; border-radius: 50%; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff;
+}
+.path-node.done .path-stone { background: var(--success); }
+.path-node.current .path-stone { background: var(--cap-help); box-shadow: 0 0 0 6px var(--cap-help-soft); }
+.path-node.locked .path-stone { background: var(--locked); }
+.path-node .info { flex: 1; }
+.path-node .info .name { font-weight: 800; font-size: 0.92rem; }
+.path-node .info .cap { font-size: 0.68rem; color: var(--text-soft); font-weight: 700; }
+.path-node.locked { opacity: 0.55; }
+.path-legend { display: flex; gap: var(--space-3); justify-content: center; margin-top: var(--space-4); font-size: 0.7rem; color: var(--text-soft); font-weight: 700; }
+.path-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* ===================== MY ENGLISH WORLD (mapa) ===================== */
+.world-map {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, #CDEFE0 0%, #BFE8F2 55%, #FFF3D6 100%);
+  min-height: 420px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+.map-blob { position: absolute; border-radius: 50%; opacity: 0.5; }
+.pin {
+  position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transform: translate(-50%, -50%);
+}
+.pin-badge {
+  width: 54px; height: 54px; border-radius: 50%; background: var(--surface);
+  display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+  box-shadow: var(--shadow-btn); border: 3px solid #fff;
+}
+.pin .label { background: var(--surface); border-radius: 999px; padding: 2px 10px; font-size: 0.68rem; font-weight: 800; box-shadow: var(--shadow-btn); }
+.pin .ring { position: absolute; top: 0; left: 0; width: 54px; height: 54px; border-radius: 50%; border: 3px solid var(--success); }
+.world-avatar { position: absolute; width: 60px; transform: translate(-50%,-50%); transition: top 0.9s ease, left 0.9s ease; z-index: 5; }
+.world-avatar.walking { animation: avatar-bounce 0.35s ease infinite; }
+@keyframes avatar-bounce { 0%,100% { transform: translate(-50%,-50%) translateY(0); } 50% { transform: translate(-50%,-50%) translateY(-6px); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.world-avatar svg { display: block; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.18)); }
+.world-hint {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border-radius: 999px; padding: 6px 14px; font-size: 0.72rem; font-weight: 800;
+  box-shadow: var(--shadow-btn); color: var(--text-soft); white-space: nowrap;
+}
+
+/* ===================== AVATAR (custom voxel) ===================== */
+.avatar-hero {
+  background: var(--surface); border-radius: var(--radius-lg);
+  padding: var(--space-4); text-align: center; box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-4);
+}
+.avatar-hero .voxel-avatar { width: 140px; height: auto; }
+.avatar-hero .name { font-weight: 800; margin-top: var(--space-2); }
+.avatar-hero .unlocked-count { font-size: 0.75rem; color: var(--text-soft); font-weight: 700; }
+
+.item-group { margin-bottom: var(--space-4); }
+.item-group .label { font-size: 0.8rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2); }
+.item-row { display: flex; gap: var(--space-2); overflow-x: auto; padding-bottom: 4px; }
+.item-swatch {
+  flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
+  border: 3px solid transparent; position: relative; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+  box-shadow: var(--shadow-btn);
+}
+.item-swatch.selected { border-color: var(--text); }
+.item-swatch.locked { opacity: 0.55; }
+.item-swatch .lock-badge {
+  position: absolute; bottom: -4px; right: -4px; background: var(--text);
+  color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.unlock-hint { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--brand-dark); min-height: 1.4em; margin-top: -6px; margin-bottom: var(--space-3); }
+
+.avatar-banner {
+  display: flex; align-items: center; gap: var(--space-3);
+  background: var(--cap-communicate-soft); border-radius: var(--radius-md);
+  padding: var(--space-3); margin-bottom: var(--space-4); cursor: pointer; border: none; width: 100%; text-align: left;
+}
+.avatar-banner .voxel-avatar { width: 44px; }
+.avatar-banner .txt { flex: 1; font-weight: 800; font-size: 0.85rem; color: var(--text); }
+.avatar-banner .txt small { display: block; font-weight: 600; color: var(--text-soft); font-size: 0.72rem; }
+</style>
+</head>
+<body>
+
+<div class="proto-tabs" id="tabs">
+  <button class="proto-tab active" data-screen="home">🏠 Home</button>
+  <button class="proto-tab" data-screen="mission">🎭 Missão / Story Mode</button>
+  <button class="proto-tab" data-screen="path">🪨 Trilha</button>
+  <button class="proto-tab" data-screen="avatar">🧱 Avatar</button>
+  <button class="proto-tab" data-screen="world">🌏 My English World</button>
+</div>
+<p class="proto-note">Protótipo Fase 0 — telas de exemplo com dados fixos, ainda não conectadas ao app real.</p>
+
+<!-- ===================== HOME ===================== -->
+<section class="screen active" id="screen-home">
+  <div class="home-header">
+    <svg class="quokka" width="52" height="52" viewBox="0 0 100 100">
+      <ellipse class="ear" cx="24" cy="26" rx="14" ry="16"/>
+      <ellipse class="ear" cx="76" cy="26" rx="14" ry="16"/>
+      <ellipse class="ear-inner" cx="24" cy="28" rx="7" ry="9"/>
+      <ellipse class="ear-inner" cx="76" cy="28" rx="7" ry="9"/>
+      <circle class="body" cx="50" cy="56" r="38"/>
+      <ellipse class="belly" cx="50" cy="66" rx="22" ry="18"/>
+      <circle class="cheek" cx="27" cy="58" r="8"/>
+      <circle class="cheek" cx="73" cy="58" r="8"/>
+      <circle class="eye" cx="38" cy="48" r="4.5"/>
+      <circle class="eye" cx="62" cy="48" r="4.5"/>
+      <path d="M35 62 Q50 74 65 62" stroke="#3A2E2A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="greeting">
+      <div class="hello">Good morning! 👋</div>
+      <h1>Meu Inglês</h1>
+    </div>
+    <div class="streak-badge">🔥 4</div>
+  </div>
+
+  <div class="mission-card">
+    <button class="speak-icon" data-speak="Missão de hoje: Minha Sala de Aula!" aria-label="Ouvir">🔊</button>
+    <div class="eyebrow">Today's Mission</div>
+    <h2>🏫 My Classroom</h2>
+    <div class="meta">⏱ 5 min · 4 atividades</div>
+    <button class="play-btn" data-speak="Vamos começar! Minha Sala de Aula.">▶ PLAY</button>
+    <svg class="mascot-corner" viewBox="0 0 100 100">
+      <ellipse class="ear" cx="24" cy="26" rx="14" ry="16" fill="#fff" opacity="0.25"/>
+      <ellipse class="ear" cx="76" cy="26" rx="14" ry="16" fill="#fff" opacity="0.25"/>
+      <circle cx="50" cy="56" r="38" fill="#fff" opacity="0.18"/>
+    </svg>
+  </div>
+
+  <div class="section-title">Your Journey</div>
+  <div class="journey-preview">
+    <button class="journey-node" data-speak="Saudações. Você já sabe!"><div class="journey-dot done">✓</div><div class="label">Greetings</div></button>
+    <div class="journey-line"></div>
+    <button class="journey-node" data-speak="Meu Nome. Você já sabe!"><div class="journey-dot done">✓</div><div class="label">My Name</div></button>
+    <div class="journey-line"></div>
+    <button class="journey-node" data-speak="Pedir Ajuda. Vamos praticar!"><div class="journey-dot current">🆘</div><div class="label">Asking Help</div></button>
+    <div class="journey-line"></div>
+    <button class="journey-node" data-speak="Sala de Aula. Ainda bloqueado!"><div class="journey-dot locked">○</div><div class="label">Classroom</div></button>
+    <div class="journey-line"></div>
+    <button class="journey-node" data-speak="Parquinho. Ainda bloqueado!"><div class="journey-dot locked">○</div><div class="label">Playground</div></button>
+  </div>
+
+  <div class="section-title">Quick Play</div>
+  <div class="quick-play">
+    <button class="quick-tile" data-speak="Escutar!"><span class="ic">👂</span>Listen</button>
+    <button class="quick-tile" data-speak="Falar!"><span class="ic">🗣️</span>Speak</button>
+    <button class="quick-tile" data-speak="Combinar!"><span class="ic">🧩</span>Match</button>
+    <button class="quick-tile" data-speak="Situações!"><span class="ic">🎭</span>Situations</button>
+  </div>
+
+  <button class="avatar-banner" data-goto="avatar" data-speak="Personalize seu avatar!">
+    <div class="voxel-avatar" id="home-avatar-mount"></div>
+    <div class="txt">Customize your avatar<small id="home-avatar-hint">2 new items to unlock!</small></div>
+    <span>›</span>
+  </button>
+</section>
+
+<!-- ===================== MISSION / STORY MODE ===================== -->
+<section class="screen" id="screen-mission">
+  <div class="step-track">
+    <div class="step-dot done"><div class="step-circle">✓</div>Listen</div>
+    <div class="step-dot done"><div class="step-circle">✓</div>Understand</div>
+    <div class="step-dot current"><div class="step-circle">🎭</div>Speak</div>
+    <div class="step-dot"><div class="step-circle">🎮</div>Play</div>
+    <div class="step-dot"><div class="step-circle">⭐</div>Complete</div>
+  </div>
+
+  <div class="scene-card">
+    <div class="scene-emoji">🚻</div>
+    <div class="speech-bubble">
+      <span class="avatar">👩‍🏫</span>
+      <span class="txt">"Você não sabe onde fica o banheiro."</span>
+      <span class="speaker" data-speak="Você não sabe onde fica o banheiro.">🔊</span>
+    </div>
+  </div>
+
+  <div class="prompt-line">O que você fala? 🇬🇧</div>
+  <button id="btn-hear-again" class="hear-again-btn">🔊 Ouvir de novo</button>
+  <button class="option-btn">Can I go to the bathroom, please?</button>
+  <button class="option-btn">I like pizza.</button>
+  <button class="option-btn">My name is Leo.</button>
+</section>
+
+<!-- ===================== LEARNING PATH ===================== -->
+<section class="screen" id="screen-path">
+  <div class="section-title" style="text-align:center;">Learning Path</div>
+  <div class="path-wrap">
+    <div class="path-node done" data-speak="Saudações. Você já sabe!"><div class="path-stone">👋</div><div class="info"><div class="name">Greetings</div><div class="cap">I Can Communicate</div></div></div>
+    <div class="path-node done alt" data-speak="Meu Nome. Você já sabe!"><div class="path-stone">🙋</div><div class="info"><div class="name">My Name</div><div class="cap">I Can Say It</div></div></div>
+    <div class="path-node current" data-speak="Pedir Ajuda. Vamos praticar!"><div class="path-stone">🆘</div><div class="info"><div class="name">Asking Help</div><div class="cap">I Need Help</div></div></div>
+    <div class="path-node locked alt" data-speak="Entender a Professora. Ainda bloqueado!"><div class="path-stone">👂</div><div class="info"><div class="name">Understanding Teacher</div><div class="cap">I Understand</div></div></div>
+    <div class="path-node locked" data-speak="Banheiro. Ainda bloqueado!"><div class="path-stone">🚻</div><div class="info"><div class="name">Bathroom</div><div class="cap">I Need Help</div></div></div>
+    <div class="path-node locked alt" data-speak="Sala de Aula. Ainda bloqueado!"><div class="path-stone">🎒</div><div class="info"><div class="name">Classroom</div><div class="cap">I Understand</div></div></div>
+  </div>
+  <div class="path-legend">
+    <span><span class="legend-dot" style="background:var(--success);"></span>dominada</span>
+    <span><span class="legend-dot" style="background:var(--cap-help);"></span>praticando</span>
+    <span><span class="legend-dot" style="background:var(--locked);"></span>bloqueada</span>
+  </div>
+</section>
+
+<!-- ===================== AVATAR (voxel, customizável) ===================== -->
+<section class="screen" id="screen-avatar">
+  <div class="section-title" style="text-align:center;">🧱 My Avatar</div>
+  <div class="avatar-hero">
+    <div class="voxel-avatar" id="avatar-hero-mount" style="margin: 0 auto;"></div>
+    <div class="name">Your Explorer</div>
+    <div class="unlocked-count" id="avatar-unlocked-count"></div>
+  </div>
+
+  <div class="unlock-hint" id="avatar-unlock-hint">&nbsp;</div>
+
+  <div class="item-group">
+    <div class="label">👕 Shirt</div>
+    <div class="item-row" id="row-shirt"></div>
+  </div>
+  <div class="item-group">
+    <div class="label">🧢 Hat</div>
+    <div class="item-row" id="row-hat"></div>
+  </div>
+  <div class="item-group">
+    <div class="label">🎒 Backpack</div>
+    <div class="item-row" id="row-backpack"></div>
+  </div>
+</section>
+
+<!-- ===================== MY ENGLISH WORLD ===================== -->
+<section class="screen" id="screen-world">
+  <div class="section-title" style="text-align:center;">🌏 My English World</div>
+  <div class="world-map" id="world-map">
+    <div class="map-blob" style="width:160px;height:160px;background:#fff;top:10px;left:-40px;"></div>
+    <div class="map-blob" style="width:120px;height:120px;background:#fff;bottom:20px;right:-30px;"></div>
+    <div class="world-hint">👉 Toque num lugar pra ir até lá!</div>
+
+    <div class="pin" data-pin data-pt="Escola" style="top:18%;left:28%;"><div class="pin-badge">🏫</div><div class="ring"></div><div class="label">School</div></div>
+    <div class="pin" data-pin data-pt="Cantina" style="top:14%;left:70%;"><div class="pin-badge">🍎</div><div class="ring"></div><div class="label">Cafeteria</div></div>
+    <div class="pin" data-pin data-pt="Parquinho" style="top:45%;left:50%;"><div class="pin-badge">⚽</div><div class="label">Playground</div></div>
+    <div class="pin" data-pin data-pt="Ônibus" style="top:50%;left:14%;"><div class="pin-badge">🚌</div><div class="label">Bus</div></div>
+    <div class="pin" data-pin data-pt="Casa" style="top:72%;left:76%;"><div class="pin-badge">🏠</div><div class="label">Home</div></div>
+    <div class="pin" data-pin data-pt="Enfermaria" style="top:78%;left:36%;"><div class="pin-badge">🏥</div><div class="label">Nurse</div></div>
+
+    <div class="world-avatar" id="world-avatar" style="top:55%;left:38%;"></div>
+  </div>
+</section>
+
+<script>
+// ===================== Narração (o filho não lê — praticamente todo texto precisa de voz) =====================
+let voicesReady = [];
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => { voicesReady = speechSynthesis.getVoices(); };
+  voicesReady = speechSynthesis.getVoices();
+}
+function pickVoice(lang) {
+  const filtered = voicesReady.filter(v => v.lang && v.lang.toLowerCase().startsWith(lang));
+  if (lang === 'pt') return filtered.find(v => /BR/i.test(v.lang)) || filtered[0] || voicesReady[0];
+  return filtered.find(v => /AU/i.test(v.lang)) || filtered.find(v => /GB/i.test(v.lang)) || filtered[0] || voicesReady[0];
+}
+// lang: 'pt' pra narração/instrução (o filho não lê e ainda não entende inglês — quem "explica" fala português),
+// 'en' só pro conteúdo-alvo que está sendo ensinado (as frases/palavras em si).
+function speak(text, lang) {
+  lang = lang || 'pt';
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = pickVoice(lang);
+  if (v) u.voice = v;
+  u.lang = lang === 'pt' ? 'pt-BR' : (v ? v.lang : 'en-US');
+  u.rate = 0.88;
+  speechSynthesis.speak(u);
+}
+function activateScreen(id) {
+  document.querySelectorAll('.proto-tab').forEach(t => t.classList.toggle('active', t.dataset.screen === id));
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + id));
+  if (id === 'mission') runMissionNarration();
+}
+document.querySelectorAll('.proto-tab').forEach(tab => {
+  tab.addEventListener('click', () => activateScreen(tab.dataset.screen));
+});
+document.querySelectorAll('.option-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#screen-mission .option-btn').forEach(b => b.style.pointerEvents = 'none');
+  });
+});
+const hashScreen = location.hash.replace('#', '');
+if (hashScreen && document.getElementById('screen-' + hashScreen)) {
+  activateScreen(hashScreen);
+}
+
+function goToScreen(id) { activateScreen(id); }
+document.querySelectorAll('[data-goto]').forEach(btn => btn.addEventListener('click', () => goToScreen(btn.dataset.goto)));
+
+// ===================== Avatar bloxinho (voxel), itens desbloqueáveis por skill =====================
+// Progresso de exemplo — reflete o que já aparece na tela Trilha (Greetings e My Name dominadas).
+const COMPLETED_SKILLS = ['Greetings', 'My Name'];
+const SKILL_PT = {
+  'Greetings': 'Saudações', 'My Name': 'Meu Nome', 'Asking Help': 'Pedir Ajuda',
+  'Classroom': 'Sala de Aula', 'Understanding Teacher': 'Entender a Professora',
+};
+
+const AVATAR_ITEMS = {
+  shirt: [
+    { id: 'coral', color: '#FF6B5B', unlockedBy: null },
+    { id: 'teal', color: '#3FB6C9', unlockedBy: 'Greetings' },
+    { id: 'yellow', color: '#FFB648', unlockedBy: 'My Name' },
+    { id: 'green', color: '#5FC98D', unlockedBy: 'Asking Help' },
+    { id: 'purple', color: '#B18CD9', unlockedBy: 'Classroom' },
+  ],
+  hat: [
+    { id: 'none', type: null, unlockedBy: null },
+    { id: 'cap', type: 'cap', color: '#FF6B5B', unlockedBy: 'My Name' },
+    { id: 'party', type: 'party', color: '#FFB648', unlockedBy: 'Classroom' },
+  ],
+  backpack: [
+    { id: 'none', color: null, unlockedBy: null },
+    { id: 'red', color: '#FF6B5B', unlockedBy: 'Understanding Teacher' },
+  ],
+};
+
+function isUnlocked(item) { return !item.unlockedBy || COMPLETED_SKILLS.includes(item.unlockedBy); }
+
+let avatarState = { shirt: 'coral', hat: 'none', backpack: 'none' };
+
+function svgHat(item) {
+  if (!item || item.type === null) return '';
+  if (item.type === 'cap') return `<path d="M30 16 Q50 -2 70 16 L70 22 L30 22 Z" fill="${item.color}"/><rect x="26" y="20" width="48" height="6" rx="3" fill="${item.color}"/>`;
+  if (item.type === 'party') return `<path d="M50 -4 L68 20 L32 20 Z" fill="${item.color}"/><circle cx="50" cy="-4" r="4" fill="#fff"/>`;
+  return '';
+}
+function svgBackpack(item) {
+  if (!item || !item.color) return '';
+  return `<rect x="6" y="62" width="14" height="32" rx="5" fill="${item.color}"/>`;
+}
+
+function avatarSVG(state) {
+  const shirt = AVATAR_ITEMS.shirt.find(i => i.id === state.shirt);
+  const hat = AVATAR_ITEMS.hat.find(i => i.id === state.hat);
+  const backpack = AVATAR_ITEMS.backpack.find(i => i.id === state.backpack);
+  return `<svg class="voxel-avatar" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+    ${svgBackpack(backpack)}
+    <rect x="34" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
+    <rect x="52" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
+    <rect x="14" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
+    <rect x="72" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
+    <rect x="26" y="58" width="48" height="42" rx="6" fill="${shirt.color}"/>
+    <rect x="30" y="14" width="40" height="40" rx="8" fill="#F3C79A"/>
+    <circle cx="42" cy="34" r="3.2" fill="#3A2E2A"/>
+    <circle cx="58" cy="34" r="3.2" fill="#3A2E2A"/>
+    <path d="M40 42 Q50 48 60 42" stroke="#3A2E2A" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    ${svgHat(hat)}
+  </svg>`;
+}
+
+function mountAvatar(elId) {
+  const el = document.getElementById(elId);
+  if (el) el.innerHTML = avatarSVG(avatarState);
+}
+function renderAllAvatars() {
+  ['avatar-hero-mount', 'home-avatar-mount', 'world-avatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = avatarSVG(avatarState);
+  });
+}
+
+function renderAvatarScreen() {
+  let totalUnlocked = 0, totalItems = 0;
+  Object.keys(AVATAR_ITEMS).forEach(cat => {
+    const row = document.getElementById('row-' + cat);
+    row.innerHTML = '';
+    AVATAR_ITEMS[cat].forEach(item => {
+      totalItems++;
+      const unlocked = isUnlocked(item);
+      if (unlocked) totalUnlocked++;
+      const btn = document.createElement('button');
+      btn.className = 'item-swatch' + (unlocked ? '' : ' locked') + (avatarState[cat] === item.id ? ' selected' : '');
+      btn.style.background = item.color || '#EFE7DF';
+      btn.innerHTML = item.type ? (item.type === 'cap' ? '🧢' : '🎉') : (cat === 'backpack' && item.color ? '🎒' : (item.id === 'none' ? '⛔' : ''));
+      if (!unlocked) btn.innerHTML += '<span class="lock-badge">🔒</span>';
+      btn.addEventListener('click', () => {
+        if (!unlocked) {
+          const skillPt = SKILL_PT[item.unlockedBy] || item.unlockedBy;
+          document.getElementById('avatar-unlock-hint').textContent = `🔒 Complete "${skillPt}" pra desbloquear!`;
+          speak(`Bloqueado! Complete "${skillPt}" pra desbloquear isso.`, 'pt');
+          btn.style.animation = 'none'; void btn.offsetWidth; btn.style.animation = 'shake 0.4s';
+          return;
+        }
+        avatarState[cat] = item.id;
+        document.getElementById('avatar-unlock-hint').textContent = '';
+        speak('Ficou show!', 'pt');
+        renderAvatarScreen();
+        renderAllAvatars();
+      });
+      row.appendChild(btn);
+    });
+  });
+  document.getElementById('avatar-unlocked-count').textContent = `${totalUnlocked}/${totalItems} items unlocked`;
+}
+
+// andar pelo mapa: toca num pino, o avatar se move até lá e o lugar é narrado
+document.querySelectorAll('#world-map [data-pin]').forEach(pin => {
+  pin.addEventListener('click', () => {
+    speak(pin.dataset.pt + '!', 'pt');
+    const avatarEl = document.getElementById('world-avatar');
+    avatarEl.style.top = pin.style.top;
+    avatarEl.style.left = pin.style.left;
+    avatarEl.classList.add('walking');
+    setTimeout(() => avatarEl.classList.remove('walking'), 900);
+  });
+});
+
+// toque-pra-ouvir genérico: qualquer elemento com data-speak fala seu texto ao ser tocado
+document.querySelectorAll('[data-speak]').forEach(el => {
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    speak(el.dataset.speak);
+  });
+});
+
+// ===================== Story Mode: cenário em PT-BR (ele ainda não entende inglês), opções em EN (é o conteúdo-alvo) =====================
+const MISSION_TEACHER_LINE_PT = "Você não sabe onde fica o banheiro. O que você fala?";
+const MISSION_OPTIONS = [
+  { text: 'Can I go to the bathroom, please?', correct: true },
+  { text: 'I like pizza.', correct: false },
+  { text: 'My name is Leo.', correct: false },
+];
+let missionAnswered = false;
+
+function runMissionNarration() {
+  missionAnswered = false;
+  const btns = [...document.querySelectorAll('#screen-mission .option-btn')];
+  btns.forEach(b => { b.classList.remove('correct', 'wrong'); b.style.pointerEvents = ''; });
+  speak(MISSION_TEACHER_LINE_PT, 'pt');
+  MISSION_OPTIONS.forEach((opt, i) => {
+    setTimeout(() => {
+      btns.forEach(b => b.classList.remove('reading'));
+      btns[i].classList.add('reading');
+      speak(opt.text, 'en');
+    }, 2400 + i * 2000);
+  });
+  setTimeout(() => btns.forEach(b => b.classList.remove('reading')), 2400 + MISSION_OPTIONS.length * 2000);
+}
+document.getElementById('btn-hear-again')?.addEventListener('click', runMissionNarration);
+
+document.querySelectorAll('#screen-mission .option-btn').forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    if (missionAnswered) return;
+    missionAnswered = true;
+    speechSynthesis.cancel();
+    speak(MISSION_OPTIONS[idx].text, 'en');
+    document.querySelectorAll('#screen-mission .option-btn').forEach(b => b.style.pointerEvents = 'none');
+    setTimeout(() => {
+      if (MISSION_OPTIONS[idx].correct) {
+        btn.classList.add('correct');
+        speak('Mandou bem!', 'pt');
+      } else {
+        btn.classList.add('wrong');
+        const correctBtn = document.querySelectorAll('#screen-mission .option-btn')[MISSION_OPTIONS.findIndex(o => o.correct)];
+        correctBtn.classList.add('correct');
+        speak('Vamos tentar essa aqui!', 'pt');
+      }
+    }, 1300);
+  });
+});
+
+renderAvatarScreen();
+renderAllAvatars();
+</script>
+</body>
+</html>

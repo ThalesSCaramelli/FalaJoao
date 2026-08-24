@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Meu Inglês</title>
+<meta name="theme-color" content="#4ECDC4" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TELA INICIAL: categorias -->
+  <section id="screen-home" class="screen active">
+    <header class="home-header">
+      <h1>🌟 Meu Inglês 🌟</h1>
+      <button id="btn-settings" class="icon-btn" aria-label="Configurações">⚙️</button>
+    </header>
+    <button id="btn-session" class="session-btn">🚀 Sessão de hoje <span id="session-badge" class="session-badge"></span></button>
+    <div id="category-grid" class="grid"></div>
+  </section>
+
+  <!-- TELA CATEGORIA: explorar palavras -->
+  <section id="screen-category" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2 id="category-title"></h2>
+      <button id="btn-play-quiz" class="play-btn">🎮 Jogar</button>
+    </header>
+    <div id="word-grid" class="grid"></div>
+  </section>
+
+  <!-- TELA JOGO: quiz de escuta -->
+  <section id="screen-quiz" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="category">⬅️</button>
+      <div id="quiz-progress" class="quiz-progress"></div>
+    </header>
+    <div class="quiz-body">
+      <button id="btn-repeat-word" class="repeat-btn">🔊 Ouvir de novo</button>
+      <div id="quiz-options" class="quiz-options"></div>
+    </div>
+  </section>
+
+  <!-- TELA FIM DE JOGO -->
+  <section id="screen-result" class="screen">
+    <div class="result-body">
+      <div id="result-stars" class="result-stars"></div>
+      <p id="result-text"></p>
+      <button id="btn-play-again" class="big-btn">🔁 Jogar de novo</button>
+      <button class="big-btn secondary" data-back="category">⬅️ Voltar</button>
+    </div>
+  </section>
+
+  <!-- TELA CONFIGURAÇÕES (pais) -->
+  <section id="screen-settings" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2>Configurações</h2>
+    </header>
+    <div class="settings-body">
+      <label class="setting-row">
+        <span>Velocidade da voz</span>
+        <input type="range" id="rate-slider" min="0.5" max="1.2" step="0.05" value="0.85" />
+      </label>
+      <label class="setting-row">
+        <span>Voz em inglês</span>
+        <select id="voice-select"></select>
+      </label>
+      <button id="btn-test-voice" class="big-btn">🔊 Testar voz</button>
+      <hr />
+      <p class="progress-summary" id="progress-summary"></p>
+      <button id="btn-share-report" class="big-btn">📤 Compartilhar relatório</button>
+      <button id="btn-reset-progress" class="big-btn danger">Zerar progresso</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
