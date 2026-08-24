@@ -252,6 +252,17 @@ function isCategoryUnlockThresholdMet(categoryId) {
   return getCategoryProgressRatio(categoryId) >= UNLOCK_THRESHOLD;
 }
 
+// ===================== Situações (My English World) =====================
+function getSituationItems(situation) {
+  return situation.categoryId ? CONTENT.filter((it) => it.category === situation.categoryId) : situation.itemIds.map((id) => CONTENT_BY_ID[id]).filter(Boolean);
+}
+function getSituationProgressRatio(situation) {
+  const items = getSituationItems(situation);
+  if (!items.length) return 0;
+  const progressed = items.filter((it) => ["consolidating", "mastered"].includes(getLearningStage(it.id))).length;
+  return progressed / items.length;
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

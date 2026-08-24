@@ -111,6 +111,41 @@ document.getElementById("btn-avatar-banner").addEventListener("click", () => {
   showScreen("avatar");
 });
 
+// ===================== My English World (mapa de situações) =====================
+function renderWorldMap() {
+  const pinsWrap = document.getElementById("world-pins");
+  pinsWrap.innerHTML = "";
+  SITUATIONS.forEach((situation) => {
+    const ratio = getSituationProgressRatio(situation);
+    const pin = document.createElement("button");
+    pin.className = "pin";
+    pin.style.top = situation.mapPos.top;
+    pin.style.left = situation.mapPos.left;
+    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${situation.namePt}</div>`;
+    pin.addEventListener("click", () => goToSituation(situation));
+    pinsWrap.appendChild(pin);
+  });
+  document.getElementById("world-avatar").innerHTML = avatarSVG(avatarState);
+}
+
+function goToSituation(situation) {
+  speakPT(situation.namePt);
+  const avatarEl = document.getElementById("world-avatar");
+  avatarEl.style.top = situation.mapPos.top;
+  avatarEl.style.left = situation.mapPos.left;
+  avatarEl.classList.add("walking");
+  setTimeout(() => {
+    avatarEl.classList.remove("walking");
+    const items = getSituationItems(situation);
+    startQuiz(shuffle(items).slice(0, 8).map((it) => ({ item: it, roundType: getState(it.id).introduced ? "choice" : "intro" })));
+  }, 900);
+}
+
+document.getElementById("btn-world-banner").addEventListener("click", () => {
+  renderWorldMap();
+  showScreen("world");
+});
+
 // ===================== Voz (TTS) =====================
 let voices = [];
 let chosenVoiceURI = localStorage.getItem("meuIngles_voice") || null;
@@ -159,16 +194,30 @@ function speak(text, itemId) {
   speakLive(text);
 }
 
-function speakLive(text) {
+function speakLive(text, lang) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickDefaultVoice();
-  if (voice) utter.voice = voice;
-  utter.lang = voice ? voice.lang : "en-US";
+  if (lang === "pt") {
+    const ptVoice = voices.find((v) => v.lang && v.lang.toLowerCase().startsWith("pt"));
+    if (ptVoice) utter.voice = ptVoice;
+    utter.lang = ptVoice ? ptVoice.lang : "pt-BR";
+  } else {
+    const voice = pickDefaultVoice();
+    if (voice) utter.voice = voice;
+    utter.lang = voice ? voice.lang : "en-US";
+  }
   utter.rate = speechRate;
   utter.pitch = 1.05;
   window.speechSynthesis.speak(utter);
+}
+// Narração em português (nomes de lugar, instrução) — nunca é o conteúdo-alvo em inglês.
+function speakPT(text) {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  speakLive(text, "pt");
 }
 
 function populateVoiceSelect() {
