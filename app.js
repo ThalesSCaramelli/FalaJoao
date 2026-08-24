@@ -1,152 +1,10 @@
-// ===================== Preparação dos dados =====================
-function slug(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-}
-
-const GROUPS = [
-  { id: "tier0", tier: 0, namePt: "Sobrevivência", icon: "🚸", color: "#FF8FA3", words: TIER0_SURVIVAL },
-  ...CATEGORIES.map((c) => ({ ...c, tier: 1 })),
-  { id: "tier2", tier: 2, namePt: "Combinações", icon: "🧩", color: "#C9A7EB", words: TIER2_COMBOS },
-  { id: "tier3", tier: 3, namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1", words: TIER3_SENTENCES },
-];
-
-const ALL_ITEMS = [];
-GROUPS.forEach((group) => {
-  group.words.forEach((w) => {
-    ALL_ITEMS.push({
-      id: `${group.id}_${slug(w.en)}`,
-      groupId: group.id,
-      tier: group.tier,
-      en: w.en,
-      pt: w.pt,
-      emoji: w.emoji,
-      image: w.image || null,
-    });
-  });
-});
-const ITEM_BY_ID = Object.fromEntries(ALL_ITEMS.map((i) => [i.id, i]));
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+// ===================== UI =====================
+// Usa CONTENT/CATEGORY_META (data.js) e o motor de aprendizagem (engine.js). Não guarda estado próprio
+// de progresso — só estado de navegação/tela.
 
 function renderMedia(item) {
   if (item.image) return `<img class="word-photo" src="${item.image}" alt="${item.en}" />`;
   return item.emoji;
-}
-
-// ===================== Repetição espaçada (Leitner simplificado) =====================
-const SRS_KEY = "meuIngles_srs_v1";
-const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 21];
-
-function loadSRS() {
-  try {
-    return JSON.parse(localStorage.getItem(SRS_KEY)) || {};
-  } catch (e) {
-    return {};
-  }
-}
-let srsState = loadSRS();
-function saveSRS() {
-  localStorage.setItem(SRS_KEY, JSON.stringify(srsState));
-}
-
-function getItemState(id) {
-  return (
-    srsState[id] || {
-      box: 0,
-      introduced: false,
-      nextDue: 0,
-      correctStreak: 0,
-      wrongCount: 0,
-      correctCount: 0,
-      lastSeen: null,
-    }
-  );
-}
-
-function markIntroduced(id) {
-  const st = getItemState(id);
-  if (!st.introduced) {
-    st.introduced = true;
-    st.nextDue = Date.now();
-    st.lastSeen = Date.now();
-    srsState[id] = st;
-    saveSRS();
-  }
-}
-
-function recordResult(id, correct) {
-  const st = getItemState(id);
-  st.introduced = true;
-  st.lastSeen = Date.now();
-  if (correct) {
-    st.box = Math.min(st.box + 1, BOX_INTERVAL_DAYS.length - 1);
-    st.correctStreak = (st.correctStreak || 0) + 1;
-    st.correctCount = (st.correctCount || 0) + 1;
-  } else {
-    st.box = Math.max(st.box - 1, 0);
-    st.correctStreak = 0;
-    st.wrongCount = (st.wrongCount || 0) + 1;
-  }
-  st.nextDue = Date.now() + BOX_INTERVAL_DAYS[st.box] * 86400000;
-  srsState[id] = st;
-  saveSRS();
-}
-
-function getDueItems() {
-  const now = Date.now();
-  return ALL_ITEMS.filter((it) => {
-    const st = getItemState(it.id);
-    return st.introduced && st.nextDue <= now;
-  });
-}
-
-function getNewCandidates(limit) {
-  const notIntroduced = ALL_ITEMS.filter((it) => !getItemState(it.id).introduced);
-  notIntroduced.sort((a, b) => a.tier - b.tier);
-  return notIntroduced.slice(0, limit);
-}
-
-function speechRecognitionAvailable() {
-  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-}
-
-function pickRoundType(item) {
-  const st = getItemState(item.id);
-  if (!st.introduced) return "intro";
-  if (st.box >= 3 && speechRecognitionAvailable() && navigator.onLine && Math.random() < 0.3) return "speak";
-  return "choice";
-}
-
-// Monta a sessão do dia: revisões vencidas (prioridade pra Camada 0) + palavras novas, sempre misturado.
-function buildSession() {
-  const maxSession = 14;
-  const due = getDueItems().sort((a, b) => {
-    if (a.tier !== b.tier) return a.tier - b.tier;
-    return (getItemState(b.id).wrongCount || 0) - (getItemState(a.id).wrongCount || 0);
-  });
-  const dueSlice = due.slice(0, Math.max(0, maxSession - 3));
-  const newNeeded = Math.min(4, maxSession - dueSlice.length);
-  const newItems = getNewCandidates(Math.max(2, newNeeded));
-  let session = [...dueSlice, ...newItems].slice(0, maxSession);
-  if (session.length === 0) {
-    const introduced = ALL_ITEMS.filter((it) => getItemState(it.id).introduced);
-    session = shuffle(introduced).slice(0, 10);
-  }
-  session = shuffle(session);
-  return session.map((it) => ({ item: it, roundType: pickRoundType(it) }));
-}
-
-function getDistractors(item, count) {
-  const sameGroup = ALL_ITEMS.filter((it) => it.groupId === item.groupId && it.id !== item.id);
-  const pool = sameGroup.length >= count ? sameGroup : ALL_ITEMS.filter((it) => it.id !== item.id);
-  return shuffle(pool).slice(0, count);
 }
 
 // ===================== Voz (TTS) =====================
@@ -248,14 +106,15 @@ document.getElementById("btn-settings").addEventListener("click", () => {
 function renderHome() {
   const grid = document.getElementById("category-grid");
   grid.innerHTML = "";
-  GROUPS.forEach((group) => {
-    const total = group.words.length;
-    const introducedCount = group.words.filter((w) => getItemState(`${group.id}_${slug(w.en)}`).introduced).length;
+  Object.keys(CATEGORY_META).forEach((catId) => {
+    const meta = CATEGORY_META[catId];
+    const items = CONTENT.filter((it) => it.category === catId);
+    const introducedCount = items.filter((it) => getState(it.id).introduced).length;
     const btn = document.createElement("button");
     btn.className = "cat-card";
-    btn.style.background = group.color;
-    btn.innerHTML = `<span class="cat-icon">${group.icon}</span><span>${group.namePt}</span><span class="cat-progress">${introducedCount}/${total}</span>`;
-    btn.addEventListener("click", () => openCategory(group.id));
+    btn.style.background = meta.color;
+    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${meta.namePt}</span><span class="cat-progress">${introducedCount}/${items.length}</span>`;
+    btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
   const dueCount = getDueItems().length;
@@ -263,21 +122,20 @@ function renderHome() {
 }
 
 // ===================== Categoria (explorar) =====================
-let currentGroupId = null;
-function openCategory(groupId) {
-  currentGroupId = groupId;
-  const group = GROUPS.find((g) => g.id === groupId);
-  document.getElementById("category-title").textContent = group.namePt;
+let currentCategoryId = null;
+function openCategory(catId) {
+  currentCategoryId = catId;
+  const meta = CATEGORY_META[catId];
+  document.getElementById("category-title").textContent = meta.namePt;
   const wordGrid = document.getElementById("word-grid");
   wordGrid.innerHTML = "";
-  group.words.forEach((w) => {
-    const id = `${group.id}_${slug(w.en)}`;
+  CONTENT.filter((it) => it.category === catId).forEach((item) => {
     const card = document.createElement("button");
     card.className = "word-card";
-    card.innerHTML = `<span class="word-emoji">${renderMedia({ en: w.en, image: w.image, emoji: w.emoji })}</span><span class="word-en">${w.en}</span><span class="word-pt">${w.pt}</span>`;
+    card.innerHTML = `<span class="word-emoji">${renderMedia(item)}</span><span class="word-en">${item.en}</span><span class="word-pt">${item.pt}</span>`;
     card.addEventListener("click", () => {
-      speak(w.en);
-      markIntroduced(id);
+      speak(item.en);
+      markIntroduced(item.id);
       renderHome();
     });
     wordGrid.appendChild(card);
@@ -286,8 +144,7 @@ function openCategory(groupId) {
 }
 
 document.getElementById("btn-play-quiz").addEventListener("click", () => {
-  const group = GROUPS.find((g) => g.id === currentGroupId);
-  const items = group.words.map((w) => ITEM_BY_ID[`${group.id}_${slug(w.en)}`]);
+  const items = CONTENT.filter((it) => it.category === currentCategoryId);
   startQuiz(shuffle(items).slice(0, 10).map((it) => ({ item: it, roundType: "choice" })));
 });
 
@@ -410,6 +267,7 @@ function handleChoice(btn, opt, target, container) {
   }
 }
 
+// ---- Speaking: correção de integridade — só conta como resultado quando reconhece de verdade ----
 function startSpeakAttempt(item) {
   const statusEl = document.getElementById("speak-status");
   const micBtn = document.getElementById("mic-btn");
@@ -425,11 +283,10 @@ function startSpeakAttempt(item) {
   statusEl.textContent = "Ouvindo...";
 
   rec.onresult = (e) => {
-    const alts = Array.from(e.results[0]).map((r) => r.transcript.toLowerCase().trim());
-    const target = item.en.toLowerCase();
-    const matched = alts.some((a) => a.includes(target) || target.includes(a));
+    const alts = Array.from(e.results[0]).map((r) => r.transcript);
+    const matched = alts.some((a) => matchesAcceptedAnswer(item, a));
     micBtn.classList.remove("listening");
-    recordResult(item.id, true);
+    recordSpeechAttempt(item.id, matched);
     if (matched) {
       statusEl.textContent = "Arrasou! 🎉";
       playCheer();
@@ -445,6 +302,7 @@ function startSpeakAttempt(item) {
   rec.onerror = () => {
     micBtn.classList.remove("listening");
     statusEl.textContent = "Sem problemas, vamos seguir!";
+    // erro técnico de reconhecimento não é uma tentativa real -> não registra nada no progresso
     setTimeout(() => {
       quizIndex++;
       renderRound();
@@ -481,22 +339,22 @@ document.getElementById("btn-test-voice").addEventListener("click", () => speak(
 
 document.getElementById("btn-reset-progress").addEventListener("click", () => {
   if (confirm("Tem certeza que quer zerar todo o progresso?")) {
-    srsState = {};
-    saveSRS();
+    learningState = {};
+    saveLearningState();
     renderSettings();
     renderHome();
   }
 });
 
 function buildProgressSummary() {
-  const lines = GROUPS.map((g) => {
-    const total = g.words.length;
-    const states = g.words.map((w) => getItemState(`${g.id}_${slug(w.en)}`));
-    const introduced = states.filter((s) => s.introduced).length;
-    const mastered = states.filter((s) => s.box >= 3).length;
-    return `${g.icon} ${g.namePt}: ${mastered}/${total} dominadas (${introduced} vistas)`;
+  const lines = Object.keys(CATEGORY_META).map((catId) => {
+    const meta = CATEGORY_META[catId];
+    const items = CONTENT.filter((it) => it.category === catId);
+    const introduced = items.filter((it) => getState(it.id).introduced).length;
+    const mastered = items.filter((it) => getLearningStage(it.id) === "mastered").length;
+    return `${meta.icon} ${meta.namePt}: ${mastered}/${items.length} dominadas (${introduced} vistas)`;
   });
-  const struggling = ALL_ITEMS.map((it) => ({ it, st: getItemState(it.id) }))
+  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
     .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
@@ -519,10 +377,48 @@ document.getElementById("btn-share-report").addEventListener("click", () => {
   }
 });
 
+// ---- Debug do motor adaptativo ----
+function renderAdaptationLog() {
+  const el = document.getElementById("adaptation-log");
+  if (!adaptationLog.length) {
+    el.innerHTML = `<div class="empty">Nada registrado ainda — a decomposição aparece aqui quando um item falha ${FAILURE_THRESHOLD}x seguidas sem sair da caixa 0.</div>`;
+    return;
+  }
+  el.innerHTML = adaptationLog
+    .map(
+      (e) => `
+      <div class="entry">
+        <div class="when">${e.at}</div>
+        <div><strong>${e.itemEn}</strong> (${e.item}) — ${e.reason}</div>
+        <div>→ inseriu: ${e.insertedPrerequisites.join(", ")}</div>
+      </div>`
+    )
+    .join("");
+}
+
+document.getElementById("btn-simulate-difficulty").addEventListener("click", () => {
+  const id = "phrase_bathroom_please";
+  markIntroduced(id);
+  recordResult(id, false);
+  recordResult(id, false);
+  buildSession(); // dispara a checagem de decomposição e loga se aplicável
+  renderAdaptationLog();
+  renderHome();
+});
+
+document.getElementById("btn-clear-log").addEventListener("click", () => {
+  adaptationLog = [];
+  try {
+    sessionStorage.removeItem(ADAPTATION_LOG_KEY);
+  } catch (e) {}
+  renderAdaptationLog();
+});
+
 function renderSettings() {
   populateVoiceSelect();
   document.getElementById("rate-slider").value = speechRate;
   document.getElementById("progress-summary").textContent = buildProgressSummary();
+  renderAdaptationLog();
 }
 
 // ===================== Service Worker (offline) =====================

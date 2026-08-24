@@ -1,0 +1,225 @@
+// ===================== LEARNING ENGINE =====================
+// Learning State: o que o app sabe sobre o progresso do aluno em cada item de conteúdo.
+// Não confundir com Content (data.js, estático) nem com User State (futuro: perfil agregado).
+// learningStage é DERIVADO daqui, não é salvo em nenhum lugar — é sempre uma função da caixa/estado atual.
+
+const CONTENT_BY_ID = Object.fromEntries(CONTENT.map((it) => [it.id, it]));
+
+const LEARNING_KEY = "meuIngles_learning_v2"; // v2: substitui meuIngles_srs_v1 (schema novo, sem dado real em produção ainda — sem necessidade de migração)
+const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 21];
+
+function loadLearningState() {
+  try {
+    return JSON.parse(localStorage.getItem(LEARNING_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+let learningState = loadLearningState();
+function saveLearningState() {
+  localStorage.setItem(LEARNING_KEY, JSON.stringify(learningState));
+}
+
+function getState(id) {
+  return (
+    learningState[id] || {
+      box: 0,
+      introduced: false,
+      nextDue: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      correctStreak: 0,
+      lastSeen: null,
+      speech: { attemptCount: 0, matchedCount: 0, lastResult: null },
+    }
+  );
+}
+
+// learningStage: new -> learning -> consolidating -> mastered. Puramente derivado da caixa Leitner —
+// não é um novo conceito de dado, é só um rótulo pedagógico mais honesto sobre o que já tínhamos.
+function getLearningStage(id) {
+  const st = getState(id);
+  if (!st.introduced) return "new";
+  if (st.box <= 1) return "learning";
+  if (st.box <= 3) return "consolidating";
+  return "mastered";
+}
+
+function markIntroduced(id) {
+  const st = getState(id);
+  if (!st.introduced) {
+    st.introduced = true;
+    st.nextDue = Date.now();
+    st.lastSeen = Date.now();
+    learningState[id] = st;
+    saveLearningState();
+  }
+}
+
+function recordResult(id, correct) {
+  const st = getState(id);
+  st.introduced = true;
+  st.lastSeen = Date.now();
+  if (correct) {
+    st.box = Math.min(st.box + 1, BOX_INTERVAL_DAYS.length - 1);
+    st.correctStreak = (st.correctStreak || 0) + 1;
+    st.correctCount = (st.correctCount || 0) + 1;
+  } else {
+    st.box = Math.max(st.box - 1, 0);
+    st.correctStreak = 0;
+    st.wrongCount = (st.wrongCount || 0) + 1;
+  }
+  st.nextDue = Date.now() + BOX_INTERVAL_DAYS[st.box] * 86400000;
+  learningState[id] = st;
+  saveLearningState();
+}
+
+// ---- Integridade do speaking (correção do bug apontado: falar qualquer coisa não pode contar como acerto) ----
+// matched: o reconhecimento de fala bateu com uma resposta aceita -> conta como recordResult(true).
+// inconclusive: não bateu ou não reconheceu nada -> NÃO mexe na caixa. Não é erro, é "não sei dizer" —
+// o reconhecimento de fala de criança pequena não é confiável o suficiente pra virar um "errado".
+function recordSpeechAttempt(id, matched) {
+  const st = getState(id);
+  st.speech = st.speech || { attemptCount: 0, matchedCount: 0, lastResult: null };
+  st.speech.attemptCount = (st.speech.attemptCount || 0) + 1;
+  st.speech.lastResult = matched ? "matched" : "inconclusive";
+  if (matched) st.speech.matchedCount = (st.speech.matchedCount || 0) + 1;
+  learningState[id] = st;
+  saveLearningState();
+  if (matched) recordResult(id, true);
+}
+
+function matchesAcceptedAnswer(item, transcript) {
+  const accepted = item.acceptedAnswers || [item.en.toLowerCase()];
+  const t = transcript.toLowerCase().trim();
+  return accepted.some((a) => t.includes(a) || a.includes(t));
+}
+
+function getDueItems() {
+  const now = Date.now();
+  return CONTENT.filter((it) => {
+    const st = getState(it.id);
+    return st.introduced && st.nextDue <= now;
+  });
+}
+
+// Prioriza survival, depois por dificuldade (não existe mais "tier" como campo — isso é só uma
+// heurística de ORDEM de introdução, reaproveitando category+difficulty que já existem).
+function getNewCandidates(limit) {
+  const notIntroduced = CONTENT.filter((it) => !getState(it.id).introduced);
+  notIntroduced.sort((a, b) => {
+    const aPriority = a.category === "survival" ? 0 : 1;
+    const bPriority = b.category === "survival" ? 0 : 1;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return a.difficulty - b.difficulty;
+  });
+  return notIntroduced.slice(0, limit);
+}
+
+function getDistractors(item, count) {
+  const sameCategory = CONTENT.filter((it) => it.category === item.category && it.id !== item.id);
+  const pool = sameCategory.length >= count ? sameCategory : CONTENT.filter((it) => it.id !== item.id);
+  return shuffle(pool).slice(0, count);
+}
+
+// ===================== Telemetria local de adaptação =====================
+// Log visível (console + tela de Configurações) pra comprovar que a decomposição por pré-requisito
+// está realmente mudando a sessão, e não é só um "devia estar funcionando".
+const ADAPTATION_LOG_KEY = "meuIngles_adaptationLog_v1";
+let adaptationLog = (() => {
+  try {
+    return JSON.parse(sessionStorage.getItem(ADAPTATION_LOG_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+})();
+function logAdaptation(entry) {
+  const withTime = { ...entry, at: new Date().toLocaleString("pt-BR") };
+  adaptationLog.unshift(withTime);
+  if (adaptationLog.length > 30) adaptationLog.length = 30;
+  try {
+    sessionStorage.setItem(ADAPTATION_LOG_KEY, JSON.stringify(adaptationLog));
+  } catch (e) {}
+  console.info("[adaptação]", withTime);
+}
+
+// ===================== Sessão adaptativa (due + novo + decomposição por pré-requisito) =====================
+const FAILURE_THRESHOLD = 2; // erros seguidos sem sair da caixa 0 -> considerar decompor
+const MAX_SESSION = 14;
+
+function needsDecomposition(item) {
+  const st = getState(item.id);
+  return (
+    st.introduced &&
+    st.box === 0 &&
+    (st.wrongCount || 0) >= FAILURE_THRESHOLD &&
+    item.prerequisites &&
+    item.prerequisites.length > 0
+  );
+}
+
+function buildSession() {
+  const due = getDueItems().sort((a, b) => {
+    const aPriority = a.category === "survival" ? 0 : 1;
+    const bPriority = b.category === "survival" ? 0 : 1;
+    if (aPriority !== bPriority) return aPriority - bPriority;
+    return (getState(b.id).wrongCount || 0) - (getState(a.id).wrongCount || 0);
+  });
+  const dueSlice = due.slice(0, Math.max(0, MAX_SESSION - 3));
+  const newNeeded = Math.min(4, MAX_SESSION - dueSlice.length);
+  const newItems = getNewCandidates(Math.max(2, newNeeded));
+  let session = [...dueSlice, ...newItems].slice(0, MAX_SESSION);
+
+  if (session.length === 0) {
+    const introduced = CONTENT.filter((it) => getState(it.id).introduced);
+    session = shuffle(introduced).slice(0, 10);
+  }
+
+  // Decomposição: se um item da sessão está travado (falhou muito, não sai da caixa 0), troca ele
+  // pelos pré-requisitos que ainda não estão consolidados, em vez de insistir na mesma frase difícil.
+  const expanded = [];
+  session.forEach((item) => {
+    if (needsDecomposition(item)) {
+      const prereqs = (item.prerequisites || [])
+        .map((pid) => CONTENT_BY_ID[pid])
+        .filter((p) => p && getLearningStage(p.id) !== "mastered");
+      if (prereqs.length > 0) {
+        logAdaptation({
+          type: "decompose",
+          item: item.id,
+          itemEn: item.en,
+          reason: `errou ${getState(item.id).wrongCount}x sem sair da caixa 0`,
+          insertedPrerequisites: prereqs.map((p) => p.id),
+        });
+        prereqs.forEach((p) => expanded.push(p));
+        return; // não inclui o item difícil nesta sessão — volta depois que os pré-requisitos evoluírem
+      }
+    }
+    expanded.push(item);
+  });
+
+  const seen = new Set();
+  const deduped = expanded.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
+
+  return shuffle(deduped).map((it) => ({ item: it, roundType: pickRoundType(it) }));
+}
+
+function speechRecognitionAvailable() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+function pickRoundType(item) {
+  const st = getState(item.id);
+  if (!st.introduced) return "intro";
+  if (st.box >= 3 && speechRecognitionAvailable() && navigator.onLine && Math.random() < 0.3) return "speak";
+  return "choice";
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
