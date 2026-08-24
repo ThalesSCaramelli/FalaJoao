@@ -471,10 +471,23 @@ function pickVoice(lang) {
 }
 // lang: 'pt' pra narração/instrução (o filho não lê e ainda não entende inglês — quem "explica" fala português),
 // 'en' só pro conteúdo-alvo que está sendo ensinado (as frases/palavras em si).
+let AUDIO_MANIFEST = {};
+fetch('audio/manifest.json').then(r => r.json()).then(m => { AUDIO_MANIFEST = m; }).catch(() => {});
+let currentAudio = null;
+
 function speak(text, lang) {
   lang = lang || 'pt';
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (window.speechSynthesis) speechSynthesis.cancel();
+
+  // voz neural pré-gravada (edge-tts) quando disponível — muito melhor que o TTS ao vivo do navegador
+  if (AUDIO_MANIFEST[text]) {
+    currentAudio = new Audio(AUDIO_MANIFEST[text]);
+    currentAudio.play().catch(() => {});
+    return;
+  }
+  // fallback: TTS ao vivo do navegador (varia de qualidade por aparelho)
   if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   const v = pickVoice(lang);
   if (v) u.voice = v;
