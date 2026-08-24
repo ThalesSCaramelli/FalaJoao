@@ -25,3 +25,11 @@
 - **school_scissors** (scissors): "Scissors sticker, stationery illustration vector" por desconhecido — cc0 — https://www.rawpixel.com/image/6430831/vector-sticker-public-domain-illustrations
 - **school_crayon** (crayon): "Colorful sketch pens on white background" por www.readyelements.com — cc0 — https://www.flickr.com/photos/155753322@N06/43712542771
 - **family_grandpa** (grandpa): "Grandfather png sticker, transparent background" por desconhecido — cc0 — https://www.rawpixel.com/image/9069723/png-white-background-cartoon
+- **food_banana** (banana): "Free ripe yellow banana image" por desconhecido — cc0 — https://www.rawpixel.com/image/5926741/photo-image-public-domain-tropical-fruit
+- **food_orange** (orange): "Tree Ripe Satsuma Mandarin Orange Citrus Fruit" por Jennifer Bourn — cc0 — https://wordpress.org/photos/photo/15361f9890/
+- **body_mouth** (mouth): "Big Beautiful Smile" por Smiles7676 — cc0 — https://www.flickr.com/photos/150210070@N05/35142272074
+- **clothes_socks** (socks): "A person’s legs wearing colorful striped socks, standing on the wooden floor of a stage." por Nilo Velez — cc0 — https://wordpress.org/photos/photo/68667249ed/
+- **school_pencil** (pencil): "Yellow pencil clipart, stationery illustration" por desconhecido — cc0 — https://www.rawpixel.com/image/6286296/image-public-domain-illustrations-pencil
+- **school_backpack** (backpack): "Backpack" por megforce1 — cc0 — https://www.flickr.com/photos/35608308@N05/28404475294
+- **school_chair** (chair): "Free classroom chairs photo" por desconhecido — cc0 — https://www.rawpixel.com/image/5905043/photo-image-public-domain-red-free
+- **school_glue** (glue): "PNG Blue glue stick sticker" por desconhecido — cc0 — https://www.rawpixel.com/image/11728676/png-sticker-collage

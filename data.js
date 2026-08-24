@@ -79,7 +79,7 @@ const CONTENT = [
 
   // ---- food ----
   { id: "food_apple", contentType: "word", image: "assets/images/food_apple.jpg", en: "apple", pt: "maçã", emoji: "🍎", category: "food", difficulty: 1, prerequisites: [] },
-  { id: "food_banana", contentType: "word", en: "banana", pt: "banana", emoji: "🍌", category: "food", difficulty: 1, prerequisites: [] },
+  { id: "food_banana", contentType: "word", image: "assets/images/food_banana.jpg", en: "banana", pt: "banana", emoji: "🍌", category: "food", difficulty: 1, prerequisites: [] },
   { id: "food_milk", contentType: "word", image: "assets/images/food_milk.jpg", en: "milk", pt: "leite", emoji: "🥛", category: "food", difficulty: 1, prerequisites: [] },
   { id: "food_bread", contentType: "word", image: "assets/images/food_bread.jpg", en: "bread", pt: "pão", emoji: "🍞", category: "food", difficulty: 1, prerequisites: [] },
   { id: "food_water", contentType: "word", image: "assets/images/food_water.jpg", en: "water", pt: "água", emoji: "💧", category: "food", difficulty: 1, prerequisites: [] },
@@ -87,12 +87,12 @@ const CONTENT = [
   { id: "food_cheese", contentType: "word", image: "assets/images/food_cheese.jpg", en: "cheese", pt: "queijo", emoji: "🧀", category: "food", difficulty: 1, prerequisites: [] },
   { id: "food_grapes", contentType: "word", image: "assets/images/food_grapes.jpg", en: "grapes", pt: "uvas", emoji: "🍇", category: "food", difficulty: 1, prerequisites: [] },
   { id: "food_cookie", contentType: "word", image: "assets/images/food_cookie.jpg", en: "cookie", pt: "biscoito", emoji: "🍪", category: "food", difficulty: 1, prerequisites: [] },
-  { id: "food_orange", contentType: "word", en: "orange", pt: "laranja (fruta)", emoji: "🍊", category: "food", difficulty: 1, prerequisites: [] },
+  { id: "food_orange", contentType: "word", image: "assets/images/food_orange.jpg", en: "orange", pt: "laranja (fruta)", emoji: "🍊", category: "food", difficulty: 1, prerequisites: [] },
 
   // ---- body ----
   { id: "body_eyes", contentType: "word", image: "assets/images/body_eyes.jpg", en: "eyes", pt: "olhos", emoji: "👀", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_nose", contentType: "word", image: "assets/images/body_nose.jpg", en: "nose", pt: "nariz", emoji: "👃", category: "body", difficulty: 1, prerequisites: [] },
-  { id: "body_mouth", contentType: "word", en: "mouth", pt: "boca", emoji: "👄", category: "body", difficulty: 1, prerequisites: [] },
+  { id: "body_mouth", contentType: "word", image: "assets/images/body_mouth.jpg", en: "mouth", pt: "boca", emoji: "👄", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_ear", contentType: "word", en: "ear", pt: "orelha", emoji: "👂", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_hand", contentType: "word", en: "hand", pt: "mão", emoji: "✋", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_foot", contentType: "word", en: "foot", pt: "pé", emoji: "🦶", category: "body", difficulty: 1, prerequisites: [] },
@@ -112,19 +112,19 @@ const CONTENT = [
   { id: "clothes_shirt", contentType: "word", image: "assets/images/clothes_shirt.jpg", en: "shirt", pt: "camiseta", emoji: "👕", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_pants", contentType: "word", en: "pants", pt: "calça", emoji: "👖", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_shoes", contentType: "word", en: "shoes", pt: "sapatos", emoji: "👟", category: "clothes", difficulty: 1, prerequisites: [] },
-  { id: "clothes_socks", contentType: "word", en: "socks", pt: "meias", emoji: "🧦", category: "clothes", difficulty: 1, prerequisites: [] },
+  { id: "clothes_socks", contentType: "word", image: "assets/images/clothes_socks.jpg", en: "socks", pt: "meias", emoji: "🧦", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_hat", contentType: "word", en: "hat", pt: "boné", emoji: "🧢", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_jacket", contentType: "word", en: "jacket", pt: "jaqueta", emoji: "🧥", category: "clothes", difficulty: 1, prerequisites: [] },
 
   // ---- school ----
   { id: "school_book", contentType: "word", en: "book", pt: "livro", emoji: "📖", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_pencil", contentType: "word", en: "pencil", pt: "lápis", emoji: "✏️", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_backpack", contentType: "word", en: "backpack", pt: "mochila", emoji: "🎒", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_pencil", contentType: "word", image: "assets/images/school_pencil.jpg", en: "pencil", pt: "lápis", emoji: "✏️", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_backpack", contentType: "word", image: "assets/images/school_backpack.jpg", en: "backpack", pt: "mochila", emoji: "🎒", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_scissors", contentType: "word", image: "assets/images/school_scissors.jpg", en: "scissors", pt: "tesoura", emoji: "✂️", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_crayon", contentType: "word", image: "assets/images/school_crayon.jpg", en: "crayon", pt: "giz de cera", emoji: "🖍️", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_chair", contentType: "word", en: "chair", pt: "cadeira", emoji: "🪑", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_chair", contentType: "word", image: "assets/images/school_chair.jpg", en: "chair", pt: "cadeira", emoji: "🪑", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_ball", contentType: "word", en: "ball", pt: "bola", emoji: "⚽", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_glue", contentType: "word", en: "glue", pt: "cola", emoji: "🧴", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_glue", contentType: "word", image: "assets/images/school_glue.jpg", en: "glue", pt: "cola", emoji: "🧴", category: "school", difficulty: 1, prerequisites: [] },
 
   // ---- combos (combinações curtas, 2-3 palavras) ----
   { id: "combo_red_apple", contentType: "phrase", en: "red apple", pt: "maçã vermelha", emoji: "🔴🍎", category: "combos", difficulty: 2, prerequisites: ["colors_red", "food_apple"] },
