@@ -1,0 +1,27 @@
+# Créditos das imagens (CC0 / domínio público — atribuição não obrigatória, mantida por transparência)
+
+- **animals_dog** (dog): "Vintage spaniel dog, animal clipart" por desconhecido — cc0 — https://www.rawpixel.com/image/6256563/vector-sticker-vintage-public-domain
+- **animals_cat** (cat): "Cute striped cat, animal image" por desconhecido — cc0 — https://www.rawpixel.com/image/6039585/photo-image-public-domain-cat-cute
+- **animals_bird** (bird): "Small Birds" por Wildlife Terry — cc0 — https://www.flickr.com/photos/44510888@N05/24697161857
+- **animals_fish** (fish): "Yellow fish, animal illustration" por desconhecido — cc0 — https://www.rawpixel.com/image/6743254/image-public-domain-illustrations-free
+- **animals_rabbit** (rabbit): "Easter rabbit, animal illustration" por desconhecido — cc0 — https://www.rawpixel.com/image/6743503/image-public-domain-celebration-illustrations
+- **animals_lion** (lion): "Lion animal cartoon png clipart" por desconhecido — cc0 — https://www.rawpixel.com/image/10192226/png-cartoon-illustrations
+- **animals_elephant** (elephant): "Elephant, animal & wildlife image" por desconhecido — cc0 — https://www.rawpixel.com/image/6041711/photo-image-public-domain-nature-white
+- **animals_bear** (bear): "Berliner Bär im Bärenzwinger 3/3" por qubodup — cc0 — https://www.flickr.com/photos/21051491@N02/3557683230
+- **animals_duck** (duck): "Canadian Geese" por goldiamondcorp — cc0 — https://www.flickr.com/photos/186116748@N05/49307589297
+- **animals_frog** (frog): "Frog animal clipart, vintage hand" por desconhecido — cc0 — https://www.rawpixel.com/image/6730170/vector-vintage-public-domain-illustrations
+- **food_apple** (apple): "Apples Fruits" por Agnieszka Bladzik — cc0 — https://stocksnap.io/photo/apples-fruits-91E0HB20F8
+- **food_milk** (milk): "Milk glass clipart, illustration vector" por desconhecido — cc0 — https://www.rawpixel.com/image/7620202/vector-illustrations-public-domain-table
+- **food_bread** (bread): "bread-food-healthy-breakfast" por pixellaphoto — cc0 — https://www.flickr.com/photos/137643065@N06/24244213301
+- **food_water** (water): "Even With Glasses the Water is Murky" por cogdogblog — cc0 — https://www.flickr.com/photos/37996646802@N01/791328451
+- **food_egg** (egg): "Eggs Food" por Peter Belch — cc0 — https://stocksnap.io/photo/eggs-food-Z05D72KD5S
+- **food_cheese** (cheese): "Cheese Food" por Jakub Rostkowski — cc0 — https://stocksnap.io/photo/cheese-food-ABFRSZL8XB
+- **food_grapes** (grapes): "Grapes Fruit" por Ian Schneider — cc0 — https://stocksnap.io/photo/grapes-fruit-L40MK4MIEJ
+- **food_cookie** (cookie): "Gingerbread cookies" por deborah.soltesz — cc0 — https://www.flickr.com/photos/10836653@N05/3117777526
+- **body_eyes** (eyes): "Clear Human Eye" por Image Catalog — cc0 — https://www.flickr.com/photos/132795455@N08/20668139425
+- **body_nose** (nose): "Smile" por Smiles7676 — cc0 — https://www.flickr.com/photos/150210070@N05/36588338772
+- **body_tooth** (tooth): "Smile" por Smiles7676 — cc0 — https://www.flickr.com/photos/150210070@N05/36588338772
+- **clothes_shirt** (shirt): "Riders by Lee Indigo Women's Short-Sleeve Polo Shirt" por shop8447 — cc0 — https://www.flickr.com/photos/185514373@N06/49062067612
+- **school_scissors** (scissors): "Scissors sticker, stationery illustration vector" por desconhecido — cc0 — https://www.rawpixel.com/image/6430831/vector-sticker-public-domain-illustrations
+- **school_crayon** (crayon): "Colorful sketch pens on white background" por www.readyelements.com — cc0 — https://www.flickr.com/photos/155753322@N06/43712542771
+- **family_grandpa** (grandpa): "Grandfather png sticker, transparent background" por desconhecido — cc0 — https://www.rawpixel.com/image/9069723/png-white-background-cartoon
