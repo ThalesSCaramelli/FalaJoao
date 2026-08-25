@@ -27,9 +27,14 @@ function icon(name, extraClass) {
   return `<span class="icon${extraClass ? " " + extraClass : ""}"><svg viewBox="0 0 24 24">${ICONS[name] || ""}</svg></span>`;
 }
 
-function renderDots(current, total, cls) {
+// Pontinhos de progresso. Pra totais grandes (>maxDots), escala proporcionalmente em vez de
+// desenhar um pontinho por item — evita virar uma fileira ilegível numa categoria com 10+ palavras.
+function renderDots(current, total, cls, maxDots) {
+  maxDots = maxDots || 8;
+  const shown = Math.min(total, maxDots);
+  const filled = total > 0 ? Math.round((current / total) * shown) : 0;
   let html = `<div class="progress-dots${cls ? " " + cls : ""}">`;
-  for (let i = 0; i < total; i++) html += `<span class="dot${i < current ? " filled" : ""}"></span>`;
+  for (let i = 0; i < shown; i++) html += `<span class="dot${i < filled ? " filled" : ""}"></span>`;
   return html + "</div>";
 }
 
@@ -37,9 +42,14 @@ function renderDots(current, total, cls) {
 // Emoji temático/decorativo (🌏 no mundo, 🎯 na missão, carinhas de conteúdo) fica como está.
 function initIcons() {
   const settingsBtn = document.getElementById("btn-settings");
-  if (settingsBtn) settingsBtn.innerHTML = icon("settings");
+  if (settingsBtn) {
+    settingsBtn.innerHTML = icon("settings");
+    settingsBtn.setAttribute("aria-label", "Configurações");
+  }
   document.querySelectorAll(".back-btn").forEach((el) => {
-    el.innerHTML = el.textContent.trim().includes("Voltar") ? icon("back") + " Voltar" : icon("back");
+    const isVoltar = el.textContent.trim().includes("Voltar");
+    el.innerHTML = isVoltar ? icon("back") + " Voltar" : icon("back");
+    if (!isVoltar) el.setAttribute("aria-label", "Voltar");
   });
   const repeatBtn = document.getElementById("btn-repeat-word");
   if (repeatBtn) repeatBtn.innerHTML = icon("sound") + " Ouvir de novo";
@@ -84,6 +94,14 @@ function svgHat(item) {
   if (item.type === "party") return `<path d="M50 -4 L68 20 L32 20 Z" fill="${item.color}"/><circle cx="50" cy="-4" r="4" fill="#fff"/>`;
   return "";
 }
+// Ícone de cada item de avatar no seletor/celebração — cada categoria tem seu próprio símbolo,
+// "sem item" (hat:none / backpack:none) fica só com a cor, sem ícone confuso.
+function avatarItemIcon(cat, item) {
+  if (cat === "shirt") return "👕";
+  if (cat === "hat") return item.type === "cap" ? "🧢" : item.type === "party" ? "🎉" : "";
+  if (cat === "backpack") return item.color ? "🎒" : "";
+  return "";
+}
 function svgBackpack(item) {
   if (!item || !item.color) return "";
   return `<rect x="6" y="62" width="14" height="32" rx="5" fill="${item.color}"/>`;
@@ -125,7 +143,7 @@ function renderAvatarScreen() {
       const btn = document.createElement("button");
       btn.className = "item-swatch" + (unlocked ? "" : " locked") + (avatarState[cat] === item.id ? " selected" : "");
       btn.style.background = item.color || "#EFE7DF";
-      btn.innerHTML = item.type ? (item.type === "cap" ? "🧢" : "🎉") : (cat === "backpack" && item.color ? "🎒" : (item.id === "none" ? "⛔" : ""));
+      btn.innerHTML = avatarItemIcon(cat, item);
       if (!unlocked) btn.innerHTML += `<span class="lock-badge">${icon("lock")}</span>`;
       btn.addEventListener("click", () => {
         const hintEl = document.getElementById("avatar-unlock-hint");
@@ -151,15 +169,16 @@ function renderAvatarScreen() {
   if (homeHint) homeHint.textContent = `${totalUnlocked}/${totalItems} itens`;
 }
 
-document.getElementById("btn-avatar-banner").addEventListener("click", () => {
+document.getElementById("btn-avatar-hero").addEventListener("click", () => {
   renderAvatarScreen();
   showScreen("avatar");
 });
 
-// ===================== My English World (mapa de situações) =====================
+// ===================== My English World (mapa de situações + explorar por categoria) =====================
 function renderWorldMap() {
   const pinsWrap = document.getElementById("world-pins");
   pinsWrap.innerHTML = "";
+  renderCategoryGrid();
   SITUATIONS.forEach((situation) => {
     const ratio = getSituationProgressRatio(situation);
     const pin = document.createElement("button");
@@ -171,6 +190,11 @@ function renderWorldMap() {
     pinsWrap.appendChild(pin);
   });
   document.getElementById("world-avatar").innerHTML = avatarSVG(avatarState);
+  const hintEl = document.querySelector("#world-map .world-hint");
+  if (hintEl) {
+    const anyIntroduced = CONTENT.some((it) => getState(it.id).introduced);
+    hintEl.textContent = anyIntroduced ? "👉 Toque num lugar pra ir e jogar lá!" : "🌱 Sua aventura começa aqui — toque num lugar!";
+  }
 }
 
 function goToSituation(situation) {
@@ -305,6 +329,38 @@ function playCheer() {
 function playGentle() {
   playTone(392, 0.2, 0);
 }
+function playUnlock() {
+  playTone(659.25, 0.12, 0);
+  playTone(880, 0.12, 0.1);
+  playTone(1046.5, 0.3, 0.2);
+}
+// Confete leve em CSS puro (sem lib) — só no acerto, função clara de recompensa, não decoração gratuita.
+const CONFETTI_COLORS = ["#FF6B5B", "#FFB648", "#5FC98D", "#3FB6C9"];
+function spawnConfetti(anchorEl) {
+  const rect = anchorEl.getBoundingClientRect();
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer";
+  for (let i = 0; i < 10; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = rect.left + rect.width / 2 + "px";
+    piece.style.top = rect.top + rect.height / 2 + "px";
+    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.setProperty("--dx", (Math.random() * 160 - 80) + "px");
+    piece.style.setProperty("--dy", (Math.random() * -120 - 40) + "px");
+    piece.style.setProperty("--rot", Math.round(Math.random() * 360) + "deg");
+    layer.appendChild(piece);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 900);
+}
+
+function playFanfare() {
+  playTone(523.25, 0.13, 0);
+  playTone(659.25, 0.13, 0.11);
+  playTone(783.99, 0.13, 0.22);
+  playTone(1046.5, 0.4, 0.33);
+}
 
 // ===================== Navegação de telas =====================
 const screens = document.querySelectorAll(".screen");
@@ -340,35 +396,21 @@ function renderHome() {
   document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${topCat.namePt}` : "🎉 Tudo em dia!";
   document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
 
-  // jornada (prévia por categoria)
-  const journey = document.getElementById("journey-preview");
-  journey.innerHTML = "";
-  Object.keys(CATEGORY_META).slice(0, 7).forEach((catId) => {
-    const meta = CATEGORY_META[catId];
-    const items = CONTENT.filter((it) => it.category === catId);
-    const introducedCount = items.filter((it) => getState(it.id).introduced).length;
-    const ratio = getCategoryProgressRatio(catId);
-    const dotClass = ratio >= UNLOCK_THRESHOLD ? "done" : introducedCount > 0 ? "progress" : "";
-    const dotContent = ratio >= UNLOCK_THRESHOLD ? "✓" : meta.icon;
-    const node = document.createElement("button");
-    node.className = "journey-node";
-    node.innerHTML = `<div class="journey-dot ${dotClass}">${dotContent}</div><div class="label">${meta.namePt}</div>`;
-    node.addEventListener("click", () => openCategory(catId));
-    journey.appendChild(node);
-    journey.appendChild(document.createElement("div")).className = "journey-line";
-  });
+}
 
-  // categorias (explorar livre)
+// Grade de categorias (explorar livre) — mora dentro de Adventure/My English World, não na Home.
+function renderCategoryGrid() {
   const grid = document.getElementById("category-grid");
+  if (!grid) return;
   grid.innerHTML = "";
   Object.keys(CATEGORY_META).forEach((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
-    const introducedCount = items.filter((it) => getState(it.id).introduced).length;
+    const masteredCount = items.filter((it) => getLearningStage(it.id) === "mastered").length;
     const btn = document.createElement("button");
     btn.className = "cat-card";
     btn.style.background = meta.color;
-    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${meta.namePt}</span><span class="cat-progress">${introducedCount}/${items.length}</span>`;
+    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${meta.namePt}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
     btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
@@ -412,10 +454,24 @@ let quizScore = { correct: 0, total: 0 };
 let choiceLocked = false;
 let wrongAttemptsThisRound = 0;
 
+// Itens de avatar desbloqueados agora (usado pra detectar desbloqueios novos ao fim da sessão).
+function getUnlockedAvatarItemIds() {
+  const ids = [];
+  Object.keys(AVATAR_ITEMS).forEach((cat) => {
+    AVATAR_ITEMS[cat].forEach((item) => {
+      if (isCategoryUnlockThresholdMet(item.unlockedBy)) ids.push(cat + ":" + item.id);
+    });
+  });
+  return ids;
+}
+
+let unlockedSnapshotAtSessionStart = [];
+
 function startQuiz(queue) {
   quizQueue = queue;
   quizIndex = 0;
   quizScore = { correct: 0, total: 0 };
+  unlockedSnapshotAtSessionStart = getUnlockedAvatarItemIds();
   showScreen("quiz");
   renderRound();
 }
@@ -431,10 +487,13 @@ function renderRound() {
     return;
   }
   const round = quizQueue[quizIndex];
-  document.getElementById("quiz-progress").textContent = `${quizIndex + 1} / ${quizQueue.length}`;
+  document.getElementById("quiz-progress").innerHTML = renderDots(quizIndex, quizQueue.length, "", quizQueue.length);
   const container = document.getElementById("quiz-options");
   const repeatBtn = document.getElementById("btn-repeat-word");
   container.innerHTML = "";
+  container.classList.remove("enter");
+  void container.offsetWidth;
+  container.classList.add("enter");
   choiceLocked = false;
 
   if (round.roundType === "intro") {
@@ -462,7 +521,7 @@ function renderRound() {
     container.innerHTML = `
       <div class="speak-round">
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
-        <button class="mic-btn" id="mic-btn">${icon("mic")}</button>
+        <button class="mic-btn" id="mic-btn" aria-label="Falar">${icon("mic")}</button>
         <span class="speak-status" id="speak-status">Toque no microfone e fale: "${round.item.en}"</span>
         <span class="speak-note">É só uma brincadeira de praticar a fala — não avalia a pronúncia dele.</span>
       </div>`;
@@ -493,6 +552,7 @@ function handleChoice(btn, opt, target, container) {
     choiceLocked = true;
     btn.classList.add("correct");
     playCheer();
+    spawnConfetti(btn);
     recordResult(target.id, wrongAttemptsThisRound === 0);
     quizScore.correct++;
     quizScore.total++;
@@ -570,12 +630,58 @@ function startSpeakAttempt(item) {
 }
 
 function finishQuiz() {
+  const newUnlockIds = getUnlockedAvatarItemIds().filter((id) => !unlockedSnapshotAtSessionStart.includes(id));
+  if (newUnlockIds.length > 0) {
+    showUnlockCelebration(newUnlockIds, showResultScreen);
+  } else {
+    showResultScreen();
+  }
+}
+
+function showResultScreen() {
   showScreen("result");
+  playFanfare();
   const pct = quizScore.total ? quizScore.correct / quizScore.total : 1;
   const starCount = pct >= 0.85 ? 3 : pct >= 0.5 ? 2 : 1;
   document.getElementById("result-stars").textContent = "⭐".repeat(starCount) + "☆".repeat(3 - starCount);
   document.getElementById("result-text").textContent = `Você brincou com ${quizQueue.length} palavras!`;
   renderHome();
+}
+
+// Momento de celebração: 🔒 → ✨ → item revelado. Só aparece quando algo é desbloqueado de verdade
+// nesta sessão (loop LEARN → COMPLETE → REWARD do LEARNING_PHILOSOPHY.md, seção 28).
+function showUnlockCelebration(newUnlockIds, onDone) {
+  const [cat, itemId] = newUnlockIds[0].split(":");
+  const item = AVATAR_ITEMS[cat].find((i) => i.id === itemId);
+  const catLabel = { shirt: "Camiseta", hat: "Chapéu", backpack: "Mochila" }[cat] || cat;
+  showScreen("unlock");
+  const lockEl = document.getElementById("unlock-lock-icon");
+  const revealEl = document.getElementById("unlock-reveal");
+  lockEl.style.display = "";
+  revealEl.style.display = "none";
+  lockEl.innerHTML = icon("lock");
+  lockEl.classList.remove("sparkle");
+  void lockEl.offsetWidth;
+  lockEl.classList.add("sparkle");
+
+  const btn = document.getElementById("btn-unlock-continue");
+  btn.textContent = newUnlockIds.length > 1 ? `Continuar (+${newUnlockIds.length - 1})` : "Continuar";
+  btn.onclick = () => {
+    if (newUnlockIds.length > 1) {
+      showUnlockCelebration(newUnlockIds.slice(1), onDone);
+    } else {
+      onDone();
+    }
+  };
+
+  setTimeout(() => {
+    playUnlock();
+    lockEl.style.display = "none";
+    revealEl.style.display = "";
+    document.getElementById("unlock-item-preview").innerHTML =
+      `<div class="item-swatch selected" style="background:${item.color || "#EFE7DF"}">${avatarItemIcon(cat, item)}</div>`;
+    document.getElementById("unlock-item-name").textContent = `Novo item de ${catLabel.toLowerCase()} desbloqueado!`;
+  }, 900);
 }
 document.getElementById("btn-play-again").addEventListener("click", () => startQuiz(buildSession()));
 
