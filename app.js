@@ -206,7 +206,14 @@ function goToSituation(situation) {
   setTimeout(() => {
     avatarEl.classList.remove("walking");
     const items = getSituationItems(situation);
-    startQuiz(shuffle(items).slice(0, 8).map((it) => ({ item: it, roundType: getState(it.id).introduced ? "choice" : "intro" })));
+    const queue = shuffle(items).slice(0, 7).map((it) => ({ item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
+    // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
+    // do lugar vem depois, como prática complementar.
+    const scenario = getScenarioForSituation(situation.id);
+    if (scenario) {
+      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: "situation", scenario });
+    }
+    startQuiz(queue);
   }, 900);
 }
 
@@ -527,6 +534,45 @@ function renderRound() {
       </div>`;
     speak(round.item.en, round.item.id);
     document.getElementById("mic-btn").addEventListener("click", () => startSpeakAttempt(round.item));
+    return;
+  }
+
+  if (round.roundType === "situation") {
+    repeatBtn.style.display = "none";
+    wrongAttemptsThisRound = 0;
+    const scenario = round.scenario;
+    container.innerHTML = `
+      <div class="situation-card">
+        <div class="scenario-emoji">${round.item.emoji}</div>
+        <div class="scenario-bubble">
+          <span class="avatar">👩‍🏫</span>
+          <span class="txt">"${scenario.promptPt}"</span>
+          <button class="speaker" id="scenario-replay" aria-label="Ouvir de novo">${icon("sound")}</button>
+        </div>
+      </div>
+      <div class="prompt-line">O que você fala? 🇬🇧</div>
+      <div class="situation-options" id="situation-options"></div>`;
+    const optionsWrap = document.getElementById("situation-options");
+    const options = shuffle([round.item, ...scenario.distractorIds.map((id) => CONTENT_BY_ID[id])]);
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option situation-option";
+      btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span><span class="opt-text">${opt.en}</span>`;
+      btn.dataset.itemId = opt.id;
+      btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+      optionsWrap.appendChild(btn);
+    });
+    document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt));
+    speakPT(scenario.promptPt);
+    options.forEach((opt, i) => {
+      setTimeout(() => {
+        const btn = optionsWrap.children[[...optionsWrap.children].findIndex((b) => b.dataset.itemId === opt.id)];
+        optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading"));
+        if (btn) btn.classList.add("reading");
+        speak(opt.en, opt.id);
+      }, 2200 + i * 2000);
+    });
+    setTimeout(() => optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading")), 2200 + options.length * 2000);
     return;
   }
 

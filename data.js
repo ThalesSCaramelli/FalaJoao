@@ -52,6 +52,26 @@ const SITUATIONS = [
   { id: "classroom", namePt: "Sala de Aula", icon: "🎒", mapPos: { top: "68%", left: "25%" }, categoryId: "school" },
   { id: "family", namePt: "Família", icon: "👨‍👩‍👧", mapPos: { top: "70%", left: "60%" }, categoryId: "family" },
   { id: "animals", namePt: "Bichinhos", icon: "🐶", mapPos: { top: "85%", left: "85%" }, categoryId: "animals" },
+  { id: "friends", namePt: "Fazer Amigos", icon: "🤝", mapPos: { top: "15%", left: "48%" }, itemIds: ["phrase_play_with_you", "phrase_lets_play", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "sharing", namePt: "Dividir e Emprestar", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "teacher_tell", namePt: "Avisar a Professora", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
+  { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
+];
+
+// Cenários de "problem-posing": a professora/situação apresenta um problema em português (ele
+// ainda não entende inglês, então o contexto é dado na língua dele), e ele escolhe a frase certa
+// em inglês pra resolver — a atividade central do LEARNING_PHILOSOPHY.md ("learn through doing",
+// seção 2/5/9.2). correctId/distractorIds sempre apontam pra itens reais de CONTENT (mesmo áudio,
+// mesmo registro de progresso — não é conteúdo paralelo).
+const SCENARIOS = [
+  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_hungry", "survival_my_name_is"] },
+  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", correctId: "phrase_water_please", distractorIds: ["survival_bye_bye", "phrase_im_hurt"] },
+  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", correctId: "phrase_help_please", distractorIds: ["phrase_hungry", "survival_hello"] },
+  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", correctId: "survival_my_name_is", distractorIds: ["phrase_thirsty", "survival_bathroom"] },
+  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", correctId: "phrase_play_with_you", distractorIds: ["survival_bye_bye", "phrase_hungry"] },
+  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["survival_hello", "phrase_thirsty"] },
+  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["survival_bye_bye", "phrase_hungry"] },
+  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["phrase_help_please", "survival_water"] },
 ];
 
 const CONTENT = [
@@ -204,5 +224,36 @@ const CONTENT = [
     category: "phrases", difficulty: 4,
     prerequisites: ["survival_water", "survival_please"],
     acceptedAnswers: ["can i have some water please", "can i have water please", "can i have some water"],
+  },
+
+  // ---- situações sociais do dia a dia (fazer amigos, dividir, avisar a professora, se despedir) ----
+  {
+    id: "phrase_play_with_you", contentType: "sentence",
+    en: "Can I play with you?", pt: "posso brincar com você?", emoji: "🤝",
+    category: "phrases", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["can i play with you", "can i play"],
+  },
+  { id: "phrase_lets_play", contentType: "phrase", en: "Let's play!", pt: "vamos brincar!", emoji: "🎮", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_my_turn", contentType: "phrase", en: "My turn!", pt: "minha vez!", emoji: "☝️", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_your_turn", contentType: "phrase", en: "Your turn!", pt: "sua vez!", emoji: "👉", category: "phrases", difficulty: 2, prerequisites: [] },
+  {
+    id: "phrase_can_i_have_this", contentType: "sentence",
+    en: "Can I have this?", pt: "posso ficar com isso?", emoji: "🙏🧸",
+    category: "phrases", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["can i have this"],
+  },
+  {
+    id: "phrase_can_i_borrow", contentType: "sentence",
+    en: "Can I borrow this, please?", pt: "posso pegar isso emprestado, por favor?", emoji: "🔄🧸",
+    category: "phrases", difficulty: 4, prerequisites: ["survival_please"],
+    acceptedAnswers: ["can i borrow this please", "can i borrow this"],
+  },
+  { id: "phrase_im_hurt", contentType: "sentence", en: "I'm hurt", pt: "eu me machuquei", emoji: "🤕", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_see_you_later", contentType: "phrase", en: "See you later!", pt: "até mais!", emoji: "👋", category: "phrases", difficulty: 2, prerequisites: ["survival_bye_bye"] },
+  {
+    id: "phrase_whats_this", contentType: "sentence",
+    en: "What's this?", pt: "o que é isso?", emoji: "🤔",
+    category: "phrases", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["whats this", "what is this"],
   },
 ];

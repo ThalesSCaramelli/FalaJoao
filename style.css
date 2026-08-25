@@ -424,6 +424,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 100%;
   max-width: 520px;
 }
+/* rodada de Situação empilha em vez de grade 3x1 (não são fotos, são frases) */
+.quiz-options:has(.situation-card) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
 
 .quiz-option {
   background: #fff;
@@ -465,6 +472,62 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   25% { transform: translateX(-8px); }
   75% { transform: translateX(8px); }
 }
+
+/* QUIZ - modo Situação (problem-posing) */
+.situation-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--cap-understand-soft);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  text-align: center;
+}
+.scenario-emoji { font-size: 3rem; }
+.scenario-bubble {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+  box-shadow: var(--shadow-btn);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: left;
+}
+.scenario-bubble .avatar { font-size: 1.6rem; }
+.scenario-bubble .txt { flex: 1; font-weight: 700; font-size: 0.95rem; }
+.scenario-bubble .speaker {
+  background: none; border: none; cursor: pointer; color: var(--color-secondary);
+  width: 1.6rem; height: 1.6rem; flex: 0 0 auto;
+}
+
+.situation-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 420px;
+}
+.situation-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface);
+  border: 3px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+  font-size: 1rem;
+}
+.situation-option .opt-emoji { font-size: 1.6rem; flex: 0 0 auto; }
+.situation-option .opt-text { font-family: var(--font-display); font-weight: 700; }
+.situation-option.reading { border-color: var(--color-secondary); animation: avatar-bounce 0.6s ease infinite; }
+.situation-option.correct { border-color: var(--color-success); background: var(--cap-communicate-soft); }
+.situation-option.correct::after { content: " 🌟"; }
+.situation-option.wrong { animation: shake 0.4s ease; opacity: 0.5; }
 
 /* QUIZ - intro round (palavra nova) */
 .intro-card {
@@ -762,7 +825,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   position: relative;
   border-radius: 24px;
   background: linear-gradient(160deg, #CDEFE0 0%, #BFE8F2 55%, #FFF3D6 100%);
-  min-height: 420px;
+  min-height: 480px;
   box-shadow: var(--shadow-card);
   overflow: hidden;
   margin-bottom: 16px;

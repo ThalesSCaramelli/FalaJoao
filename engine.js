@@ -201,16 +201,31 @@ function buildSession() {
   const seen = new Set();
   const deduped = expanded.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
 
-  return shuffle(deduped).map((it) => ({ item: it, roundType: pickRoundType(it) }));
+  return shuffle(deduped).map((it) => {
+    const roundType = pickRoundType(it);
+    const round = { item: it, roundType };
+    if (roundType === "situation") round.scenario = SCENARIO_BY_CORRECT_ID[it.id];
+    return round;
+  });
 }
 
 function speechRecognitionAvailable() {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
+// Cenário associado a um item, quando ele é a resposta "certa" de algum problem-posing
+// (SCENARIOS em data.js). Um item pode ter no máximo um cenário como alvo principal.
+const SCENARIO_BY_CORRECT_ID = Object.fromEntries((typeof SCENARIOS !== "undefined" ? SCENARIOS : []).map((s) => [s.correctId, s]));
+function getScenarioForSituation(situationId) {
+  return (typeof SCENARIOS !== "undefined" ? SCENARIOS : []).find((s) => s.situationId === situationId);
+}
+
 function pickRoundType(item) {
   const st = getState(item.id);
   if (!st.introduced) return "intro";
+  // já foi visto ao menos uma vez com sucesso -> às vezes vira um cenário de verdade em vez de
+  // só reconhecer a imagem (problem-posing, LEARNING_PHILOSOPHY.md seção 2/5)
+  if (st.box >= 1 && SCENARIO_BY_CORRECT_ID[item.id] && Math.random() < 0.4) return "situation";
   if (st.box >= 3 && speechRecognitionAvailable() && navigator.onLine && Math.random() < 0.3) return "speak";
   return "choice";
 }
