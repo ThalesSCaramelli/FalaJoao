@@ -32,36 +32,41 @@
   unicode-range: U+0100-024F, U+0300-0301, U+0303-0304, U+0308-0309, U+1E00-1EFF;
 }
 
-/* ===================== Design tokens ===================== */
+/* ===================== Design tokens — paleta "Quokka Bay" ===================== */
+/* Hierarquia semântica (não é troca 1:1 de hex): coral = ação principal (Play/Start/Continuar),
+   teal = exploração (Mundo, categorias, descoberta), dourado = recompensa/atenção (desbloqueios,
+   streak), verde = sucesso (acerto, progresso), creme = fundo/canvas. */
 :root {
   /* cor de marca */
-  --color-primary: #FF6B5B;
-  --color-primary-dark: #E8543F;
-  --color-secondary: #3FB6C9;
-  --color-accent: #FFB648;
+  --color-primary: #FF7A52;
+  --color-primary-dark: #D9522F;
+  --color-secondary: #1CA7B0;
+  --color-accent: #FFB238;
 
   /* feedback */
-  --color-success: #5FC98D;
-  --color-warning: #FFB648;
-  --color-error: #FF6B5B;
+  --color-success: #3F8F5C;
+  --color-warning: #FFB238;
+  --color-error: #E8543F;
 
   /* superfícies e texto */
-  --color-background: #FFF8E7;
+  --color-background: #FDF3E1;
   --color-surface: #FFFFFF;
   --color-surface-elevated: #FFFFFF;
-  --color-text: #333333;
-  --color-text-secondary: #8A7A72;
-  --color-border: #EDE3D9;
+  --color-text: #3A2E27;
+  --color-text-secondary: #8A7A6E;
+  --color-border: #EBDFCF;
 
-  /* cores por capacidade (I Need Help / I Understand / I Can Say It / I Communicate) */
-  --cap-help: #FF6B5B;
-  --cap-help-soft: #FFE3DE;
-  --cap-understand: #3FB6C9;
-  --cap-understand-soft: #D9F3F6;
-  --cap-say: #FFB648;
-  --cap-say-soft: #FFEDD1;
-  --cap-communicate: #5FC98D;
-  --cap-communicate-soft: #DFF6E8;
+  /* cores por capacidade (I Need Help / I Understand / I Can Say It / I Communicate) —
+     realinhadas à mesma hierarquia: help=ação(primary), understand=exploração(secondary),
+     say=recompensa(accent), communicate=sucesso(success). */
+  --cap-help: #FF7A52;
+  --cap-help-soft: #FFE1D3;
+  --cap-understand: #1CA7B0;
+  --cap-understand-soft: #D6F0EF;
+  --cap-say: #FFB238;
+  --cap-say-soft: #FFEACC;
+  --cap-communicate: #3F8F5C;
+  --cap-communicate-soft: #DCEFE1;
   --locked: #D8CFC7;
 
   /* espaçamento */
@@ -210,7 +215,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 100%;
   text-align: left;
   position: relative;
-  background: linear-gradient(135deg, var(--color-primary), #FFB86B);
+  background: linear-gradient(135deg, var(--color-primary), #FFA24E);
   color: #fff;
   border: none;
   border-radius: 24px;
@@ -227,7 +232,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .mission-card .meta { font-size: 0.82rem; opacity: 0.9; margin-bottom: 12px; }
 .play-pill {
   display: inline-block;
-  background: #fff; color: #E8543F; font-weight: 800; font-size: 0.9rem;
+  background: #fff; color: var(--color-primary-dark); font-weight: 800; font-size: 0.9rem;
   border-radius: 999px; padding: 8px 20px;
 }
 
@@ -365,8 +370,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .word-photo {
-  width: 3em;
-  height: 3em;
+  /* rem, não em: dentro de .quiz-option (font-size:3.2rem, pensado pra emoji) um tamanho em "em"
+     herdava essa fonte gigante e estourava a foto pra ~150px, quebrando a grade de 3 colunas. */
+  width: 4rem;
+  height: 4rem;
   object-fit: cover;
   border-radius: 14px;
 }
@@ -444,6 +451,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   display: flex;
   align-items: center;
   justify-content: center;
+  /* sem isso, a grade de 3 colunas usa o min-content do item (que herda font-size:3.2rem, pensado
+     pra emoji) como piso da coluna e estoura a largura — achado testando fotos reais no quiz. */
+  min-width: 0;
+  min-height: 0;
 }
 
 .quiz-option:active {
@@ -524,7 +535,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .situation-option .opt-emoji { font-size: 1.6rem; flex: 0 0 auto; }
 .situation-option .opt-text { font-family: var(--font-display); font-weight: 700; }
-.situation-option.reading { border-color: var(--color-secondary); animation: avatar-bounce 0.6s ease infinite; }
+.situation-option.reading { border-color: var(--color-secondary); animation: option-pulse 0.6s ease infinite; }
+/* própria (não reaproveita avatar-bounce — aquela tem translate(-50%,-50%) fixo pro avatar
+   posicionado no mapa; aplicado aqui, jogava o card inteiro pra fora da tela). */
+@keyframes option-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
 .situation-option.correct { border-color: var(--color-success); background: var(--cap-communicate-soft); }
 .situation-option.correct::after { content: " 🌟"; }
 .situation-option.wrong { animation: shake 0.4s ease; opacity: 0.5; }
@@ -824,7 +838,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem;
   display: flex; align-items: center; justify-content: center;
 }
-.unlock-hint { text-align: center; font-size: 0.75rem; font-weight: 700; color: #E8543F; min-height: 1.4em; margin-top: -8px; margin-bottom: 14px; }
+.unlock-hint { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--color-primary-dark); min-height: 1.4em; margin-top: -8px; margin-bottom: 14px; }
 
 /* ===================== MY ENGLISH WORLD (mapa) ===================== */
 .world-banner {
