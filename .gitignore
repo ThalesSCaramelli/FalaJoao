@@ -1,2 +1,4 @@
 .claude/
 review/
+__pycache__/
+*.pyc

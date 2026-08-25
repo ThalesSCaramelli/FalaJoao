@@ -21,6 +21,13 @@ Passo 3 — aplicar a selecao escolhida:
     -> copia/otimiza pra assets/images/<id>.jpg e imprime as linhas prontas pra colar em data.js
        (o campo image ainda precisa ser adicionado a mao em data.js, de proposito -- e' rapido
        e evita um script mexendo em data.js sozinho)
+
+Alternativa direta (uma imagem que voce ja escolheu, sem passar pelo Openverse) --
+url ou caminho de arquivo local, sem revisao de candidatas (voce ja revisou ao escolher):
+    python scripts/curate_images.py add <item_id> <url_ou_caminho_local>
+    -> mesmo otimizador (thumbnail 480x480, JPEG q82) copia pra assets/images/<id>.jpg e
+       imprime a linha pronta pra colar em data.js. Pra "upload": salve o arquivo em
+       review/incoming/ (ou qualquer caminho) e passe o caminho como argumento.
 """
 import json
 import os
@@ -136,14 +143,46 @@ def cmd_apply(selection_path):
     print("\nNao esqueca de rodar generate_audio.py se os itens tambem forem novos, e de\nsubir o CACHE_NAME em sw.js antes de publicar.")
 
 
+def cmd_add(item_id, source):
+    from PIL import Image
+
+    os.makedirs(ASSETS_DIR, exist_ok=True)
+    dst = os.path.join(ASSETS_DIR, f"{item_id}.jpg")
+
+    if source.startswith("http://") or source.startswith("https://"):
+        tmp = dst + ".download"
+        res = curl_get(source, tmp, timeout=15)
+        if res.returncode != 0 or not os.path.exists(tmp) or os.path.getsize(tmp) < 500:
+            print(f"Falha ao baixar {source} (curl retornou {res.returncode}).")
+            sys.exit(1)
+        src_path = tmp
+    else:
+        if not os.path.exists(source):
+            print(f"Arquivo não encontrado: {source}")
+            sys.exit(1)
+        src_path = source
+
+    img = Image.open(src_path).convert("RGB")
+    img.thumbnail((480, 480), Image.LANCZOS)
+    img.save(dst, "JPEG", quality=82)
+    if source.startswith("http"):
+        os.remove(src_path)
+
+    print(f'Salvo: assets/images/{item_id}.jpg')
+    print(f'\nAdicione em data.js (campo image no item "{item_id}"):')
+    print(f'  image: "assets/images/{item_id}.jpg",')
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 3 or sys.argv[1] not in ("fetch", "apply"):
+    if sys.argv[1:2] == ["fetch"] and len(sys.argv) == 3:
+        cmd_fetch(sys.argv[2])
+    elif sys.argv[1:2] == ["apply"] and len(sys.argv) == 3:
+        cmd_apply(sys.argv[2])
+    elif sys.argv[1:2] == ["add"] and len(sys.argv) == 4:
+        cmd_add(sys.argv[2], sys.argv[3])
+    else:
         print(__doc__)
         sys.exit(1)
-    if sys.argv[1] == "fetch":
-        cmd_fetch(sys.argv[2])
-    else:
-        cmd_apply(sys.argv[2])
 
 # Exemplo de arquivo de lista (salve como minha_lista.py e passe pro comando fetch):
 # ITEMS = [
