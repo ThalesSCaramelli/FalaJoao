@@ -854,13 +854,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .world-map {
   position: relative;
   border-radius: 24px;
-  background: linear-gradient(160deg, #CDEFE0 0%, #BFE8F2 55%, #FFF3D6 100%);
+  background: linear-gradient(180deg, #BEE6EC 0%, #D7F0DD 46%, #F3E3B7 78%, #F3E3B7 100%);
   min-height: 480px;
   box-shadow: var(--shadow-card);
   overflow: hidden;
   margin-bottom: 16px;
 }
-.map-blob { position: absolute; border-radius: 50%; opacity: 0.5; background: #fff; }
+/* Cenário de baía: sol + colinas + areia, atrás dos pinos (que continuam vindo depois no DOM,
+   então ficam por cima). Decorativo, não muda nenhuma lógica de #world-pins/#world-avatar. */
+.bay-sun {
+  position: absolute; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%;
+  background: #FFD97A; box-shadow: 0 0 0 10px rgba(255, 217, 122, 0.3);
+}
+.bay-hill { position: absolute; border-radius: 50%; background: #BFE0B8; opacity: 0.85; }
+.bay-sand { position: absolute; left: -20%; right: -20%; bottom: -80px; height: 220px; border-radius: 50%; background: #F6DFA6; }
 .world-hint {
   position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
   background: #fff; border-radius: 999px; padding: 6px 14px; font-size: 0.72rem; font-weight: 800;
