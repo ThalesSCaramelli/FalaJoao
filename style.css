@@ -1,4 +1,59 @@
+/* ===================== Fontes (auto-hospedadas, offline-safe — sem CDN) ===================== */
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/baloo2-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2122;
+}
+@font-face {
+  font-family: "Baloo 2";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/baloo2-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-024F, U+0300-0301, U+0303-0304, U+0308-0309, U+1E00-1EFF;
+}
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/nunito-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2122;
+}
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/nunito-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-024F, U+0300-0301, U+0303-0304, U+0308-0309, U+1E00-1EFF;
+}
+
+/* ===================== Design tokens ===================== */
 :root {
+  /* cor de marca */
+  --color-primary: #FF6B5B;
+  --color-primary-dark: #E8543F;
+  --color-secondary: #3FB6C9;
+  --color-accent: #FFB648;
+
+  /* feedback */
+  --color-success: #5FC98D;
+  --color-warning: #FFB648;
+  --color-error: #FF6B5B;
+
+  /* superfícies e texto */
+  --color-background: #FFF8E7;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #FFFFFF;
+  --color-text: #333333;
+  --color-text-secondary: #8A7A72;
+  --color-border: #EDE3D9;
+
+  /* cores por capacidade (I Need Help / I Understand / I Can Say It / I Communicate) */
   --cap-help: #FF6B5B;
   --cap-help-soft: #FFE3DE;
   --cap-understand: #3FB6C9;
@@ -8,8 +63,32 @@
   --cap-communicate: #5FC98D;
   --cap-communicate-soft: #DFF6E8;
   --locked: #D8CFC7;
-  --shadow-btn: 0 5px 0 rgba(58,46,42,0.14);
-  --shadow-card: 0 8px 24px rgba(58,46,42,0.10);
+
+  /* espaçamento */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* sombras: física (forte, "de jogo", pra elementos interativos) e suave (cards/containers) */
+  --shadow-soft: 0 8px 24px rgba(58,46,42,0.10);
+  --shadow-card: var(--shadow-soft);
+  --shadow-physical: 0 6px 0 rgba(58,46,42,0.16);
+  --shadow-physical-sm: 0 4px 0 rgba(58,46,42,0.13);
+  --shadow-btn: var(--shadow-physical-sm);
+
+  /* tipografia */
+  --font-display: "Baloo 2", "Nunito", -apple-system, sans-serif;
+  --font-body: "Nunito", -apple-system, sans-serif;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -19,10 +98,42 @@ html, body {
   padding: 0;
   height: 100%;
   overscroll-behavior: none;
-  font-family: "Segoe UI", "Comic Sans MS", -apple-system, sans-serif;
-  background: #FFF8E7;
-  color: #333;
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-text);
 }
+
+h1, h2, h3, .font-display, button {
+  font-family: var(--font-display);
+}
+
+/* ===================== Ícones SVG (substituem emoji de interface — emoji de conteúdo continua) ===================== */
+.icon {
+  width: 1.4em;
+  height: 1.4em;
+  flex: 0 0 auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+.icon svg { width: 100%; height: 100%; display: block; }
+
+/* ===================== Progresso visual (pontinhos, não fração crua) ===================== */
+.progress-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.progress-dots .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--locked);
+  flex: 0 0 auto;
+}
+.progress-dots .dot.filled {
+  background: var(--color-success);
+}
+.progress-dots.sm .dot { width: 6px; height: 6px; }
 
 #app {
   height: 100vh;
@@ -80,7 +191,7 @@ html, body {
   width: 100%;
   text-align: left;
   position: relative;
-  background: linear-gradient(135deg, #FF6B6B, #FFB86B);
+  background: linear-gradient(135deg, var(--color-primary), #FFB86B);
   color: #fff;
   border: none;
   border-radius: 24px;
@@ -194,7 +305,7 @@ html, body {
 }
 
 .play-btn {
-  background: #FF6B6B;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 16px;
@@ -268,7 +379,7 @@ html, body {
 }
 
 .repeat-btn {
-  background: #4ECDC4;
+  background: var(--color-secondary);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -311,7 +422,7 @@ html, body {
 }
 
 .quiz-option.correct {
-  border-color: #6BCB77;
+  border-color: var(--color-success);
   background: #EAFBEA;
   animation: pop 0.4s ease;
 }
@@ -369,7 +480,7 @@ html, body {
   height: 110px;
   border-radius: 50%;
   border: none;
-  background: #FF6B6B;
+  background: var(--color-primary);
   color: #fff;
   font-size: 3rem;
   cursor: pointer;
@@ -378,7 +489,7 @@ html, body {
 
 .mic-btn.listening {
   animation: pulse 1s infinite;
-  background: #6BCB77;
+  background: var(--color-success);
 }
 
 @keyframes pulse {
@@ -422,7 +533,7 @@ html, body {
 }
 
 .big-btn {
-  background: #FF6B6B;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -498,7 +609,7 @@ html, body {
 }
 
 .adaptation-log .entry {
-  border-left: 3px solid #FF6B6B;
+  border-left: 3px solid var(--color-primary);
   padding-left: 8px;
 }
 

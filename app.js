@@ -7,6 +7,51 @@ function renderMedia(item) {
   return item.emoji;
 }
 
+// ===================== Ícones de interface (SVG, substituem emoji de UI) =====================
+// Emoji continua sendo usado como CONTEÚDO pedagógico (a carinha de cada palavra); isso aqui é só
+// pra cromo de interface (botões de voltar, configurações, tocar som, etc.), pra não depender de
+// como cada aparelho desenha emoji.
+const ICONS = {
+  back: '<path d="M15 5L8 12l7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>',
+  settings: '<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M19.4 13a1.7 1.7 0 000-2l1.2-1.6-2-2L17 8.6a1.7 1.7 0 00-2 0l-.6-1.9h-2.8L11 8.6a1.7 1.7 0 00-2 0L7.4 7.4l-2 2L6.6 11a1.7 1.7 0 000 2l-1.2 1.6 2 2L9 15.4a1.7 1.7 0 002 0l.6 1.9h2.8l.6-1.9a1.7 1.7 0 002 0l1.6 1.2 2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  sound: '<path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 9a4 4 0 010 6M19 6.5a8 8 0 010 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0012 0M12 19v2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  play: '<path d="M7 4l13 8-13 8V4z" fill="currentColor"/>',
+  check: '<path d="M5 13l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2.5" fill="currentColor"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  star: '<path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1L6.6 19.3l1.3-6-4.6-4.1 6.1-.6L12 3z" fill="currentColor"/>',
+  home: '<path d="M4 11l8-7 8 7v8a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-8z" fill="currentColor"/>',
+};
+function icon(name, extraClass) {
+  return `<span class="icon${extraClass ? " " + extraClass : ""}"><svg viewBox="0 0 24 24">${ICONS[name] || ""}</svg></span>`;
+}
+
+function renderDots(current, total, cls) {
+  let html = `<div class="progress-dots${cls ? " " + cls : ""}">`;
+  for (let i = 0; i < total; i++) html += `<span class="dot${i < current ? " filled" : ""}"></span>`;
+  return html + "</div>";
+}
+
+// Troca o cromo de interface estático (voltar, engrenagem, som, play) pelos ícones SVG.
+// Emoji temático/decorativo (🌏 no mundo, 🎯 na missão, carinhas de conteúdo) fica como está.
+function initIcons() {
+  const settingsBtn = document.getElementById("btn-settings");
+  if (settingsBtn) settingsBtn.innerHTML = icon("settings");
+  document.querySelectorAll(".back-btn").forEach((el) => {
+    el.innerHTML = el.textContent.trim().includes("Voltar") ? icon("back") + " Voltar" : icon("back");
+  });
+  const repeatBtn = document.getElementById("btn-repeat-word");
+  if (repeatBtn) repeatBtn.innerHTML = icon("sound") + " Ouvir de novo";
+  const testVoiceBtn = document.getElementById("btn-test-voice");
+  if (testVoiceBtn) testVoiceBtn.innerHTML = icon("sound") + " Testar voz";
+  const playQuizBtn = document.getElementById("btn-play-quiz");
+  if (playQuizBtn) playQuizBtn.innerHTML = icon("play") + " Jogar";
+  const playPill = document.querySelector(".play-pill");
+  if (playPill) playPill.innerHTML = icon("play") + " JOGAR";
+}
+initIcons();
+
 // ===================== Mascote (quokka) e avatar (voxel customizável) — SVG original =====================
 function mascotSVG() {
   return `<svg class="quokka" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -81,7 +126,7 @@ function renderAvatarScreen() {
       btn.className = "item-swatch" + (unlocked ? "" : " locked") + (avatarState[cat] === item.id ? " selected" : "");
       btn.style.background = item.color || "#EFE7DF";
       btn.innerHTML = item.type ? (item.type === "cap" ? "🧢" : "🎉") : (cat === "backpack" && item.color ? "🎒" : (item.id === "none" ? "⛔" : ""));
-      if (!unlocked) btn.innerHTML += '<span class="lock-badge">🔒</span>';
+      if (!unlocked) btn.innerHTML += `<span class="lock-badge">${icon("lock")}</span>`;
       btn.addEventListener("click", () => {
         const hintEl = document.getElementById("avatar-unlock-hint");
         if (!unlocked) {
@@ -417,7 +462,7 @@ function renderRound() {
     container.innerHTML = `
       <div class="speak-round">
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
-        <button class="mic-btn" id="mic-btn">🎤</button>
+        <button class="mic-btn" id="mic-btn">${icon("mic")}</button>
         <span class="speak-status" id="speak-status">Toque no microfone e fale: "${round.item.en}"</span>
         <span class="speak-note">É só uma brincadeira de praticar a fala — não avalia a pronúncia dele.</span>
       </div>`;
