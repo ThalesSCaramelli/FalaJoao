@@ -103,3 +103,50 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
 - **NEXT**: já claro que vem, mas não é urgente.
 - **LATER**: direção conhecida, sem detalhe ainda.
 - **FUTURE**: mencionado no LEARNING_PHILOSOPHY/DESIGN_BRIEF, mas explicitamente não priorizado agora (IA adaptativa, backend, learner model complexo, FSRS).
+
+### NOW
+
+- Pendência técnica pequena: nunca confirmei com 100% de certeza que o Service Worker está
+  guardando os áudios/assets mais recentes offline (v14+) — o navegador de teste deu sinais
+  inconsistentes depois de muitos ciclos de registro/cancelamento na mesma sessão. Reproduzi a
+  lista exata de arquivos manualmente e funcionou, então é bem provável que seja só o ambiente de
+  teste, não o código — mas vale um teste calmo num aparelho de verdade antes de confiar 100%.
+
+### NEXT
+
+- Mais cadeias de "evolução natural" além de água/saudação (padrão documentado em
+  `CONTENT_GUIDE.md` seção 8, pronto pra reaproveitar).
+- 4 `SITUATIONS` ainda sem `SCENARIO` de problem-posing: `cafeteria`, `classroom`, `family`,
+  `animals` — hoje só vocabulário solto nelas, sem a abertura "professora pergunta X".
+- Curadoria de imagens de verdade (`scripts/curate_images.py`): revisar fotos já aplicadas que
+  possam estar fora de contexto (usuário mencionou isso, nunca chegamos a fazer a revisão
+  completa — só corrigimos `animals_bird.jpg` pontualmente) + buscar fotos pra `hello`/`bye_bye`/
+  `see_you_later` (hoje só emoji, a solução definitiva é foto contextual) e `school_glue`.
+- Telas "menos glamurosas" (Configurações, Resultado, celebração de desbloqueio) ainda não
+  receberam nenhum tratamento visual da paleta/identidade Quokka Bay — continuam com a cara
+  antiga (sliders/combobox padrão de navegador).
+
+### LATER
+
+- **Quokka como companion de aprendizagem reativo** — não só um avatar customizável: comemora
+  acerto, reage a erro, aparece nas situações, eventualmente dá dicas. A tela "Companheiro &
+  Adesivos" (aposentar o boneco voxel, reaproveitar `AVATAR_ITEMS` como stickers do Quokka) é o
+  primeiro passo disso, validado só como mockup até agora.
+- **Modo história** — encadear vários `SCENARIOS` numa sequência narrativa (ex. "Um dia na
+  escola"), com o Quokka guiando entre as cenas. Mecânica é barata (reaproveita `CONTENT`,
+  `SCENARIOS`, `startQuiz`, os dois sistemas de voz); o trabalho real é escrever uma história boa.
+  Pedido em 2026-08-26, registrado pra depois do vocabulário atual rodar um pouco com o João.
+- Gírias australianas (snag, barbie, arvo etc.) — só depois que as cadeias de evolução "natural"
+  já estiverem rodando com o João por um tempo (decisão do usuário, 2026-08-26).
+
+### FUTURE (do feedback externo sobre `data.js` — nenhum tem consumidor hoje no engine)
+
+- `function`/taxonomia comunicativa por item (greet/request/help/permission/social).
+- Contexto rico em `SCENARIO` (location/speaker/target/goal/feedback object).
+- Distractors tipados (semantic/functional/visual/linguistic).
+- `difficulty` multidimensional (lexical/listening/speaking/production/grammar) em vez de um
+  número só.
+- `visual` estruturado (`{type, src}`) em vez de `emoji`/`image` soltos.
+- **Exposure modalities** (see/hear/say/recognize/use rastreados por item) — o mais interessante
+  dessa lista pra "adaptação de verdade", mas é uma reforma grande do motor, não uma tarde de
+  trabalho.
