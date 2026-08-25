@@ -273,4 +273,87 @@ const CONTENT = [
     category: "phrases", difficulty: 5, prerequisites: ["phrase_good_morning"],
     acceptedAnswers: ["hi mate hows it going", "hi mate how is it going", "hows it going"],
   },
+
+  // ==================== AUTONOMIA NA ESCOLA (lote grande, 2026-08-26) ====================
+  // Curadoria do usuário: comandos da professora, o que fazer quando não entende, interação com
+  // colegas, gostos/vontades, limites, dor/emergência, necessidades pessoais. Deduplicado contra
+  // o que já existia (bathroom/water/help/play/turn/thank you etc. não repetidos aqui).
+
+  // ---- comandos da professora (school) ----
+  { id: "school_come_here", contentType: "phrase", en: "Come here", pt: "vem aqui", emoji: "📍", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_sit_down", contentType: "phrase", en: "Sit down", pt: "senta", emoji: "⬇️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_stand_up", contentType: "phrase", en: "Stand up", pt: "levanta", emoji: "⬆️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_line_up", contentType: "phrase", en: "Line up", pt: "faz fila", emoji: "🧍‍♂️🧍‍♀️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_wait", contentType: "word", en: "Wait", pt: "espera", emoji: "⏳", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_stop", contentType: "word", en: "Stop", pt: "para", emoji: "🛑", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_listen", contentType: "word", en: "Listen", pt: "escuta", emoji: "🎧", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_look", contentType: "word", en: "Look", pt: "olha", emoji: "🔍", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_be_quiet", contentType: "phrase", en: "Be quiet", pt: "fica quietinho", emoji: "🤫", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_lets_go", contentType: "phrase", en: "Let's go", pt: "vamos", emoji: "🏃", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_follow_me", contentType: "phrase", en: "Follow me", pt: "me segue", emoji: "➡️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_open_your_book", contentType: "sentence", en: "Open your book", pt: "abre o livro", emoji: "📖✅", category: "school", difficulty: 3, prerequisites: ["school_book"] },
+  { id: "school_close_your_book", contentType: "sentence", en: "Close your book", pt: "fecha o livro", emoji: "📕", category: "school", difficulty: 3, prerequisites: ["school_book"] },
+  { id: "school_put_it_away", contentType: "sentence", en: "Put it away", pt: "guarda isso", emoji: "📦", category: "school", difficulty: 3, prerequisites: [] },
+  { id: "school_clean_up", contentType: "phrase", en: "Clean up", pt: "arruma", emoji: "🧹", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_pack_your_bag", contentType: "sentence", en: "Pack your bag", pt: "arruma a mochila", emoji: "🧳", category: "school", difficulty: 3, prerequisites: ["school_backpack"] },
+
+  // ---- quando não entende (phrases) ----
+  { id: "phrase_i_dont_know", contentType: "sentence", en: "I don't know", pt: "eu não sei", emoji: "❓", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_what_do_i_do", contentType: "sentence", en: "What do I do?", pt: "o que eu faço?", emoji: "🧐", category: "phrases", difficulty: 3, prerequisites: ["phrase_dont_understand"] },
+  { id: "phrase_can_you_show_me", contentType: "sentence", en: "Can you show me?", pt: "você pode me mostrar?", emoji: "👆", category: "phrases", difficulty: 3, prerequisites: ["phrase_help_please"] },
+  { id: "phrase_can_you_say_it_again", contentType: "sentence", en: "Can you say it again?", pt: "pode falar de novo?", emoji: "🔁", category: "phrases", difficulty: 4, prerequisites: ["phrase_dont_understand"] },
+
+  // ---- brincar e compartilhar (phrases) ----
+  { id: "phrase_can_i_play_too", contentType: "sentence", en: "Can I play too?", pt: "posso brincar também?", emoji: "🙋🎮", category: "phrases", difficulty: 3, prerequisites: ["phrase_play_with_you"] },
+  { id: "phrase_do_you_want_to_play", contentType: "sentence", en: "Do you want to play?", pt: "você quer brincar?", emoji: "🎲", category: "phrases", difficulty: 3, prerequisites: ["phrase_lets_play"] },
+  { id: "phrase_come_play_with_me", contentType: "sentence", en: "Come play with me", pt: "vem brincar comigo", emoji: "🤗", category: "phrases", difficulty: 3, prerequisites: ["phrase_lets_play"] },
+  { id: "phrase_lets_do_it_together", contentType: "sentence", en: "Let's do it together", pt: "vamos fazer juntos", emoji: "👫", category: "phrases", difficulty: 3, prerequisites: [] },
+  { id: "phrase_can_i_use_it", contentType: "sentence", en: "Can I use it?", pt: "posso usar?", emoji: "🔧", category: "phrases", difficulty: 3, prerequisites: ["phrase_can_i_borrow"] },
+  { id: "phrase_can_i_have_a_turn", contentType: "sentence", en: "Can I have a turn?", pt: "posso ter uma vez?", emoji: "🔄", category: "phrases", difficulty: 3, prerequisites: ["phrase_my_turn"] },
+  { id: "phrase_here_you_go", contentType: "phrase", en: "Here you go", pt: "aqui está", emoji: "🎁", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_youre_welcome", contentType: "phrase", en: "You're welcome", pt: "de nada", emoji: "😊", category: "phrases", difficulty: 2, prerequisites: ["survival_thank_you"] },
+
+  // ---- gostos e vontades (phrases) ----
+  { id: "phrase_i_like_it", contentType: "sentence", en: "I like it", pt: "eu gosto", emoji: "😍", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_dont_like_it", contentType: "sentence", en: "I don't like it", pt: "eu não gosto", emoji: "😕", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_love_it", contentType: "sentence", en: "I love it!", pt: "eu adoro!", emoji: "🥰", category: "phrases", difficulty: 2, prerequisites: ["phrase_i_like_it"] },
+  { id: "phrase_its_fun", contentType: "sentence", en: "It's fun!", pt: "é divertido!", emoji: "🎉", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_its_boring", contentType: "sentence", en: "It's boring", pt: "é chato", emoji: "🥱", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_want_this", contentType: "sentence", en: "I want this", pt: "eu quero isso", emoji: "🫵", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_dont_want_this", contentType: "sentence", en: "I don't want this", pt: "eu não quero isso", emoji: "🙅", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_want_to_play", contentType: "sentence", en: "I want to play", pt: "eu quero brincar", emoji: "🛝", category: "phrases", difficulty: 3, prerequisites: ["phrase_i_want_this"] },
+  { id: "phrase_this_one_please", contentType: "phrase", en: "This one, please", pt: "este, por favor", emoji: "👇", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_which_one", contentType: "phrase", en: "Which one?", pt: "qual?", emoji: "🤷‍♀️", category: "phrases", difficulty: 2, prerequisites: [] },
+
+  // ---- limites (phrases) ----
+  { id: "phrase_no_thank_you", contentType: "phrase", en: "No, thank you", pt: "não, obrigado", emoji: "🙅‍♀️", category: "phrases", difficulty: 2, prerequisites: ["survival_no"] },
+  { id: "phrase_dont_touch_me", contentType: "sentence", en: "Don't touch me", pt: "não toca em mim", emoji: "🚫", category: "phrases", difficulty: 3, prerequisites: [] },
+  { id: "phrase_thats_mine", contentType: "sentence", en: "That's mine", pt: "isso é meu", emoji: "🔒", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_was_using_it", contentType: "sentence", en: "I was using it", pt: "eu estava usando isso", emoji: "🖐️", category: "phrases", difficulty: 4, prerequisites: ["phrase_thats_mine"] },
+  { id: "phrase_i_dont_want_to_play", contentType: "sentence", en: "I don't want to play", pt: "eu não quero brincar", emoji: "🚫🎮", category: "phrases", difficulty: 3, prerequisites: ["phrase_i_dont_want_this"] },
+
+  // ---- dor e emergência (phrases) ----
+  { id: "phrase_it_hurts", contentType: "sentence", en: "It hurts", pt: "está doendo", emoji: "😖", category: "phrases", difficulty: 2, prerequisites: ["phrase_im_hurt"] },
+  { id: "phrase_my_tummy_hurts", contentType: "sentence", en: "My tummy hurts", pt: "minha barriga dói", emoji: "🤢", category: "phrases", difficulty: 3, prerequisites: ["phrase_it_hurts"] },
+  { id: "phrase_i_fell", contentType: "sentence", en: "I fell", pt: "eu caí", emoji: "😵", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_need_help", contentType: "sentence", en: "I need help", pt: "eu preciso de ajuda", emoji: "😰", category: "phrases", difficulty: 2, prerequisites: ["survival_help"] },
+  { id: "phrase_i_need_the_teacher", contentType: "sentence", en: "I need the teacher", pt: "eu preciso da professora", emoji: "🙏🧑‍🏫", category: "phrases", difficulty: 3, prerequisites: ["school_teacher"] },
+  { id: "phrase_i_cant_find_my_bag", contentType: "sentence", en: "I can't find my bag", pt: "não acho minha mochila", emoji: "😟", category: "phrases", difficulty: 4, prerequisites: [] },
+  { id: "phrase_where_is_my_teacher", contentType: "sentence", en: "Where is my teacher?", pt: "onde está minha professora?", emoji: "🧑‍🏫❓", category: "phrases", difficulty: 3, prerequisites: ["school_teacher"] },
+
+  // ---- necessidades pessoais (phrases) ----
+  { id: "phrase_can_i_have_some_food", contentType: "sentence", en: "Can I have some food?", pt: "posso comer alguma coisa?", emoji: "🍱", category: "phrases", difficulty: 4, prerequisites: ["phrase_hungry"] },
+  { id: "phrase_i_need_a_tissue", contentType: "sentence", en: "I need a tissue", pt: "eu preciso de um lenço", emoji: "🤧", category: "phrases", difficulty: 3, prerequisites: [] },
+  { id: "phrase_im_cold", contentType: "sentence", en: "I'm cold", pt: "estou com frio", emoji: "🥶", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_im_tired", contentType: "sentence", en: "I'm tired", pt: "estou cansado", emoji: "😴", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🛋️", category: "phrases", difficulty: 3, prerequisites: [] },
+
+  // ---- objetos novos de sala (school) ----
+  { id: "school_teacher", contentType: "word", en: "teacher", pt: "professora", emoji: "🧑‍🏫", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_paper", contentType: "word", en: "paper", pt: "papel", emoji: "📄", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_pen", contentType: "word", en: "pen", pt: "caneta", emoji: "🖊️", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_toy", contentType: "word", en: "toy", pt: "brinquedo", emoji: "🧸", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_door", contentType: "word", en: "door", pt: "porta", emoji: "🚪", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_window", contentType: "word", en: "window", pt: "janela", emoji: "🪟", category: "school", difficulty: 1, prerequisites: [] },
 ];
