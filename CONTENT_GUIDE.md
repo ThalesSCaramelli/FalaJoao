@@ -73,7 +73,17 @@ ilustração; conceito abstrato (cor/número/forma) → fica em emoji, nem vale 
    colar no item em `data.js` (o script não edita `data.js` sozinho, de propósito).
 
 **Nunca** aplique uma imagem sem passar pela revisão — resultado automático de busca já trouxe
-coisa inadequada antes (ver histórico do projeto).
+coisa inadequada antes (ver histórico do projeto). Na prática, o banco gratuito (Openverse) veio
+bem ruidoso pra várias buscas (fotos etiquetadas errado, esculturas de museu, etc.) — de um lote
+de 25 buscados em 2026-08-26, só 6 tinham candidata boa. Pra quem prefere escolher a própria foto
+em vez de depender da busca automática, tem duas opções diretas (sem passar pelo Openverse):
+
+- **Página de upload**: `python scripts/review_server.py` (porta 8090 por padrão), abra
+  `http://localhost:8090/review/upload.html` — lista os itens pendentes, envia arquivo do
+  computador ou cola um link, salva direto em `assets/images/<id>.jpg` já otimizado. Não mexe em
+  `data.js` (mesma regra de sempre — isso continua manual).
+- **Linha de comando**: `python scripts/curate_images.py add <item_id> <url_ou_caminho_local>` —
+  mesmo resultado, sem servidor.
 
 ## 4. Adicionar uma situação nova (mapa "My English World")
 

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Curadoria de imagens — FalaJoao</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #FDF3E1; padding: 24px; max-width: 760px; margin: 0 auto; color: #3A2E27; }
+  h1 { font-size: 1.4rem; }
+  p.hint { color: #8A7A6E; font-size: 0.9rem; }
+  .item {
+    display: flex; align-items: center; gap: 14px;
+    background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 10px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.06);
+  }
+  .item.done { outline: 3px solid #3F8F5C; }
+  .thumb {
+    width: 64px; height: 64px; border-radius: 10px; object-fit: cover;
+    background: #f2ece0; display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    flex: 0 0 auto;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .label { flex: 0 0 150px; }
+  .label b { display: block; font-size: 1rem; }
+  .label span { display: block; font-size: 0.78rem; color: #8A7A6E; }
+  .label .tag { display: inline-block; margin-top: 4px; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .tag.photo { background: #D6F0EF; color: #14818C; }
+  .tag.illustration { background: #FFEACC; color: #A66A00; }
+  .controls { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .row { display: flex; gap: 6px; }
+  input[type="text"] { flex: 1; padding: 7px 10px; border: 1px solid #EBDFCF; border-radius: 8px; font-size: 0.85rem; }
+  button { padding: 7px 12px; border: none; border-radius: 8px; background: #FF7A52; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+  button:hover { background: #D9522F; }
+  input[type="file"] { font-size: 0.78rem; max-width: 180px; }
+  .status { font-size: 0.75rem; min-height: 1.1em; }
+  .status.ok { color: #3F8F5C; font-weight: 700; }
+  .status.err { color: #D9522F; font-weight: 700; }
+</style>
+</head>
+<body>
+<h1>Curadoria de imagens — FalaJoao</h1>
+<p class="hint">Envie um arquivo do computador ou cole um link de imagem, por item. Salva direto em <code>assets/images/&lt;id&gt;.jpg</code> (otimizado automaticamente). Depois de enviar, avise no chat que eu adiciono a linha em <code>data.js</code> e publico.</p>
+
+<div id="list"></div>
+
+<script>
+const ITEMS = [
+  {id:"body_ear", en:"ear", pt:"orelha", emoji:"👂", type:"photo"},
+  {id:"body_hand", en:"hand", pt:"mão", emoji:"✋", type:"photo"},
+  {id:"body_foot", en:"foot", pt:"pé", emoji:"🦶", type:"photo"},
+  {id:"body_hair", en:"hair", pt:"cabelo", emoji:"💇", type:"photo"},
+  {id:"family_mom", en:"mom", pt:"mãe", emoji:"👩", type:"illustration"},
+  {id:"family_dad", en:"dad", pt:"pai", emoji:"👨", type:"illustration"},
+  {id:"family_baby", en:"baby", pt:"bebê", emoji:"👶", type:"illustration"},
+  {id:"family_sister", en:"sister", pt:"irmã", emoji:"👧", type:"illustration"},
+  {id:"clothes_pants", en:"pants", pt:"calça", emoji:"👖", type:"photo"},
+  {id:"clothes_shoes", en:"shoes", pt:"sapatos", emoji:"👟", type:"photo"},
+  {id:"clothes_socks", en:"socks", pt:"meias", emoji:"🧦", type:"photo", note:"já tem foto (pernas peludas de adulto) — pode trocar"},
+  {id:"clothes_jacket", en:"jacket", pt:"jaqueta", emoji:"🧥", type:"photo"},
+  {id:"school_ball", en:"ball", pt:"bola", emoji:"⚽", type:"photo"},
+  {id:"school_teacher", en:"teacher", pt:"professora", emoji:"🧑‍🏫", type:"illustration"},
+  {id:"school_paper", en:"paper", pt:"papel", emoji:"📄", type:"photo"},
+  {id:"school_pen", en:"pen", pt:"caneta", emoji:"🖊️", type:"photo"},
+  {id:"school_toy", en:"toy", pt:"brinquedo", emoji:"🧸", type:"photo"},
+  {id:"school_door", en:"door", pt:"porta", emoji:"🚪", type:"photo"},
+  {id:"school_window", en:"window", pt:"janela", emoji:"🪟", type:"photo"},
+];
+
+const list = document.getElementById("list");
+ITEMS.forEach(item => {
+  const row = document.createElement("div");
+  row.className = "item";
+  row.id = "row-" + item.id;
+  row.innerHTML = `
+    <div class="thumb" id="thumb-${item.id}">${item.emoji}</div>
+    <div class="label">
+      <b>${item.en}</b>
+      <span>${item.pt}${item.note ? " — " + item.note : ""}</span>
+      <span class="tag ${item.type}">${item.type === "photo" ? "foto real" : "ilustração"}</span>
+    </div>
+    <div class="controls">
+      <div class="row">
+        <input type="file" id="file-${item.id}" accept="image/*" />
+        <button data-id="${item.id}" data-mode="file">Enviar</button>
+      </div>
+      <div class="row">
+        <input type="text" id="url-${item.id}" placeholder="ou cole um link de imagem" />
+        <button data-id="${item.id}" data-mode="url">Baixar</button>
+      </div>
+      <div class="status" id="status-${item.id}"></div>
+    </div>
+  `;
+  list.appendChild(row);
+});
+
+async function submitFile(id) {
+  const input = document.getElementById("file-" + id);
+  const statusEl = document.getElementById("status-" + id);
+  if (!input.files[0]) { statusEl.textContent = "Escolha um arquivo primeiro."; statusEl.className = "status err"; return; }
+  statusEl.textContent = "Enviando..."; statusEl.className = "status";
+  const fd = new FormData();
+  fd.append("item_id", id);
+  fd.append("file", input.files[0]);
+  try {
+    const r = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await r.json();
+    handleResult(id, data);
+  } catch (e) {
+    statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err";
+  }
+}
+
+async function submitUrl(id) {
+  const input = document.getElementById("url-" + id);
+  const statusEl = document.getElementById("status-" + id);
+  if (!input.value.trim()) { statusEl.textContent = "Cole um link primeiro."; statusEl.className = "status err"; return; }
+  statusEl.textContent = "Baixando..."; statusEl.className = "status";
+  try {
+    const r = await fetch("/api/fetch-url", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({item_id: id, url: input.value.trim()}) });
+    const data = await r.json();
+    handleResult(id, data);
+  } catch (e) {
+    statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err";
+  }
+}
+
+function handleResult(id, data) {
+  const statusEl = document.getElementById("status-" + id);
+  const row = document.getElementById("row-" + id);
+  const thumb = document.getElementById("thumb-" + id);
+  if (data.ok) {
+    statusEl.textContent = "Salvo! ✓"; statusEl.className = "status ok";
+    row.classList.add("done");
+    thumb.innerHTML = `<img src="/${data.path}?t=${Date.now()}" />`;
+  } else {
+    statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err";
+  }
+}
+
+list.addEventListener("click", (e) => {
+  if (e.target.tagName !== "BUTTON") return;
+  const id = e.target.dataset.id;
+  const mode = e.target.dataset.mode;
+  if (mode === "file") submitFile(id);
+  else submitUrl(id);
+});
+</script>
+</body>
+</html>

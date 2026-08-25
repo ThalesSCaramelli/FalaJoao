@@ -1,4 +1,5 @@
 .claude/
-review/
+review/*
+!review/upload.html
 __pycache__/
 *.pyc
