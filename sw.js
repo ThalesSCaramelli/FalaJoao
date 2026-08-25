@@ -1,6 +1,6 @@
 // Service Worker — cache do app shell pra funcionar offline.
 // Bump o CACHE_NAME sempre que mudar algum arquivo do shell (força atualização nos aparelhos).
-const CACHE_NAME = "meu-ingles-v13";
+const CACHE_NAME = "meu-ingles-v14";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -139,8 +139,32 @@ const AUDIO_SHELL = [
   "./assets/audio/en/survival_yes.mp3",
 ];
 
+const PT_AUDIO_SHELL = [
+  "./assets/audio/pt/animals.mp3",
+  "./assets/audio/pt/bathroom.mp3",
+  "./assets/audio/pt/cafeteria.mp3",
+  "./assets/audio/pt/classroom.mp3",
+  "./assets/audio/pt/family.mp3",
+  "./assets/audio/pt/friends.mp3",
+  "./assets/audio/pt/goodbye.mp3",
+  "./assets/audio/pt/greetings.mp3",
+  "./assets/audio/pt/help.mp3",
+  "./assets/audio/pt/onboarding_greeting.mp3",
+  "./assets/audio/pt/scn_bathroom.mp3",
+  "./assets/audio/pt/scn_friends.mp3",
+  "./assets/audio/pt/scn_goodbye.mp3",
+  "./assets/audio/pt/scn_greetings.mp3",
+  "./assets/audio/pt/scn_help.mp3",
+  "./assets/audio/pt/scn_sharing.mp3",
+  "./assets/audio/pt/scn_teacher_tell.mp3",
+  "./assets/audio/pt/scn_water.mp3",
+  "./assets/audio/pt/sharing.mp3",
+  "./assets/audio/pt/teacher_tell.mp3",
+  "./assets/audio/pt/water.mp3",
+];
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL.concat(AUDIO_SHELL))));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL.concat(AUDIO_SHELL, PT_AUDIO_SHELL))));
   self.skipWaiting();
 });
 

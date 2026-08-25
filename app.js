@@ -198,7 +198,7 @@ function renderWorldMap() {
 }
 
 function goToSituation(situation) {
-  speakPT(situation.namePt);
+  speakPT(situation.namePt, situation.id);
   const avatarEl = document.getElementById("world-avatar");
   avatarEl.style.top = situation.mapPos.top;
   avatarEl.style.left = situation.mapPos.left;
@@ -289,10 +289,20 @@ function speakLive(text, lang) {
   window.speechSynthesis.speak(utter);
 }
 // Narração em português (nomes de lugar, instrução) — nunca é o conteúdo-alvo em inglês.
-function speakPT(text) {
+// Mesmo padrão de speak(): voz neural pré-gravada (edge-tts, Antônio) quando tem id, senão TTS
+// ao vivo do navegador (só ficava no TTS ao vivo até aqui — daí a voz robótica em PT).
+function speakPT(text, id) {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
+  }
+  if (id) {
+    const audio = new Audio(`assets/audio/pt/${id}.mp3`);
+    audio.playbackRate = speechRate / 0.85;
+    audio.addEventListener("error", () => speakLive(text, "pt"), { once: true });
+    audio.play().catch(() => speakLive(text, "pt"));
+    currentAudio = audio;
+    return;
   }
   speakLive(text, "pt");
 }
@@ -588,8 +598,8 @@ function renderRound() {
       btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
       optionsWrap.appendChild(btn);
     });
-    document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt));
-    speakPT(scenario.promptPt);
+    document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt, scenario.id));
+    speakPT(scenario.promptPt, scenario.id);
     options.forEach((opt, i) => {
       setTimeout(() => {
         const btn = optionsWrap.children[[...optionsWrap.children].findIndex((b) => b.dataset.itemId === opt.id)];
@@ -873,5 +883,5 @@ if (localStorage.getItem(ONBOARDED_KEY)) {
   renderHome();
   showScreen("home");
 } else {
-  speakPT("Oi! Eu sou o Quokka! Vamos aprender inglês brincando?");
+  speakPT("Oi! Eu sou o Quokka! Vamos aprender inglês brincando?", "onboarding_greeting");
 }

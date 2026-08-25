@@ -86,6 +86,14 @@ Edite `data.js`, array `SITUATIONS`:
 categorias (como "banheiro" usa `survival` + `phrases`); use `categoryId` quando ela é
 essencialmente uma categoria só (como "Lanche" = `food`).
 
+Depois de adicionar uma situação (ou um cenário novo em `SCENARIOS`, com seu `promptPt`), rode:
+```bash
+python scripts/generate_pt_audio.py
+```
+Gera o áudio em `assets/audio/pt/<id>.mp3` (voz neural Antônio, edge-tts) pra `namePt`/`promptPt`
+— sem isso, aquele texto cai no TTS ao vivo do navegador (mais robótico) até rodar o script.
+Mesma lógica do `generate_audio.py`: idempotente, só gera o que falta.
+
 ## 5. Regra de ouro dos ids
 
 **Um id, uma vez criado, nunca muda.** O progresso do jogador (Learning State, em
