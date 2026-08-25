@@ -64,14 +64,14 @@ const SITUATIONS = [
 // seção 2/5/9.2). correctId/distractorIds sempre apontam pra itens reais de CONTENT (mesmo áudio,
 // mesmo registro de progresso — não é conteúdo paralelo).
 const SCENARIOS = [
-  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_hungry", "survival_my_name_is"] },
-  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", correctId: "phrase_water_please", distractorIds: ["survival_bye_bye", "phrase_im_hurt"] },
-  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", correctId: "phrase_help_please", distractorIds: ["phrase_hungry", "survival_hello"] },
-  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", correctId: "survival_my_name_is", distractorIds: ["phrase_thirsty", "survival_bathroom"] },
-  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", correctId: "phrase_play_with_you", distractorIds: ["survival_bye_bye", "phrase_hungry"] },
-  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["survival_hello", "phrase_thirsty"] },
-  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["survival_bye_bye", "phrase_hungry"] },
-  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["phrase_help_please", "survival_water"] },
+  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_water_please", "phrase_help_please"] },
+  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", correctId: "phrase_water_please", distractorIds: ["phrase_bathroom_please", "phrase_help_please"] },
+  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", correctId: "phrase_help_please", distractorIds: ["phrase_bathroom_please", "phrase_water_please"] },
+  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", correctId: "survival_my_name_is", distractorIds: ["phrase_your_name", "phrase_excuse_me"] },
+  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", correctId: "phrase_play_with_you", distractorIds: ["phrase_can_i_borrow", "phrase_can_i_have_this"] },
+  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
+  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
+  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
 ];
 
 const CONTENT = [
@@ -255,5 +255,22 @@ const CONTENT = [
     en: "What's this?", pt: "o que é isso?", emoji: "🤔",
     category: "phrases", difficulty: 3, prerequisites: [],
     acceptedAnswers: ["whats this", "what is this"],
+  },
+
+  // ---- evolução natural (mesma função comunicativa, registro mais avançado — o item simples
+  // vira prerequisite soft do mais evoluído, e difficulty mais alta já garante que ele só aparece
+  // pro João depois, via getNewCandidates em engine.js; sem mudança nenhuma de engine) ----
+  {
+    id: "phrase_water_glass_please", contentType: "sentence",
+    en: "Can I have a glass of water, please?", pt: "posso tomar um copo de água, por favor?", emoji: "🥛🙏",
+    category: "phrases", difficulty: 5, prerequisites: ["phrase_water_please"],
+    acceptedAnswers: ["can i have a glass of water please", "can i have a glass of water"],
+  },
+  { id: "phrase_good_morning", contentType: "phrase", en: "Good morning", pt: "bom dia", emoji: "🌅", category: "phrases", difficulty: 2, prerequisites: ["survival_hello"] },
+  {
+    id: "phrase_hi_mate_how_you_going", contentType: "sentence",
+    en: "Hi mate, how's it going?", pt: "oi, e aí, tudo bem?", emoji: "🤙",
+    category: "phrases", difficulty: 5, prerequisites: ["phrase_good_morning"],
+    acceptedAnswers: ["hi mate hows it going", "hi mate how is it going", "hows it going"],
   },
 ];

@@ -32,9 +32,46 @@ sobre algo já decidido sem motivo novo.
 ### Voz neural pré-gravada em vez de TTS ao vivo
 
 - **Contexto**: `speechSynthesis` ao vivo do navegador soou "muito robótico" no teste real.
-- **Escolha**: áudio pré-gerado (edge-tts, voz Natasha) por item, com fallback pro TTS ao vivo.
+- **Escolha**: áudio pré-gerado (edge-tts, voz Natasha pro inglês / Antônio pro português) por item,
+  com fallback pro TTS ao vivo. Cobre tanto o conteúdo-alvo (inglês) quanto a narração (português).
 - **Porquê**: qualidade muito superior, gratuito, continua funcionando offline (arquivo cacheado).
-- **Consequência**: todo item novo de conteúdo-alvo (inglês) precisa rodar `scripts/generate_audio.py`.
+- **Consequência**: todo item novo de conteúdo-alvo (inglês) precisa rodar `scripts/generate_audio.py`;
+  toda fala nova em português (situação/cenário/narração avulsa) precisa rodar
+  `scripts/generate_pt_audio.py`.
+
+### `prerequisites` é soft link, não gate de progresso
+
+- **Contexto**: um feedback externo apontou que `prerequisites` em `CONTENT` podia ser lido como
+  "o aluno tem que dominar isso antes" (gate) ou como "isso ajuda a decompor/entender aquilo"
+  (building block) — o campo hoje mistura as duas leituras sem deixar explícito qual é.
+- **Escolha**: `prerequisites` significa building block, não gate. O único lugar do engine que lê
+  esse campo é `needsDecomposition`/`buildSession` (engine.js) — e só entra em ação **depois** que
+  o aluno já errou o item repetidamente (`FAILURE_THRESHOLD`), nunca antes de introduzi-lo.
+- **Porquê**: um gate de verdade (não introduzir X até dominar Y) exigiria lógica nova em
+  `getNewCandidates`; o padrão atual já resolve o caso real (item difícil → decompõe) sem isso.
+- **Consequência**: ao criar uma "cadeia de evolução" (ex. `phrase_water_please` →
+  `phrase_water_glass_please`), o item mais avançado não fica bloqueado até o simples ser
+  dominado — ele só aparece **depois** na prática porque tem `difficulty` mais alta, e
+  `getNewCandidates` já ordena por difficulty ascendente. Ver `CONTENT_GUIDE.md` seção 8.
+
+---
+
+## Arquitetura de conteúdo (5 camadas)
+
+Cada camada responde uma pergunta diferente. Útil pra decidir "isso é dado de `CONTENT`, ou é
+`SITUATION`, ou é lógica de `engine.js`?" sem reabrir a discussão toda vez.
+
+| Camada | Pergunta que responde | Vive em |
+|---|---|---|
+| **Content** | Qual é a unidade linguística? (palavra/frase/sentença, en/pt, dificuldade) | `data.js`, array `CONTENT` |
+| **Category** | Sobre o quê? (tema — animais, comida, cores) | `data.js`, `CATEGORY_META` |
+| **Situation** | Onde/quando isso é usado? (lugar do mapa — banheiro, se apresentar) | `data.js`, `SITUATIONS` |
+| **Scenario** | Qual problema comunicativo o aluno precisa resolver? (problem-posing) | `data.js`, `SCENARIOS` |
+| **Engine** | O que este aluno já sabe, e qual é a próxima melhor experiência pra ele? | `engine.js` |
+
+Category é pra **explorar** conteúdo (menu livre); Situation/Scenario são pra **usar** inglês de
+verdade (uma necessidade comunicativa, não um tema). Por isso Situation pesa mais que Category na
+Home/Adventure — é o que está mais perto do objetivo real de aprender a língua.
 
 ---
 

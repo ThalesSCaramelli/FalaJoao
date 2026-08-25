@@ -31,7 +31,7 @@ conjugado ("red apple", "thank you mom") = `phrase`. Frase com sujeito+verbo ("I
 
 **Guia rápido de `difficulty`**: 1 = palavra isolada comum. 2 = combinação curta ou frase social
 simples. 3 = sentença curta (I am hungry). 4 = pedido educado completo (Can I have..., please?).
-5 = reservado pra algo mais complexo ainda (não usado hoje).
+5 = versão mais evoluída/natural de um item que já existe em difficulty menor (ver seção 8).
 
 **`prerequisites`**: só preencha se o item for difícil o bastante pra fazer sentido decompor
 (ver `engine.js`, `needsDecomposition`/`buildSession`). Exemplo real:
@@ -109,7 +109,33 @@ Categorias existentes valem; para desbloqueio ligado a uma situação específic
 categoria, seria preciso estender `isCategoryUnlockThresholdMet` — não implementado ainda
 (complexidade prematura, ver `PROCESS.md`).
 
-## 7. Checklist antes de publicar conteúdo novo
+## 8. Evolução natural de frases (mesma função, registro mais avançado)
+
+Ideia: em vez de só ensinar palavras/frases soltas, algumas seguem uma "cadeia de evolução" —
+a mesma função comunicativa, ficando mais natural/específica a cada passo. Exemplo real
+(`survival_water` → `phrase_water_please` → `phrase_water_glass_please`):
+
+```
+water                                    (difficulty 1, sem prerequisites)
+  → Can I have some water, please?       (difficulty 4, prerequisites: ["survival_water", "survival_please"])
+    → Can I have a glass of water, please? (difficulty 5, prerequisites: ["phrase_water_please"])
+```
+
+**Não existe campo `evolvesTo` nem lógica nova no engine pra isso** — de propósito (ver
+`PROCESS.md`, decisão "`prerequisites` é soft link, não gate"). O item mais evoluído só usa:
+- `difficulty` mais alta que o item anterior da cadeia (5 = o topo hoje);
+- `prerequisites: ["id_do_item_anterior_da_cadeia"]` — soft link, documenta a relação, e entra em
+  jogo se o item mais evoluído acabar sendo difícil demais (decomposição).
+
+Isso já basta: `getNewCandidates` (engine.js) ordena novidades por `difficulty` ascendente, então
+o item mais evoluído naturalmente só aparece pro João depois do simples, sem nenhum código novo.
+
+Registro mais avançado pode incluir fala natural do inglês australiano (ex. "Hi mate, how's it
+going?" em vez de só "Hello") — **gírias mais pesadas (comida/eventos: "snag", "barbie", "arvo"
+etc.) ficam de fora por enquanto**, só entram depois que as cadeias de evolução "natural" já
+estiverem rodando com o João por um tempo (decisão do usuário, 2026-08-26).
+
+## 9. Checklist antes de publicar conteúdo novo
 
 - [ ] Item(ns) adicionados em `CONTENT` com id estável e único
 - [ ] `python scripts/generate_audio.py` rodado (sem itens faltando)
