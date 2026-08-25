@@ -714,6 +714,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   box-shadow: 0 2px 0 rgba(0,0,0,0.15);
 }
 
+/* ONBOARDING (só na primeira abertura) */
+.onboarding-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  text-align: center;
+  padding: 0 var(--space-5);
+}
+.onboarding-mascot { width: 160px; }
+.onboarding-mascot svg { display: block; filter: drop-shadow(0 8px 8px rgba(58,46,42,0.12)); }
+.onboarding-title { font-size: 1.6rem; margin: 0; }
+.onboarding-sub { color: var(--color-text-secondary); font-size: 1rem; margin: 0 0 var(--space-2); max-width: 280px; }
+
 /* SETTINGS */
 .settings-body {
   padding: 12px;

@@ -213,6 +213,7 @@ function goToSituation(situation) {
     if (scenario) {
       queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: "situation", scenario });
     }
+    quizReturnScreen = "world";
     startQuiz(queue);
   }, 900);
 }
@@ -382,6 +383,24 @@ document.getElementById("btn-settings").addEventListener("click", () => {
   showScreen("settings");
 });
 
+// O quiz é aberto de 3 lugares (missão do Home, Categoria, situação do Mapa) — "voltar" precisa
+// lembrar de onde veio, senão cai numa tela de Categoria vazia quando não veio de lá (bug real,
+// achado na auditoria de navegação). Setado em cada um dos 3 pontos de entrada do quiz.
+let quizReturnScreen = "home";
+function goToQuizReturnScreen() {
+  if (quizReturnScreen === "world") {
+    renderWorldMap();
+    showScreen("world");
+  } else if (quizReturnScreen === "category") {
+    showScreen("category");
+  } else {
+    renderHome();
+    showScreen("home");
+  }
+}
+document.getElementById("btn-quiz-back").addEventListener("click", goToQuizReturnScreen);
+document.getElementById("btn-result-back").addEventListener("click", goToQuizReturnScreen);
+
 // ===================== Home =====================
 function renderHome() {
   document.getElementById("home-mascot").innerHTML = mascotSVG();
@@ -447,10 +466,12 @@ function openCategory(catId) {
 
 document.getElementById("btn-play-quiz").addEventListener("click", () => {
   const items = CONTENT.filter((it) => it.category === currentCategoryId);
+  quizReturnScreen = "category";
   startQuiz(shuffle(items).slice(0, 10).map((it) => ({ item: it, roundType: "choice" })));
 });
 
 document.getElementById("btn-session").addEventListener("click", () => {
+  quizReturnScreen = "home";
   startQuiz(buildSession());
 });
 
@@ -833,5 +854,19 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// ===================== Boas-vindas (só na primeira abertura) =====================
+const ONBOARDED_KEY = "meuIngles_onboarded_v1";
+document.getElementById("onboarding-mascot").innerHTML = mascotSVG();
+document.getElementById("btn-onboarding-start").addEventListener("click", () => {
+  localStorage.setItem(ONBOARDED_KEY, "1");
+  renderHome();
+  showScreen("home");
+});
+
 // ===================== Início =====================
-renderHome();
+if (localStorage.getItem(ONBOARDED_KEY)) {
+  renderHome();
+  showScreen("home");
+} else {
+  speakPT("Oi! Eu sou o Quokka! Vamos aprender inglês brincando?");
+}

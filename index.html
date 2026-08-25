@@ -16,8 +16,18 @@
 
 <div id="app">
 
+  <!-- TELA DE BOAS-VINDAS (só aparece na primeira abertura) -->
+  <section id="screen-onboarding" class="screen active">
+    <div class="onboarding-body">
+      <div id="onboarding-mascot" class="onboarding-mascot"></div>
+      <h1 class="onboarding-title">Oi! Eu sou o Quokka!</h1>
+      <p class="onboarding-sub">Vamos aprender inglês brincando?</p>
+      <button id="btn-onboarding-start" class="big-btn">Vamos! →</button>
+    </div>
+  </section>
+
   <!-- TELA INICIAL -->
-  <section id="screen-home" class="screen active">
+  <section id="screen-home" class="screen">
     <header class="home-header">
       <div id="home-mascot" class="home-mascot"></div>
       <div class="greeting">
@@ -102,7 +112,7 @@
   <!-- TELA JOGO: quiz de escuta -->
   <section id="screen-quiz" class="screen">
     <header class="sub-header">
-      <button class="back-btn" data-back="category">⬅️</button>
+      <button class="back-btn" id="btn-quiz-back">⬅️</button>
       <div id="quiz-progress" class="quiz-progress"></div>
     </header>
     <div class="quiz-body">
@@ -130,7 +140,7 @@
       <div id="result-stars" class="result-stars"></div>
       <p id="result-text"></p>
       <button id="btn-play-again" class="big-btn">🔁 Jogar de novo</button>
-      <button class="big-btn secondary" data-back="category">⬅️ Voltar</button>
+      <button class="big-btn secondary" id="btn-result-back">⬅️ Voltar</button>
     </div>
   </section>
 

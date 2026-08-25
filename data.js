@@ -77,8 +77,8 @@ const SCENARIOS = [
 const CONTENT = [
   // ---- survival (sobrevivência escolar) ----
   { id: "survival_hello", contentType: "word", en: "hello", pt: "olá", emoji: "👋", category: "survival", difficulty: 1, prerequisites: [] },
-  { id: "survival_bye_bye", contentType: "phrase", en: "bye bye", pt: "tchau", emoji: "👋", category: "survival", difficulty: 2, prerequisites: [] },
-  { id: "survival_please", contentType: "word", en: "please", pt: "por favor", emoji: "🙏", category: "survival", difficulty: 1, prerequisites: [] },
+  { id: "survival_bye_bye", contentType: "phrase", en: "bye bye", pt: "tchau", emoji: "🚶", category: "survival", difficulty: 2, prerequisites: [] },
+  { id: "survival_please", contentType: "word", en: "please", pt: "por favor", emoji: "🥺", category: "survival", difficulty: 1, prerequisites: [] },
   { id: "survival_thank_you", contentType: "phrase", en: "thank you", pt: "obrigado", emoji: "🙏", category: "survival", difficulty: 2, prerequisites: [] },
   { id: "survival_yes", contentType: "word", en: "yes", pt: "sim", emoji: "👍", category: "survival", difficulty: 1, prerequisites: [] },
   { id: "survival_no", contentType: "word", en: "no", pt: "não", emoji: "👎", category: "survival", difficulty: 1, prerequisites: [] },
@@ -217,7 +217,7 @@ const CONTENT = [
   { id: "phrase_your_name", contentType: "sentence", en: "What is your name?", pt: "qual é o seu nome?", emoji: "🙋❓", category: "phrases", difficulty: 3, prerequisites: ["survival_my_name_is"] },
   { id: "phrase_hungry", contentType: "sentence", en: "I am hungry", pt: "eu estou com fome", emoji: "🍽️", category: "phrases", difficulty: 2, prerequisites: [] },
   { id: "phrase_thirsty", contentType: "sentence", en: "I am thirsty", pt: "eu estou com sede", emoji: "🥤", category: "phrases", difficulty: 2, prerequisites: [] },
-  { id: "phrase_excuse_me", contentType: "phrase", en: "Excuse me", pt: "com licença", emoji: "🙋", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_excuse_me", contentType: "phrase", en: "Excuse me", pt: "com licença", emoji: "🙇", category: "phrases", difficulty: 2, prerequisites: [] },
   {
     id: "phrase_water_please", contentType: "sentence",
     en: "Can I have some water, please?", pt: "posso tomar água, por favor?", emoji: "💧🙏",
@@ -249,7 +249,7 @@ const CONTENT = [
     acceptedAnswers: ["can i borrow this please", "can i borrow this"],
   },
   { id: "phrase_im_hurt", contentType: "sentence", en: "I'm hurt", pt: "eu me machuquei", emoji: "🤕", category: "phrases", difficulty: 2, prerequisites: [] },
-  { id: "phrase_see_you_later", contentType: "phrase", en: "See you later!", pt: "até mais!", emoji: "👋", category: "phrases", difficulty: 2, prerequisites: ["survival_bye_bye"] },
+  { id: "phrase_see_you_later", contentType: "phrase", en: "See you later!", pt: "até mais!", emoji: "🏠", category: "phrases", difficulty: 2, prerequisites: ["survival_bye_bye"] },
   {
     id: "phrase_whats_this", contentType: "sentence",
     en: "What's this?", pt: "o que é isso?", emoji: "🤔",
