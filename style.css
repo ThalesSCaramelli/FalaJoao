@@ -241,30 +241,34 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   text-transform: uppercase; letter-spacing: 0.05em; margin: 4px 0 10px;
 }
 
+/* Teaser leve, não hero — a missão do dia é o destaque da Home (ver PROCESS.md: "Home = o que eu
+   devo fazer agora", não uma vitrine de customização). Só um lembrete de que o avatar existe. */
 .avatar-hero-home {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: none;
+  gap: var(--space-3);
+  background: var(--color-surface);
   border: none;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   width: 100%;
-  padding: 4px 0 12px;
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  box-shadow: var(--shadow-btn);
+  text-align: left;
 }
-.avatar-hero-home .voxel-avatar.avatar-lg {
-  width: 128px;
-  filter: drop-shadow(0 6px 6px rgba(58,46,42,0.12));
+.avatar-hero-home .voxel-avatar {
+  width: 56px;
+  height: auto;
+  flex: 0 0 auto;
   transition: transform 0.15s;
 }
-.avatar-hero-home:active .voxel-avatar.avatar-lg { transform: scale(0.96); }
+.avatar-hero-home:active .voxel-avatar { transform: scale(0.94); }
 .avatar-hero-hint {
-  background: var(--cap-communicate-soft);
-  color: var(--color-text);
-  font-weight: 800;
-  font-size: 0.72rem;
-  border-radius: var(--radius-pill);
-  padding: 4px 12px;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  flex: 1;
 }
 
 .grid {
@@ -842,14 +846,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 /* ===================== MY ENGLISH WORLD (mapa) ===================== */
 .world-banner {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; flex-direction: column; gap: var(--space-3);
   background: linear-gradient(135deg, var(--cap-understand-soft), #FFF3D6);
-  border-radius: 20px; padding: 12px 14px; margin-bottom: 20px;
+  border-radius: 20px; padding: 12px 14px; margin-bottom: 12px;
   cursor: pointer; border: none; width: 100%; text-align: left;
 }
-.world-banner .ic { font-size: 1.8rem; flex: 0 0 auto; }
-.world-banner .txt { flex: 1; font-weight: 800; font-size: 0.9rem; color: #333; }
-.world-banner .txt small { display: block; font-weight: 600; color: #888; font-size: 0.72rem; }
+.world-banner-head { display: flex; align-items: center; gap: 12px; }
+.world-banner-head .ic { font-size: 1.8rem; flex: 0 0 auto; }
+.world-banner-head .txt { flex: 1; font-weight: 800; font-size: 0.9rem; color: var(--color-text); }
+.world-banner-head .txt small { display: block; font-weight: 600; color: var(--color-text-secondary); font-size: 0.72rem; }
+.world-banner-preview { display: flex; gap: var(--space-2); }
+.world-banner-preview .chip {
+  flex: 1; min-width: 0; background: var(--color-surface); border-radius: var(--radius-md);
+  padding: var(--space-2) 4px; text-align: center; font-size: 0.66rem; font-weight: 800;
+  color: var(--color-text); box-shadow: var(--shadow-btn);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.world-banner-preview .chip .chip-ic { display: block; font-size: 1.3rem; margin-bottom: 2px; }
 
 .world-map {
   position: relative;

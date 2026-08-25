@@ -422,6 +422,11 @@ function renderHome() {
   document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${topCat.namePt}` : "🎉 Tudo em dia!";
   document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
 
+  // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
+  const nextSituations = [...SITUATIONS].sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
+  document.getElementById("world-banner-preview").innerHTML = nextSituations
+    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${s.namePt}</div>`)
+    .join("");
 }
 
 // Grade de categorias (explorar livre) — mora dentro de Adventure/My English World, não na Home.
