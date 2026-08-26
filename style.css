@@ -574,6 +574,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   letter-spacing: 0.03em;
 }
 
+/* botão de ouvir a tradução em português — João sabia dizer a palavra em inglês mas não sabia o
+   que ela significava; o texto sozinho não ajuda (ele não lê ainda), precisa de áudio também. */
+.word-pt-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--cap-understand-soft);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.word-pt-btn .icon { width: 1.1em; height: 1.1em; color: var(--color-secondary); }
+.word-pt-btn .word-pt { font-size: 0.9rem; font-weight: 700; color: var(--color-text); }
+
 /* entrada suave ao trocar de rodada — #quiz-options é o container fixo (fica vazio entre rodadas
    e ganha a classe .enter de novo em cada renderRound, forçando o replay da animação) */
 #quiz-options {

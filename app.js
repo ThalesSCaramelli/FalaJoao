@@ -556,12 +556,13 @@ function renderRound() {
       <div class="intro-card">
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
         <span class="word-en">${round.item.en}</span>
-        <span class="word-pt">${round.item.pt}</span>
-        <span class="intro-hint">toque na imagem pra ouvir de novo</span>
+        <button class="word-pt-btn" id="intro-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>
+        <span class="intro-hint">toque na imagem pra ouvir em inglês · toque na tradução pra ouvir em português</span>
         <button class="big-btn" id="intro-next">Já sei! →</button>
       </div>`;
     speak(round.item.en, round.item.id);
     container.querySelector(".word-emoji-big").addEventListener("click", () => speak(round.item.en, round.item.id));
+    container.querySelector("#intro-pt").addEventListener("click", () => speakPT(round.item.pt));
     container.querySelector("#intro-next").addEventListener("click", () => {
       markIntroduced(round.item.id);
       quizIndex++;
