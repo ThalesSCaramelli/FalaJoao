@@ -2,11 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<title>Curadoria de imagens — FalaJoao</title>
+<title>Estúdio de conteúdo — FalaJoao</title>
 <style>
-  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #FDF3E1; padding: 24px; max-width: 760px; margin: 0 auto; color: #3A2E27; }
-  h1 { font-size: 1.4rem; }
-  p.hint { color: #8A7A6E; font-size: 0.9rem; }
+  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #FDF3E1; padding: 24px; max-width: 820px; margin: 0 auto; color: #3A2E27; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  p.hint { color: #8A7A6E; font-size: 0.88rem; margin-top: 0; }
+  .tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 2px solid #EBDFCF; }
+  .tab-btn { background: none; border: none; padding: 10px 16px; font-weight: 700; font-size: 0.9rem; color: #8A7A6E; cursor: pointer; border-bottom: 3px solid transparent; }
+  .tab-btn.active { color: #D9522F; border-bottom-color: #FF7A52; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
   .item {
     display: flex; align-items: center; gap: 14px;
     background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 10px;
@@ -14,87 +20,214 @@
   }
   .item.done { outline: 3px solid #3F8F5C; }
   .thumb {
-    width: 64px; height: 64px; border-radius: 10px; object-fit: cover;
-    background: #f2ece0; display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+    background: #f2ece0; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
     flex: 0 0 auto;
   }
   .thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-  .label { flex: 0 0 150px; }
-  .label b { display: block; font-size: 1rem; }
-  .label span { display: block; font-size: 0.78rem; color: #8A7A6E; }
-  .label .tag { display: inline-block; margin-top: 4px; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .label { flex: 0 0 140px; }
+  .label b { display: block; font-size: 0.95rem; }
+  .label span { display: block; font-size: 0.75rem; color: #8A7A6E; }
+  .label .tag { display: inline-block; margin-top: 4px; font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
   .tag.photo { background: #D6F0EF; color: #14818C; }
   .tag.illustration { background: #FFEACC; color: #A66A00; }
-  .controls { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-  .row { display: flex; gap: 6px; }
-  input[type="text"] { flex: 1; padding: 7px 10px; border: 1px solid #EBDFCF; border-radius: 8px; font-size: 0.85rem; }
-  button { padding: 7px 12px; border: none; border-radius: 8px; background: #FF7A52; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+  .controls { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .row { display: flex; gap: 6px; align-items: center; }
+  input[type="text"], input[type="number"], select {
+    padding: 7px 10px; border: 1px solid #EBDFCF; border-radius: 8px; font-size: 0.85rem; background: #fff; color: #3A2E27;
+  }
+  input[type="text"] { flex: 1; }
+  button { padding: 7px 12px; border: none; border-radius: 8px; background: #FF7A52; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
   button:hover { background: #D9522F; }
-  input[type="file"] { font-size: 0.78rem; max-width: 180px; }
+  button.secondary { background: #1CA7B0; }
+  button.secondary:hover { background: #14818C; }
+  button.rec { background: #E8543F; }
+  button.rec.active { background: #D9522F; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  button:disabled { background: #D8CFC7; cursor: not-allowed; }
+  input[type="file"] { font-size: 0.75rem; max-width: 150px; }
   .status { font-size: 0.75rem; min-height: 1.1em; }
   .status.ok { color: #3F8F5C; font-weight: 700; }
   .status.err { color: #D9522F; font-weight: 700; }
+
+  .form-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 3px 0 rgba(0,0,0,0.06); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 700; color: #8A7A6E; }
+  .form-grid input, .form-grid select { width: 100%; box-sizing: border-box; }
+  .id-row { display: flex; gap: 6px; align-items: center; }
+  .form-actions { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
+  #search-audio { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #EBDFCF; margin-bottom: 14px; font-size: 0.9rem; }
+  audio { height: 32px; max-width: 140px; }
 </style>
 </head>
 <body>
-<h1>Curadoria de imagens — FalaJoao</h1>
-<p class="hint">Envie um arquivo do computador ou cole um link de imagem, por item. Salva direto em <code>assets/images/&lt;id&gt;.jpg</code> (otimizado automaticamente). Depois de enviar, avise no chat que eu adiciono a linha em <code>data.js</code> e publico.</p>
+<h1>Estúdio de conteúdo — FalaJoao</h1>
+<p class="hint">Adicionar palavra nova, curar imagem, gravar ou enviar áudio (a sua voz ou da família). Tudo local, salva direto nos arquivos do app — nada é publicado até eu revisar e der push.</p>
 
-<div id="list"></div>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="palavras">➕ Palavras</button>
+  <button class="tab-btn" data-tab="imagens">🖼️ Imagens</button>
+  <button class="tab-btn" data-tab="audios">🎙️ Áudios</button>
+</div>
+
+<div class="panel active" id="panel-palavras">
+  <div class="form-card">
+    <div class="form-grid">
+      <label>Inglês<input type="text" id="w-en" placeholder="pizza" /></label>
+      <label>Português<input type="text" id="w-pt" placeholder="pizza" /></label>
+      <label>Emoji<input type="text" id="w-emoji" placeholder="🍕" /></label>
+      <label>Categoria
+        <select id="w-category"></select>
+      </label>
+      <label>Tipo
+        <select id="w-type">
+          <option value="word">palavra (word)</option>
+          <option value="phrase">frase curta (phrase)</option>
+          <option value="sentence">sentença (sentence)</option>
+        </select>
+      </label>
+      <label>Dificuldade (1-5)
+        <select id="w-difficulty">
+          <option value="1">1 — palavra simples</option>
+          <option value="2">2 — combinação/frase social</option>
+          <option value="3">3 — sentença curta</option>
+          <option value="4">4 — pedido educado completo</option>
+          <option value="5">5 — versão mais avançada de algo que já existe</option>
+        </select>
+      </label>
+    </div>
+    <label style="display:block; margin-top:12px; font-size:0.8rem; font-weight:700; color:#8A7A6E;">
+      ID (interno, nunca muda depois de criado)
+      <div class="id-row" style="margin-top:4px;">
+        <input type="text" id="w-id" placeholder="food_pizza" style="flex:1;" />
+        <button type="button" class="secondary" id="w-suggest">Sugerir</button>
+      </div>
+    </label>
+    <div class="form-actions">
+      <button id="w-submit">Adicionar palavra</button>
+      <div class="status" id="w-status"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-imagens">
+  <div id="list-imagens"><p class="hint">Carregando...</p></div>
+</div>
+
+<div class="panel" id="panel-audios">
+  <input type="text" id="search-audio" placeholder="Buscar palavra/frase (inglês ou português)..." />
+  <div id="list-audios"><p class="hint">Digite algo pra buscar entre os itens.</p></div>
+</div>
 
 <script>
-const ITEMS = [
-  {id:"body_ear", en:"ear", pt:"orelha", emoji:"👂", type:"photo"},
-  {id:"body_hand", en:"hand", pt:"mão", emoji:"✋", type:"photo"},
-  {id:"body_foot", en:"foot", pt:"pé", emoji:"🦶", type:"photo"},
-  {id:"body_hair", en:"hair", pt:"cabelo", emoji:"💇", type:"photo"},
-  {id:"family_mom", en:"mom", pt:"mãe", emoji:"👩", type:"illustration"},
-  {id:"family_dad", en:"dad", pt:"pai", emoji:"👨", type:"illustration"},
-  {id:"family_baby", en:"baby", pt:"bebê", emoji:"👶", type:"illustration"},
-  {id:"family_sister", en:"sister", pt:"irmã", emoji:"👧", type:"illustration"},
-  {id:"clothes_pants", en:"pants", pt:"calça", emoji:"👖", type:"photo"},
-  {id:"clothes_shoes", en:"shoes", pt:"sapatos", emoji:"👟", type:"photo"},
-  {id:"clothes_socks", en:"socks", pt:"meias", emoji:"🧦", type:"photo", note:"já tem foto (pernas peludas de adulto) — pode trocar"},
-  {id:"clothes_jacket", en:"jacket", pt:"jaqueta", emoji:"🧥", type:"photo"},
-  {id:"school_ball", en:"ball", pt:"bola", emoji:"⚽", type:"photo"},
-  {id:"school_teacher", en:"teacher", pt:"professora", emoji:"🧑‍🏫", type:"illustration"},
-  {id:"school_paper", en:"paper", pt:"papel", emoji:"📄", type:"photo"},
-  {id:"school_pen", en:"pen", pt:"caneta", emoji:"🖊️", type:"photo"},
-  {id:"school_toy", en:"toy", pt:"brinquedo", emoji:"🧸", type:"photo"},
-  {id:"school_door", en:"door", pt:"porta", emoji:"🚪", type:"photo"},
-  {id:"school_window", en:"window", pt:"janela", emoji:"🪟", type:"photo"},
-];
+const CATEGORY_LABELS = {
+  survival: "Sobrevivência", colors: "Cores", numbers: "Números", shapes: "Formas",
+  animals: "Animais", food: "Comida", body: "Corpo", family: "Família",
+  clothes: "Roupas", school: "Escola", combos: "Combinações", phrases: "Frases do dia a dia",
+};
+const PHOTO_CATEGORIES = new Set(["animals", "food", "body", "clothes", "school"]);
 
-const list = document.getElementById("list");
-ITEMS.forEach(item => {
-  const row = document.createElement("div");
-  row.className = "item";
-  row.id = "row-" + item.id;
-  row.innerHTML = `
-    <div class="thumb" id="thumb-${item.id}">${item.emoji}</div>
-    <div class="label">
-      <b>${item.en}</b>
-      <span>${item.pt}${item.note ? " — " + item.note : ""}</span>
-      <span class="tag ${item.type}">${item.type === "photo" ? "foto real" : "ilustração"}</span>
-    </div>
-    <div class="controls">
-      <div class="row">
-        <input type="file" id="file-${item.id}" accept="image/*" />
-        <button data-id="${item.id}" data-mode="file">Enviar</button>
-      </div>
-      <div class="row">
-        <input type="text" id="url-${item.id}" placeholder="ou cole um link de imagem" />
-        <button data-id="${item.id}" data-mode="url">Baixar</button>
-      </div>
-      <div class="status" id="status-${item.id}"></div>
-    </div>
-  `;
-  list.appendChild(row);
+let ITEMS_CACHE = null;
+async function loadItems(force) {
+  if (ITEMS_CACHE && !force) return ITEMS_CACHE;
+  const r = await fetch("/api/items");
+  ITEMS_CACHE = await r.json();
+  return ITEMS_CACHE;
+}
+
+// ---------- tabs ----------
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    if (btn.dataset.tab === "imagens") renderImagens();
+  });
 });
 
-async function submitFile(id) {
-  const input = document.getElementById("file-" + id);
-  const statusEl = document.getElementById("status-" + id);
+// ---------- aba Palavras ----------
+const catSelect = document.getElementById("w-category");
+Object.entries(CATEGORY_LABELS).forEach(([id, label]) => {
+  const opt = document.createElement("option");
+  opt.value = id; opt.textContent = label;
+  catSelect.appendChild(opt);
+});
+
+document.getElementById("w-suggest").addEventListener("click", () => {
+  const en = document.getElementById("w-en").value.trim().toLowerCase();
+  const cat = catSelect.value;
+  const slug = en.replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  document.getElementById("w-id").value = cat && slug ? `${cat}_${slug}` : slug;
+});
+
+document.getElementById("w-submit").addEventListener("click", async () => {
+  const statusEl = document.getElementById("w-status");
+  const payload = {
+    id: document.getElementById("w-id").value.trim(),
+    en: document.getElementById("w-en").value.trim(),
+    pt: document.getElementById("w-pt").value.trim(),
+    emoji: document.getElementById("w-emoji").value.trim(),
+    category: catSelect.value,
+    contentType: document.getElementById("w-type").value,
+    difficulty: document.getElementById("w-difficulty").value,
+  };
+  statusEl.textContent = "Salvando..."; statusEl.className = "status";
+  try {
+    const r = await fetch("/api/add-word", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
+    const data = await r.json();
+    if (data.ok) {
+      statusEl.textContent = `Adicionado! (id: ${data.id}${data.audioGenerated ? ", áudio gerado ✓" : ", áudio não gerado — avise no chat"})`;
+      statusEl.className = "status ok";
+      ["w-en","w-pt","w-emoji","w-id"].forEach(id => document.getElementById(id).value = "");
+      await loadItems(true);
+    } else {
+      statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err";
+    }
+  } catch (e) {
+    statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err";
+  }
+});
+
+// ---------- aba Imagens ----------
+async function renderImagens() {
+  const container = document.getElementById("list-imagens");
+  const data = await loadItems();
+  if (!data.missingImage.length) {
+    container.innerHTML = "<p class='hint'>Nenhum item pendente de imagem no momento 🎉</p>";
+    return;
+  }
+  container.innerHTML = "";
+  data.missingImage.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "item";
+    row.id = "img-row-" + item.id;
+    const type = PHOTO_CATEGORIES.has(item.category) ? "photo" : "illustration";
+    row.innerHTML = `
+      <div class="thumb" id="img-thumb-${item.id}">📷</div>
+      <div class="label">
+        <b>${item.en}</b>
+        <span>${item.pt}</span>
+        <span class="tag ${type}">${type === "photo" ? "foto real" : "ilustração"}</span>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <input type="file" id="img-file-${item.id}" accept="image/*" />
+          <button data-id="${item.id}" data-mode="file">Enviar</button>
+        </div>
+        <div class="row">
+          <input type="text" id="img-url-${item.id}" placeholder="ou cole um link de imagem" />
+          <button data-id="${item.id}" data-mode="url">Baixar</button>
+        </div>
+        <div class="status" id="img-status-${item.id}"></div>
+      </div>`;
+    container.appendChild(row);
+  });
+}
+
+async function submitImageFile(id) {
+  const input = document.getElementById("img-file-" + id);
+  const statusEl = document.getElementById("img-status-" + id);
   if (!input.files[0]) { statusEl.textContent = "Escolha um arquivo primeiro."; statusEl.className = "status err"; return; }
   statusEl.textContent = "Enviando..."; statusEl.className = "status";
   const fd = new FormData();
@@ -102,31 +235,23 @@ async function submitFile(id) {
   fd.append("file", input.files[0]);
   try {
     const r = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await r.json();
-    handleResult(id, data);
-  } catch (e) {
-    statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err";
-  }
+    handleImageResult(id, await r.json());
+  } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
 }
-
-async function submitUrl(id) {
-  const input = document.getElementById("url-" + id);
-  const statusEl = document.getElementById("status-" + id);
+async function submitImageUrl(id) {
+  const input = document.getElementById("img-url-" + id);
+  const statusEl = document.getElementById("img-status-" + id);
   if (!input.value.trim()) { statusEl.textContent = "Cole um link primeiro."; statusEl.className = "status err"; return; }
   statusEl.textContent = "Baixando..."; statusEl.className = "status";
   try {
     const r = await fetch("/api/fetch-url", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({item_id: id, url: input.value.trim()}) });
-    const data = await r.json();
-    handleResult(id, data);
-  } catch (e) {
-    statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err";
-  }
+    handleImageResult(id, await r.json());
+  } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
 }
-
-function handleResult(id, data) {
-  const statusEl = document.getElementById("status-" + id);
-  const row = document.getElementById("row-" + id);
-  const thumb = document.getElementById("thumb-" + id);
+function handleImageResult(id, data) {
+  const statusEl = document.getElementById("img-status-" + id);
+  const row = document.getElementById("img-row-" + id);
+  const thumb = document.getElementById("img-thumb-" + id);
   if (data.ok) {
     statusEl.textContent = "Salvo! ✓"; statusEl.className = "status ok";
     row.classList.add("done");
@@ -135,14 +260,117 @@ function handleResult(id, data) {
     statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err";
   }
 }
-
-list.addEventListener("click", (e) => {
+document.getElementById("list-imagens").addEventListener("click", (e) => {
   if (e.target.tagName !== "BUTTON") return;
-  const id = e.target.dataset.id;
-  const mode = e.target.dataset.mode;
-  if (mode === "file") submitFile(id);
-  else submitUrl(id);
+  const id = e.target.dataset.id, mode = e.target.dataset.mode;
+  if (mode === "file") submitImageFile(id); else submitImageUrl(id);
 });
+
+// ---------- aba Áudios (gravar ou enviar, busca entre todos os itens) ----------
+let activeRecorder = null, activeStream = null, recordedBlob = {};
+
+function audioRowHtml(item) {
+  return `
+    <div class="item" id="aud-row-${item.id}">
+      <div class="thumb">${item.en[0].toUpperCase()}</div>
+      <div class="label"><b>${item.en}</b><span>${item.pt}</span></div>
+      <div class="controls">
+        <div class="row">
+          <button class="rec" data-id="${item.id}" data-action="rec">🎙️ Gravar</button>
+          <span id="aud-preview-${item.id}"></span>
+          <button class="secondary" data-id="${item.id}" data-action="save" style="display:none;">Salvar gravação</button>
+        </div>
+        <div class="row">
+          <input type="file" id="aud-file-${item.id}" accept="audio/*" />
+          <button data-id="${item.id}" data-action="upload">Enviar arquivo</button>
+        </div>
+        <div class="status" id="aud-status-${item.id}"></div>
+      </div>
+    </div>`;
+}
+
+function renderAudioSearch() {
+  const q = document.getElementById("search-audio").value.trim().toLowerCase();
+  const container = document.getElementById("list-audios");
+  if (!q) { container.innerHTML = "<p class='hint'>Digite algo pra buscar entre os itens.</p>"; return; }
+  loadItems().then(data => {
+    const matches = data.all.filter(it => it.en.toLowerCase().includes(q) || (it.pt || "").toLowerCase().includes(q) || it.id.includes(q)).slice(0, 25);
+    container.innerHTML = matches.length ? matches.map(audioRowHtml).join("") : "<p class='hint'>Nada encontrado.</p>";
+  });
+}
+document.getElementById("search-audio").addEventListener("input", renderAudioSearch);
+
+async function startRecording(id) {
+  try {
+    activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    document.getElementById("aud-status-" + id).textContent = "Sem acesso ao microfone: " + e.message;
+    document.getElementById("aud-status-" + id).className = "status err";
+    return;
+  }
+  const chunks = [];
+  activeRecorder = new MediaRecorder(activeStream);
+  activeRecorder.ondataavailable = (e) => chunks.push(e.data);
+  activeRecorder.onstop = () => {
+    const blob = new Blob(chunks, { type: activeRecorder.mimeType || "audio/webm" });
+    recordedBlob[id] = blob;
+    activeStream.getTracks().forEach((t) => t.stop());
+    document.getElementById("aud-preview-" + id).innerHTML = `<audio controls src="${URL.createObjectURL(blob)}"></audio>`;
+    document.querySelector(`button[data-action="save"][data-id="${id}"]`).style.display = "";
+    const recBtn = document.querySelector(`button[data-action="rec"][data-id="${id}"]`);
+    recBtn.textContent = "🎙️ Gravar de novo"; recBtn.classList.remove("active");
+  };
+  activeRecorder.start();
+  const recBtn = document.querySelector(`button[data-action="rec"][data-id="${id}"]`);
+  recBtn.textContent = "⏹️ Parar"; recBtn.classList.add("active");
+}
+function stopRecording() {
+  if (activeRecorder && activeRecorder.state !== "inactive") activeRecorder.stop();
+}
+
+async function saveRecording(id) {
+  const statusEl = document.getElementById("aud-status-" + id);
+  const blob = recordedBlob[id];
+  if (!blob) return;
+  statusEl.textContent = "Salvando..."; statusEl.className = "status";
+  const fd = new FormData();
+  fd.append("item_id", id);
+  fd.append("mime", blob.type);
+  fd.append("file", blob, `${id}.webm`);
+  try {
+    const r = await fetch("/api/audio-upload", { method: "POST", body: fd });
+    const data = await r.json();
+    if (data.ok) { statusEl.textContent = "Salvo! ✓"; statusEl.className = "status ok"; document.getElementById("aud-row-" + id).classList.add("done"); }
+    else { statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err"; }
+  } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
+}
+
+async function uploadAudioFile(id) {
+  const input = document.getElementById("aud-file-" + id);
+  const statusEl = document.getElementById("aud-status-" + id);
+  if (!input.files[0]) { statusEl.textContent = "Escolha um arquivo primeiro."; statusEl.className = "status err"; return; }
+  statusEl.textContent = "Enviando..."; statusEl.className = "status";
+  const fd = new FormData();
+  fd.append("item_id", id);
+  fd.append("file", input.files[0]);
+  try {
+    const r = await fetch("/api/audio-upload", { method: "POST", body: fd });
+    const data = await r.json();
+    if (data.ok) { statusEl.textContent = "Salvo! ✓"; statusEl.className = "status ok"; document.getElementById("aud-row-" + id).classList.add("done"); }
+    else { statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err"; }
+  } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
+}
+
+document.getElementById("list-audios").addEventListener("click", (e) => {
+  if (e.target.tagName !== "BUTTON") return;
+  const id = e.target.dataset.id, action = e.target.dataset.action;
+  if (action === "rec") {
+    if (e.target.classList.contains("active")) stopRecording(); else startRecording(id);
+  } else if (action === "save") saveRecording(id);
+  else if (action === "upload") uploadAudioFile(id);
+});
+
+loadItems();
 </script>
 </body>
 </html>

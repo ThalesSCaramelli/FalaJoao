@@ -254,6 +254,10 @@ function pickDefaultVoice() {
 
 // Voz neural pré-gravada (edge-tts, Natasha) quando o item tem id — muito mais natural que o TTS ao
 // vivo do navegador. Cai pro TTS ao vivo se não tiver id, se o arquivo não existir, ou se der erro.
+// Tenta algumas extensões em sequência: todo conteúdo gerado por TTS é .mp3 (acha de primeira,
+// sem custo), mas um áudio gravado pela família no estúdio de conteúdo (review/upload.html) vem
+// do microfone do navegador em .webm — sem isso, essas gravações nunca tocariam.
+const AUDIO_EXT_FALLBACKS = ["mp3", "webm", "ogg", "m4a", "wav"];
 let currentAudio = null;
 function speak(text, itemId) {
   if (currentAudio) {
@@ -261,14 +265,21 @@ function speak(text, itemId) {
     currentAudio = null;
   }
   if (itemId) {
-    const audio = new Audio(`assets/audio/en/${itemId}.mp3`);
-    audio.playbackRate = speechRate / 0.85; // 0.85 é o ritmo natural gravado; ajusta proporcional ao slider
-    audio.addEventListener("error", () => speakLive(text), { once: true });
-    audio.play().catch(() => speakLive(text));
-    currentAudio = audio;
+    playAudioWithFallback(`assets/audio/en/${itemId}`, 0, text);
     return;
   }
   speakLive(text);
+}
+function playAudioWithFallback(basePath, i, text) {
+  if (i >= AUDIO_EXT_FALLBACKS.length) {
+    speakLive(text);
+    return;
+  }
+  const audio = new Audio(`${basePath}.${AUDIO_EXT_FALLBACKS[i]}`);
+  audio.playbackRate = speechRate / 0.85; // 0.85 é o ritmo natural gravado; ajusta proporcional ao slider
+  audio.addEventListener("error", () => playAudioWithFallback(basePath, i + 1, text), { once: true });
+  audio.play().catch(() => playAudioWithFallback(basePath, i + 1, text));
+  currentAudio = audio;
 }
 
 function speakLive(text, lang) {

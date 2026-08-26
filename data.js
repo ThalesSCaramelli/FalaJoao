@@ -148,28 +148,28 @@ const CONTENT = [
   { id: "body_eyes", contentType: "word", image: "assets/images/body_eyes.jpg", en: "eyes", pt: "olhos", emoji: "👀", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_nose", contentType: "word", image: "assets/images/body_nose.jpg", en: "nose", pt: "nariz", emoji: "👃", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_mouth", contentType: "word", image: "assets/images/body_mouth.jpg", en: "mouth", pt: "boca", emoji: "👄", category: "body", difficulty: 1, prerequisites: [] },
-  { id: "body_ear", contentType: "word", en: "ear", pt: "orelha", emoji: "👂", category: "body", difficulty: 1, prerequisites: [] },
-  { id: "body_hand", contentType: "word", en: "hand", pt: "mão", emoji: "✋", category: "body", difficulty: 1, prerequisites: [] },
-  { id: "body_foot", contentType: "word", en: "foot", pt: "pé", emoji: "🦶", category: "body", difficulty: 1, prerequisites: [] },
-  { id: "body_hair", contentType: "word", en: "hair", pt: "cabelo", emoji: "💇", category: "body", difficulty: 1, prerequisites: [] },
+  { id: "body_ear", contentType: "word", image: "assets/images/body_ear.jpg", en: "ear", pt: "orelha", emoji: "👂", category: "body", difficulty: 1, prerequisites: [] },
+  { id: "body_hand", contentType: "word", image: "assets/images/body_hand.jpg", en: "hand", pt: "mão", emoji: "✋", category: "body", difficulty: 1, prerequisites: [] },
+  { id: "body_foot", contentType: "word", image: "assets/images/body_foot.jpg", en: "foot", pt: "pé", emoji: "🦶", category: "body", difficulty: 1, prerequisites: [] },
+  { id: "body_hair", contentType: "word", image: "assets/images/body_hair.jpg", en: "hair", pt: "cabelo", emoji: "💇", category: "body", difficulty: 1, prerequisites: [] },
   { id: "body_tooth", contentType: "word", image: "assets/images/body_tooth.jpg", en: "tooth", pt: "dente", emoji: "🦷", category: "body", difficulty: 1, prerequisites: [] },
 
   // ---- family ----
-  { id: "family_mom", contentType: "word", en: "mom", pt: "mãe", emoji: "👩", category: "family", difficulty: 1, prerequisites: [] },
-  { id: "family_dad", contentType: "word", en: "dad", pt: "pai", emoji: "👨", category: "family", difficulty: 1, prerequisites: [] },
-  { id: "family_baby", contentType: "word", en: "baby", pt: "bebê", emoji: "👶", category: "family", difficulty: 1, prerequisites: [] },
-  { id: "family_sister", contentType: "word", en: "sister", pt: "irmã", emoji: "👧", category: "family", difficulty: 1, prerequisites: [] },
+  { id: "family_mom", contentType: "word", image: "assets/images/family_mom.jpg", en: "mom", pt: "mãe", emoji: "👩", category: "family", difficulty: 1, prerequisites: [] },
+  { id: "family_dad", contentType: "word", image: "assets/images/family_dad.jpg", en: "dad", pt: "pai", emoji: "👨", category: "family", difficulty: 1, prerequisites: [] },
+  { id: "family_baby", contentType: "word", image: "assets/images/family_baby.jpg", en: "baby", pt: "bebê", emoji: "👶", category: "family", difficulty: 1, prerequisites: [] },
+  { id: "family_sister", contentType: "word", image: "assets/images/family_sister.jpg", en: "sister", pt: "irmã", emoji: "👧", category: "family", difficulty: 1, prerequisites: [] },
   { id: "family_brother", contentType: "word", image: "assets/images/family_brother.jpg", en: "brother", pt: "irmão", emoji: "👦", category: "family", difficulty: 1, prerequisites: [] },
   { id: "family_grandma", contentType: "word", image: "assets/images/family_grandma.jpg", en: "grandma", pt: "vovó", emoji: "👵", category: "family", difficulty: 1, prerequisites: [] },
   { id: "family_grandpa", contentType: "word", image: "assets/images/family_grandpa.jpg", en: "grandpa", pt: "vovô", emoji: "👴", category: "family", difficulty: 1, prerequisites: [] },
 
   // ---- clothes ----
   { id: "clothes_shirt", contentType: "word", image: "assets/images/clothes_shirt.jpg", en: "shirt", pt: "camiseta", emoji: "👕", category: "clothes", difficulty: 1, prerequisites: [] },
-  { id: "clothes_pants", contentType: "word", en: "pants", pt: "calça", emoji: "👖", category: "clothes", difficulty: 1, prerequisites: [] },
-  { id: "clothes_shoes", contentType: "word", en: "shoes", pt: "sapatos", emoji: "👟", category: "clothes", difficulty: 1, prerequisites: [] },
+  { id: "clothes_pants", contentType: "word", image: "assets/images/clothes_pants.jpg", en: "pants", pt: "calça", emoji: "👖", category: "clothes", difficulty: 1, prerequisites: [] },
+  { id: "clothes_shoes", contentType: "word", image: "assets/images/clothes_shoes.jpg", en: "shoes", pt: "sapatos", emoji: "👟", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_socks", contentType: "word", image: "assets/images/clothes_socks.jpg", en: "socks", pt: "meias", emoji: "🧦", category: "clothes", difficulty: 1, prerequisites: [] },
   { id: "clothes_hat", contentType: "word", image: "assets/images/clothes_hat.jpg", en: "hat", pt: "boné", emoji: "🧢", category: "clothes", difficulty: 1, prerequisites: [] },
-  { id: "clothes_jacket", contentType: "word", en: "jacket", pt: "jaqueta", emoji: "🧥", category: "clothes", difficulty: 1, prerequisites: [] },
+  { id: "clothes_jacket", contentType: "word", image: "assets/images/clothes_jacket.jpg", en: "jacket", pt: "jaqueta", emoji: "🧥", category: "clothes", difficulty: 1, prerequisites: [] },
 
   // ---- school ----
   { id: "school_book", contentType: "word", image: "assets/images/school_book.jpg", en: "book", pt: "livro", emoji: "📖", category: "school", difficulty: 1, prerequisites: [] },
@@ -178,7 +178,7 @@ const CONTENT = [
   { id: "school_scissors", contentType: "word", image: "assets/images/school_scissors.jpg", en: "scissors", pt: "tesoura", emoji: "✂️", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_crayon", contentType: "word", image: "assets/images/school_crayon.jpg", en: "crayon", pt: "giz de cera", emoji: "🖍️", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_chair", contentType: "word", image: "assets/images/school_chair.jpg", en: "chair", pt: "cadeira", emoji: "🪑", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_ball", contentType: "word", en: "ball", pt: "bola", emoji: "⚽", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_ball", contentType: "word", image: "assets/images/school_ball.jpg", en: "ball", pt: "bola", emoji: "⚽", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_glue", contentType: "word", image: "assets/images/school_glue.jpg", en: "glue", pt: "cola", emoji: "🧴", category: "school", difficulty: 1, prerequisites: [] },
 
   // ---- combos (combinações curtas, 2-3 palavras) ----
@@ -280,11 +280,11 @@ const CONTENT = [
   // o que já existia (bathroom/water/help/play/turn/thank you etc. não repetidos aqui).
 
   // ---- comandos da professora (school) ----
-  { id: "school_come_here", contentType: "phrase", en: "Come here", pt: "vem aqui", emoji: "📍", category: "school", difficulty: 2, prerequisites: [] },
-  { id: "school_sit_down", contentType: "phrase", en: "Sit down", pt: "senta", emoji: "⬇️", category: "school", difficulty: 2, prerequisites: [] },
-  { id: "school_stand_up", contentType: "phrase", en: "Stand up", pt: "levanta", emoji: "⬆️", category: "school", difficulty: 2, prerequisites: [] },
-  { id: "school_line_up", contentType: "phrase", en: "Line up", pt: "faz fila", emoji: "🧍‍♂️🧍‍♀️", category: "school", difficulty: 2, prerequisites: [] },
-  { id: "school_wait", contentType: "word", en: "Wait", pt: "espera", emoji: "⏳", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_come_here", contentType: "phrase", image: "assets/images/school_come_here.jpg", en: "Come here", pt: "vem aqui", emoji: "📍", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_sit_down", contentType: "phrase", image: "assets/images/school_sit_down.jpg", en: "Sit down", pt: "senta", emoji: "⬇️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_stand_up", contentType: "phrase", image: "assets/images/school_stand_up.jpg", en: "Stand up", pt: "levanta", emoji: "⬆️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_line_up", contentType: "phrase", image: "assets/images/school_line_up.jpg", en: "Line up", pt: "faz fila", emoji: "🧍‍♂️🧍‍♀️", category: "school", difficulty: 2, prerequisites: [] },
+  { id: "school_wait", contentType: "word", image: "assets/images/school_wait.jpg", en: "Wait", pt: "espera", emoji: "⏳", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_stop", contentType: "word", en: "Stop", pt: "para", emoji: "🛑", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_listen", contentType: "word", en: "Listen", pt: "escuta", emoji: "🎧", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_look", contentType: "word", en: "Look", pt: "olha", emoji: "🔍", category: "school", difficulty: 1, prerequisites: [] },
@@ -350,10 +350,10 @@ const CONTENT = [
   { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🛋️", category: "phrases", difficulty: 3, prerequisites: [] },
 
   // ---- objetos novos de sala (school) ----
-  { id: "school_teacher", contentType: "word", en: "teacher", pt: "professora", emoji: "🧑‍🏫", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_paper", contentType: "word", en: "paper", pt: "papel", emoji: "📄", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_pen", contentType: "word", en: "pen", pt: "caneta", emoji: "🖊️", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_toy", contentType: "word", en: "toy", pt: "brinquedo", emoji: "🧸", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_door", contentType: "word", en: "door", pt: "porta", emoji: "🚪", category: "school", difficulty: 1, prerequisites: [] },
-  { id: "school_window", contentType: "word", en: "window", pt: "janela", emoji: "🪟", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_teacher", contentType: "word", image: "assets/images/school_teacher.jpg", en: "teacher", pt: "professora", emoji: "🧑‍🏫", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_paper", contentType: "word", image: "assets/images/school_paper.jpg", en: "paper", pt: "papel", emoji: "📄", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_pen", contentType: "word", image: "assets/images/school_pen.jpg", en: "pen", pt: "caneta", emoji: "🖊️", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_toy", contentType: "word", image: "assets/images/school_toy.jpg", en: "toy", pt: "brinquedo", emoji: "🧸", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_door", contentType: "word", image: "assets/images/school_door.jpg", en: "door", pt: "porta", emoji: "🚪", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_window", contentType: "word", image: "assets/images/school_window.jpg", en: "window", pt: "janela", emoji: "🪟", category: "school", difficulty: 1, prerequisites: [] },
 ];
