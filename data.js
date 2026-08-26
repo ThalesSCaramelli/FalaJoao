@@ -73,6 +73,7 @@ const SCENARIOS = [
   { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
   { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
   { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
+  { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
 ];
 
 const CONTENT = [
@@ -394,4 +395,10 @@ const CONTENT = [
   { id: "seasons_cloudy", contentType: "word", en: "cloudy", pt: "nublado", emoji: "☁️", category: "seasons", difficulty: 1, prerequisites: [] },
   { id: "seasons_windy", contentType: "word", en: "windy", pt: "ventando", emoji: "💨", category: "seasons", difficulty: 1, prerequisites: [] },
   { id: "seasons_snowy", contentType: "word", en: "snowy", pt: "nevando", emoji: "🌨️", category: "seasons", difficulty: 1, prerequisites: [] },
+
+  // ---- evolução natural: palavra de clima/estação -> frase funcional de verdade (mesmo padrão
+  // documentado em CONTENT_GUIDE.md seção 8 -- difficulty mais alta + prerequisites soft) ----
+  { id: "seasons_its_sunny", contentType: "sentence", en: "It's sunny", pt: "está ensolarado", emoji: "☀️👉", category: "seasons", difficulty: 2, prerequisites: ["seasons_sunny"] },
+  { id: "seasons_its_cold", contentType: "sentence", en: "It's cold", pt: "está frio", emoji: "🥶👉", category: "seasons", difficulty: 2, prerequisites: ["seasons_winter"] },
+  { id: "seasons_i_like_summer", contentType: "sentence", en: "I like summer", pt: "eu gosto do verão", emoji: "❤️🏖️", category: "seasons", difficulty: 2, prerequisites: ["seasons_summer"] },
 ];

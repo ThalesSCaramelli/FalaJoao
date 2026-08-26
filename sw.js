@@ -1,6 +1,6 @@
 // Service Worker — cache do app shell pra funcionar offline.
 // Bump o CACHE_NAME sempre que mudar algum arquivo do shell (força atualização nos aparelhos).
-const CACHE_NAME = "meu-ingles-v23";
+const CACHE_NAME = "meu-ingles-v24";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -213,6 +213,9 @@ const AUDIO_SHELL = [
   "./assets/audio/en/school_window.mp3",
   "./assets/audio/en/seasons_autumn.mp3",
   "./assets/audio/en/seasons_cloudy.mp3",
+  "./assets/audio/en/seasons_i_like_summer.mp3",
+  "./assets/audio/en/seasons_its_cold.mp3",
+  "./assets/audio/en/seasons_its_sunny.mp3",
   "./assets/audio/en/seasons_rainy.mp3",
   "./assets/audio/en/seasons_snowy.mp3",
   "./assets/audio/en/seasons_spring.mp3",
@@ -250,6 +253,7 @@ const PT_AUDIO_SHELL = [
   "./assets/audio/pt/greetings.mp3",
   "./assets/audio/pt/help.mp3",
   "./assets/audio/pt/onboarding_greeting.mp3",
+  "./assets/audio/pt/scn_animals.mp3",
   "./assets/audio/pt/scn_bathroom.mp3",
   "./assets/audio/pt/scn_friends.mp3",
   "./assets/audio/pt/scn_goodbye.mp3",
