@@ -17,6 +17,7 @@ const CATEGORY_META = {
   school: { namePt: "Escola", icon: "🎒", color: "#FFAAA6" },
   combos: { namePt: "Combinações", icon: "🧩", color: "#C9A7EB" },
   phrases: { namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1" },
+  seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -111,6 +112,16 @@ const CONTENT = [
   { id: "numbers_eight", contentType: "word", en: "eight", pt: "oito", emoji: "8️⃣", category: "numbers", difficulty: 1, prerequisites: [] },
   { id: "numbers_nine", contentType: "word", en: "nine", pt: "nove", emoji: "9️⃣", category: "numbers", difficulty: 1, prerequisites: [] },
   { id: "numbers_ten", contentType: "word", en: "ten", pt: "dez", emoji: "🔟", category: "numbers", difficulty: 1, prerequisites: [] },
+  { id: "numbers_eleven", contentType: "word", en: "eleven", pt: "onze", emoji: "1️⃣1️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_twelve", contentType: "word", en: "twelve", pt: "doze", emoji: "1️⃣2️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_thirteen", contentType: "word", en: "thirteen", pt: "treze", emoji: "1️⃣3️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_fourteen", contentType: "word", en: "fourteen", pt: "quatorze", emoji: "1️⃣4️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_fifteen", contentType: "word", en: "fifteen", pt: "quinze", emoji: "1️⃣5️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_sixteen", contentType: "word", en: "sixteen", pt: "dezesseis", emoji: "1️⃣6️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_seventeen", contentType: "word", en: "seventeen", pt: "dezessete", emoji: "1️⃣7️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_eighteen", contentType: "word", en: "eighteen", pt: "dezoito", emoji: "1️⃣8️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_nineteen", contentType: "word", en: "nineteen", pt: "dezenove", emoji: "1️⃣9️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_twenty", contentType: "word", en: "twenty", pt: "vinte", emoji: "2️⃣0️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
 
   // ---- shapes ----
   { id: "shapes_circle", contentType: "word", en: "circle", pt: "círculo", emoji: "⭕", category: "shapes", difficulty: 1, prerequisites: [] },
@@ -372,4 +383,15 @@ const CONTENT = [
   { id: "school_toy", contentType: "word", image: "assets/images/school_toy.jpg", en: "toy", pt: "brinquedo", emoji: "🧸", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_door", contentType: "word", image: "assets/images/school_door.jpg", en: "door", pt: "porta", emoji: "🚪", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_window", contentType: "word", image: "assets/images/school_window.jpg", en: "window", pt: "janela", emoji: "🪟", category: "school", difficulty: 1, prerequisites: [] },
+
+  // ---- estações e clima ----
+  { id: "seasons_summer", contentType: "word", en: "summer", pt: "verão", emoji: "🏖️", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_winter", contentType: "word", en: "winter", pt: "inverno", emoji: "⛄", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_spring", contentType: "word", en: "spring", pt: "primavera", emoji: "🌷", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_autumn", contentType: "word", en: "autumn", pt: "outono", emoji: "🍂", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_sunny", contentType: "word", en: "sunny", pt: "ensolarado", emoji: "☀️", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_rainy", contentType: "word", en: "rainy", pt: "chuvoso", emoji: "🌧️", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_cloudy", contentType: "word", en: "cloudy", pt: "nublado", emoji: "☁️", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_windy", contentType: "word", en: "windy", pt: "ventando", emoji: "💨", category: "seasons", difficulty: 1, prerequisites: [] },
+  { id: "seasons_snowy", contentType: "word", en: "snowy", pt: "nevando", emoji: "🌨️", category: "seasons", difficulty: 1, prerequisites: [] },
 ];
