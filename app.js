@@ -817,11 +817,50 @@ function buildProgressSummary() {
   return text;
 }
 
+// Dados estruturados por trás do relatório em texto — não aparecem na tela, só vão junto do
+// compartilhamento, pra quem colar isso numa conversa com o Claude consiga pedir gráficos de
+// evolução (streak, atividade por dia, palavras dominadas por categoria) sem precisar de nenhum
+// servidor: tudo já mora no localStorage do aparelho, isso só empacota pra exportar.
+function buildStructuredReportData() {
+  const streak = loadStreak();
+  const byCategory = Object.keys(CATEGORY_META).map((catId) => {
+    const meta = CATEGORY_META[catId];
+    const items = CONTENT.filter((it) => it.category === catId);
+    return {
+      id: catId,
+      namePt: meta.namePt,
+      total: items.length,
+      introduced: items.filter((it) => getState(it.id).introduced).length,
+      mastered: items.filter((it) => getLearningStage(it.id) === "mastered").length,
+    };
+  });
+  const totals = { new: 0, learning: 0, consolidating: 0, mastered: 0 };
+  CONTENT.forEach((it) => { totals[getLearningStage(it.id)]++; });
+  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
+    .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
+    .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
+    .slice(0, 8)
+    .map((x) => ({ id: x.it.id, en: x.it.en, wrongCount: x.st.wrongCount }));
+  return {
+    exportedAt: todayStr(),
+    totalContentItems: CONTENT.length,
+    stageTotals: totals,
+    streak: { current: streak.count, lastActiveDate: streak.lastActiveDate },
+    byCategory,
+    dailyActivity: loadActivityLog(), // { "YYYY-MM-DD": { seen, correct, wrong, speech } } — até 60 dias
+    strugglingTop: struggling,
+  };
+}
+
 document.getElementById("btn-check-update").addEventListener("click", checkForUpdate);
 
 document.getElementById("btn-share-report").addEventListener("click", () => {
   const today = new Date().toLocaleDateString("pt-BR");
-  const text = `📚 Relatório do Meu Inglês — ${today}\n\n${buildProgressSummary()}`;
+  const dataBlock = JSON.stringify(buildStructuredReportData());
+  const text =
+    `📚 Relatório do Meu Inglês — ${today}\n\n${buildProgressSummary()}\n\n` +
+    `— \n📊 Cole este bloco numa conversa com o Claude pra ele gerar gráficos de evolução:\n` +
+    "```json\n" + dataBlock + "\n```";
   if (navigator.share) {
     navigator.share({ title: "Relatório - Meu Inglês", text }).catch(() => {});
   } else if (navigator.clipboard) {

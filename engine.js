@@ -53,6 +53,7 @@ function markIntroduced(id) {
     st.lastSeen = Date.now();
     learningState[id] = st;
     saveLearningState();
+    logActivity("seen");
   }
 }
 
@@ -72,6 +73,7 @@ function recordResult(id, correct) {
   st.nextDue = Date.now() + BOX_INTERVAL_DAYS[st.box] * 86400000;
   learningState[id] = st;
   saveLearningState();
+  logActivity(correct ? "correct" : "wrong");
 }
 
 // ---- Integridade do speaking (correção do bug apontado: falar qualquer coisa não pode contar como acerto) ----
@@ -87,6 +89,7 @@ function recordSpeechAttempt(id, matched) {
   learningState[id] = st;
   saveLearningState();
   if (matched) recordResult(id, true);
+  else logActivity("speech"); // inconclusive não mexe na caixa (ver PROCESS.md), mas ainda é engajamento real
 }
 
 function matchesAcceptedAnswer(item, transcript) {
@@ -252,6 +255,33 @@ function touchStreak() {
   s.lastActiveDate = today;
   localStorage.setItem(STREAK_KEY, JSON.stringify(s));
   return s;
+}
+
+// ===================== Atividade diária (engajamento — usado só pro relatório) =====================
+// Guarda contagem por dia, não por evento (leve, não precisa de nenhum servidor). É o que dá pro
+// relatório mostrar EVOLUÇÃO ao longo do tempo, não só a foto de hoje — igual a streak resolve
+// "quantos dias seguidos" mas nada mais.
+const ACTIVITY_LOG_KEY = "meuIngles_activity_v1";
+const ACTIVITY_LOG_MAX_DAYS = 60;
+function loadActivityLog() {
+  try {
+    return JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+// kind: "seen" (palavra nova introduzida) | "correct" | "wrong" | "speech" (tentativa de fala inconclusiva)
+function logActivity(kind) {
+  const log = loadActivityLog();
+  const today = todayStr();
+  const day = log[today] || { seen: 0, correct: 0, wrong: 0, speech: 0 };
+  day[kind] = (day[kind] || 0) + 1;
+  log[today] = day;
+  const days = Object.keys(log).sort();
+  while (days.length > ACTIVITY_LOG_MAX_DAYS) {
+    delete log[days.shift()];
+  }
+  localStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(log));
 }
 
 // ===================== Progresso por categoria (usado na jornada + desbloqueio do avatar) =====================

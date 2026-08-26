@@ -65,6 +65,31 @@ sobre algo já decidido sem motivo novo.
 - **Porquê**: simples — é o padrão já esperado de PWA, não precisa de nada novo (nem push
   notification, nem polling).
 
+### Relatório de progresso: continua manual (compartilhar), sem backend — mas agora com dados estruturados
+
+- **Contexto**: usuário perguntou se já crescemos a ponto de precisar de um banco de dados remoto
+  pra acompanhar o aprendizado do João. Decidiu não construir backend agora — quer continuar usando
+  o botão "Compartilhar relatório" que já existia — mas quer conseguir pedir pro Claude interpretar
+  esse relatório e gerar gráficos de evolução, e perguntou se dá pra medir engajamento.
+- **Escolha**: dois pedaços, nenhum precisa de servidor:
+  1. `engine.js`: log diário leve de atividade (`ACTIVITY_LOG_KEY`, função `logActivity(kind)`),
+     guardado por data (`{seen, correct, wrong, speech}` por dia, até 60 dias), alimentado pelos
+     pontos que já existem — `markIntroduced`, `recordResult`, `recordSpeechAttempt` (fala
+     inconclusiva também conta como engajamento, mesmo não mexendo na caixa do SRS). É o que faltava
+     pra "evolução ao longo do tempo" — antes só existia a foto do momento atual e o streak (dias
+     seguidos), sem histórico de volume por dia.
+  2. `app.js`: `buildStructuredReportData()` empacota esse log + contagens por categoria/estágio +
+     streak + itens com mais dificuldade num JSON, anexado ao texto do relatório compartilhado (o
+     texto legível continua igual, o JSON vem depois, delimitado). Quem colar o relatório inteiro
+     numa conversa com o Claude ganha os dados pra pedir gráfico sem precisar exportar nada à parte.
+- **Porquê**: o mecanismo de compartilhamento manual já resolve o caso real (relatório sob demanda,
+  quando o usuário quiser mostrar pra alguém ou analisar) — um backend real só valeria a pena se
+  precisássemos de histórico centralizado entre aparelhos ou notificação automática, que não é o
+  pedido de hoje.
+- **Consequência**: tudo continua 100% local (localStorage), nada sai do aparelho a menos que o
+  próprio usuário compartilhe. Se um dia quisermos gráfico dentro do próprio app (sem depender do
+  Claude), o dado já está no formato certo — só falta a UI.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
