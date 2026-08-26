@@ -54,6 +54,17 @@ sobre algo já decidido sem motivo novo.
   dominado — ele só aparece **depois** na prática porque tem `difficulty` mais alta, e
   `getNewCandidates` já ordena por difficulty ascendente. Ver `CONTENT_GUIDE.md` seção 8.
 
+### Atualização do app: recarrega sozinho, sem exigir fechar/abrir
+
+- **Contexto**: `sw.js` já usava `skipWaiting()`/`clients.claim()`, mas isso só faz o novo Service
+  Worker assumir o controle — não recarrega a página já aberta. Quem já tinha o app aberto ficava
+  preso na versão antiga até fechar e abrir de novo na mão (achado durante a demo pro João).
+- **Escolha**: um listener de `controllerchange` recarrega a página automaticamente, uma vez, assim
+  que o novo SW assume — silencioso, sem popup interrompendo uma rodada. Além disso, um botão em
+  Configurações (`checkForUpdate`) força checar agora, sem esperar o navegador checar sozinho.
+- **Porquê**: simples — é o padrão já esperado de PWA, não precisa de nada novo (nem push
+  notification, nem polling).
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

@@ -817,6 +817,8 @@ function buildProgressSummary() {
   return text;
 }
 
+document.getElementById("btn-check-update").addEventListener("click", checkForUpdate);
+
 document.getElementById("btn-share-report").addEventListener("click", () => {
   const today = new Date().toLocaleDateString("pt-BR");
   const text = `📚 Relatório do Meu Inglês — ${today}\n\n${buildProgressSummary()}`;
@@ -874,11 +876,42 @@ function renderSettings() {
   renderAdaptationLog();
 }
 
-// ===================== Service Worker (offline) =====================
+// ===================== Service Worker (offline + atualização) =====================
+// sw.js já usa skipWaiting()/clients.claim() (assume controle rápido), mas isso sozinho não
+// recarrega a PÁGINA já aberta — sem isso, quem já tinha o app aberto ficava preso na versão
+// antiga até fechar e abrir de novo na mão. Aqui: assim que o novo SW assume o controle, recarrega
+// a página uma vez automaticamente (silencioso — não interrompe uma rodada com um popup).
+let swRegistration = null;
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").then((reg) => { swRegistration = reg; }).catch(() => {});
   });
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloadedForUpdate) return;
+    reloadedForUpdate = true;
+    window.location.reload();
+  });
+}
+// Botão manual em Configurações — força checar agora (sem esperar o navegador checar sozinho),
+// útil antes de mostrar o app pro João sem depender de fechar/abrir.
+function checkForUpdate() {
+  const statusEl = document.getElementById("update-status");
+  if (!swRegistration) {
+    if (statusEl) statusEl.textContent = "Service worker não disponível.";
+    return;
+  }
+  if (statusEl) statusEl.textContent = "Verificando...";
+  swRegistration
+    .update()
+    .then(() => {
+      if (statusEl) statusEl.textContent = swRegistration.waiting || swRegistration.installing
+        ? "Atualização encontrada — aplicando..."
+        : "Já está na versão mais recente.";
+    })
+    .catch(() => {
+      if (statusEl) statusEl.textContent = "Não consegui verificar (sem internet?).";
+    });
 }
 
 // ===================== Boas-vindas (só na primeira abertura) =====================

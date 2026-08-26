@@ -793,6 +793,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   white-space: pre-line;
 }
 
+.update-status {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  min-height: 1.2em;
+  margin: 8px 0 0;
+}
+
 .debug-title {
   font-weight: 700;
   color: #999;

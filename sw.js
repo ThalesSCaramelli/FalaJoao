@@ -1,6 +1,6 @@
 // Service Worker — cache do app shell pra funcionar offline.
 // Bump o CACHE_NAME sempre que mudar algum arquivo do shell (força atualização nos aparelhos).
-const CACHE_NAME = "meu-ingles-v21";
+const CACHE_NAME = "meu-ingles-v22";
 const APP_SHELL = [
   "./",
   "./index.html",

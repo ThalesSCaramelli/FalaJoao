@@ -111,7 +111,11 @@
 </div>
 
 <div class="panel" id="panel-imagens">
+  <p class="hint" style="margin-top:0;"><b>Prioridade</b> — itens sem foto ainda, nas categorias onde faz mais sentido ter foto real.</p>
   <div id="list-imagens"><p class="hint">Carregando...</p></div>
+  <p class="hint" style="margin-top:24px;"><b>Buscar qualquer item</b> — pra trocar um emoji por foto em qualquer categoria, ou substituir uma foto que já existe.</p>
+  <input type="text" id="search-imagens" placeholder="Buscar palavra/frase (inglês ou português)..." />
+  <div id="list-imagens-search"></div>
 </div>
 
 <div class="panel" id="panel-audios">
@@ -190,44 +194,57 @@ document.getElementById("w-submit").addEventListener("click", async () => {
 });
 
 // ---------- aba Imagens ----------
+// prefixo (P = prioridade, S = busca) evita ids de DOM colidindo quando o mesmo item aparece
+// nas duas listas ao mesmo tempo.
+function imageRowHtml(item, prefix) {
+  const isPhoto = PHOTO_CATEGORIES.has(item.category);
+  const tagText = isPhoto ? "foto real" : "ilustração ou foto, à vontade";
+  const thumb = item.hasImage ? `<img src="/assets/images/${item.id}.jpg?t=${Date.now()}" />` : "📷";
+  return `
+    <div class="item${item.hasImage ? " done" : ""}" id="img-row-${prefix}-${item.id}">
+      <div class="thumb" id="img-thumb-${prefix}-${item.id}">${thumb}</div>
+      <div class="label">
+        <b>${item.en}</b>
+        <span>${item.pt}</span>
+        <span class="tag ${isPhoto ? "photo" : "illustration"}">${tagText}</span>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <input type="file" id="img-file-${prefix}-${item.id}" accept="image/*" />
+          <button data-id="${item.id}" data-prefix="${prefix}" data-mode="file">Enviar</button>
+        </div>
+        <div class="row">
+          <input type="text" id="img-url-${prefix}-${item.id}" placeholder="ou cole um link de imagem" />
+          <button data-id="${item.id}" data-prefix="${prefix}" data-mode="url">Baixar</button>
+        </div>
+        <div class="status" id="img-status-${prefix}-${item.id}"></div>
+      </div>`;
+}
+
 async function renderImagens() {
   const container = document.getElementById("list-imagens");
   const data = await loadItems();
   if (!data.missingImage.length) {
-    container.innerHTML = "<p class='hint'>Nenhum item pendente de imagem no momento 🎉</p>";
+    container.innerHTML = "<p class='hint'>Nenhum item prioritário pendente no momento 🎉 — use a busca abaixo pra mexer em qualquer outro.</p>";
     return;
   }
-  container.innerHTML = "";
-  data.missingImage.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "item";
-    row.id = "img-row-" + item.id;
-    const type = PHOTO_CATEGORIES.has(item.category) ? "photo" : "illustration";
-    row.innerHTML = `
-      <div class="thumb" id="img-thumb-${item.id}">📷</div>
-      <div class="label">
-        <b>${item.en}</b>
-        <span>${item.pt}</span>
-        <span class="tag ${type}">${type === "photo" ? "foto real" : "ilustração"}</span>
-      </div>
-      <div class="controls">
-        <div class="row">
-          <input type="file" id="img-file-${item.id}" accept="image/*" />
-          <button data-id="${item.id}" data-mode="file">Enviar</button>
-        </div>
-        <div class="row">
-          <input type="text" id="img-url-${item.id}" placeholder="ou cole um link de imagem" />
-          <button data-id="${item.id}" data-mode="url">Baixar</button>
-        </div>
-        <div class="status" id="img-status-${item.id}"></div>
-      </div>`;
-    container.appendChild(row);
-  });
+  container.innerHTML = data.missingImage.map(item => imageRowHtml(item, "P")).join("");
 }
 
-async function submitImageFile(id) {
-  const input = document.getElementById("img-file-" + id);
-  const statusEl = document.getElementById("img-status-" + id);
+function renderImagensSearch() {
+  const q = document.getElementById("search-imagens").value.trim().toLowerCase();
+  const container = document.getElementById("list-imagens-search");
+  if (!q) { container.innerHTML = ""; return; }
+  loadItems().then(data => {
+    const matches = data.all.filter(it => it.en.toLowerCase().includes(q) || (it.pt || "").toLowerCase().includes(q) || it.id.includes(q)).slice(0, 25);
+    container.innerHTML = matches.length ? matches.map(it => imageRowHtml(it, "S")).join("") : "<p class='hint'>Nada encontrado.</p>";
+  });
+}
+document.getElementById("search-imagens").addEventListener("input", renderImagensSearch);
+
+async function submitImageFile(id, prefix) {
+  const input = document.getElementById(`img-file-${prefix}-${id}`);
+  const statusEl = document.getElementById(`img-status-${prefix}-${id}`);
   if (!input.files[0]) { statusEl.textContent = "Escolha um arquivo primeiro."; statusEl.className = "status err"; return; }
   statusEl.textContent = "Enviando..."; statusEl.className = "status";
   const fd = new FormData();
@@ -235,23 +252,23 @@ async function submitImageFile(id) {
   fd.append("file", input.files[0]);
   try {
     const r = await fetch("/api/upload", { method: "POST", body: fd });
-    handleImageResult(id, await r.json());
+    handleImageResult(id, prefix, await r.json());
   } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
 }
-async function submitImageUrl(id) {
-  const input = document.getElementById("img-url-" + id);
-  const statusEl = document.getElementById("img-status-" + id);
+async function submitImageUrl(id, prefix) {
+  const input = document.getElementById(`img-url-${prefix}-${id}`);
+  const statusEl = document.getElementById(`img-status-${prefix}-${id}`);
   if (!input.value.trim()) { statusEl.textContent = "Cole um link primeiro."; statusEl.className = "status err"; return; }
   statusEl.textContent = "Baixando..."; statusEl.className = "status";
   try {
     const r = await fetch("/api/fetch-url", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({item_id: id, url: input.value.trim()}) });
-    handleImageResult(id, await r.json());
+    handleImageResult(id, prefix, await r.json());
   } catch (e) { statusEl.textContent = "Erro de rede: " + e.message; statusEl.className = "status err"; }
 }
-function handleImageResult(id, data) {
-  const statusEl = document.getElementById("img-status-" + id);
-  const row = document.getElementById("img-row-" + id);
-  const thumb = document.getElementById("img-thumb-" + id);
+function handleImageResult(id, prefix, data) {
+  const statusEl = document.getElementById(`img-status-${prefix}-${id}`);
+  const row = document.getElementById(`img-row-${prefix}-${id}`);
+  const thumb = document.getElementById(`img-thumb-${prefix}-${id}`);
   if (data.ok) {
     statusEl.textContent = "Salvo! ✓"; statusEl.className = "status ok";
     row.classList.add("done");
@@ -260,11 +277,13 @@ function handleImageResult(id, data) {
     statusEl.textContent = "Erro: " + data.error; statusEl.className = "status err";
   }
 }
-document.getElementById("list-imagens").addEventListener("click", (e) => {
+function imageListClickHandler(e) {
   if (e.target.tagName !== "BUTTON") return;
-  const id = e.target.dataset.id, mode = e.target.dataset.mode;
-  if (mode === "file") submitImageFile(id); else submitImageUrl(id);
-});
+  const id = e.target.dataset.id, mode = e.target.dataset.mode, prefix = e.target.dataset.prefix;
+  if (mode === "file") submitImageFile(id, prefix); else submitImageUrl(id, prefix);
+}
+document.getElementById("list-imagens-search").addEventListener("click", imageListClickHandler);
+document.getElementById("list-imagens").addEventListener("click", imageListClickHandler);
 
 // ---------- aba Áudios (gravar ou enviar, busca entre todos os itens) ----------
 let activeRecorder = null, activeStream = null, recordedBlob = {};
