@@ -435,8 +435,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 100%;
   max-width: 520px;
 }
-/* rodada de Situação empilha em vez de grade 3x1 (não são fotos, são frases) */
-.quiz-options:has(.situation-card) {
+/* Situação/Intro/Fala são um card único, não 3 fotos lado a lado — sem isso, ficam presos na
+   1ª coluna da grade de 3 colunas (achado ao vivo: intro-card ficando espremido no canto). */
+.quiz-options:has(.situation-card),
+.quiz-options:has(.intro-card),
+.quiz-options:has(.speak-round) {
   display: flex;
   flex-direction: column;
   align-items: center;
