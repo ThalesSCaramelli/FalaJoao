@@ -18,6 +18,8 @@ const CATEGORY_META = {
   combos: { namePt: "Combinações", icon: "🧩", color: "#C9A7EB" },
   phrases: { namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1" },
   seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
+  home: { namePt: "Casa", icon: "🏠", color: "#FFCF9C" },
+  toys: { namePt: "Brinquedos", icon: "🧸", color: "#B5EAD7" },
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -57,6 +59,8 @@ const SITUATIONS = [
   { id: "sharing", namePt: "Dividir e Emprestar", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
   { id: "teacher_tell", namePt: "Avisar a Professora", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
   { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
+  { id: "home", namePt: "Casa", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
+  { id: "toys", namePt: "Brinquedos", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
 ];
 
 // Cenários de "problem-posing": a professora/situação apresenta um problema em português (ele
@@ -74,6 +78,9 @@ const SCENARIOS = [
   { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
   { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
   { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
+  { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
+  { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
+  { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
 ];
 
 const CONTENT = [
@@ -380,7 +387,7 @@ const CONTENT = [
   { id: "phrase_im_cold", contentType: "sentence", en: "I'm cold", pt: "estou com frio", emoji: "🥶", category: "phrases", difficulty: 2, prerequisites: [] },
   { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: [] },
   { id: "phrase_im_tired", contentType: "sentence", en: "I'm tired", pt: "estou cansado", emoji: "😴", category: "phrases", difficulty: 2, prerequisites: [] },
-  { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🛋️", category: "phrases", difficulty: 3, prerequisites: [] },
+  { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🧘", category: "phrases", difficulty: 3, prerequisites: [] },
 
   // ---- objetos novos de sala (school) ----
   { id: "school_teacher", contentType: "word", image: "assets/images/school_teacher.jpg", en: "teacher", pt: "professora", emoji: "🧑‍🏫", category: "school", difficulty: 1, prerequisites: [] },
@@ -406,4 +413,41 @@ const CONTENT = [
   { id: "seasons_its_sunny", contentType: "sentence", en: "It's sunny", pt: "está ensolarado", emoji: "☀️👉", category: "seasons", difficulty: 2, prerequisites: ["seasons_sunny"] },
   { id: "seasons_its_cold", contentType: "sentence", en: "It's cold", pt: "está frio", emoji: "🥶👉", category: "seasons", difficulty: 2, prerequisites: ["seasons_winter"] },
   { id: "seasons_i_like_summer", contentType: "sentence", en: "I like summer", pt: "eu gosto do verão", emoji: "❤️🏖️", category: "seasons", difficulty: 2, prerequisites: ["seasons_summer"] },
+
+  // ---- objetos de casa ----
+  { id: "home_bed", contentType: "word", en: "bed", pt: "cama", emoji: "🛏️", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_sofa", contentType: "word", en: "sofa", pt: "sofá", emoji: "🛋️", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_tv", contentType: "word", en: "TV", pt: "TV", emoji: "📺", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_phone", contentType: "word", en: "phone", pt: "telefone", emoji: "📱", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_cup", contentType: "word", en: "cup", pt: "copo", emoji: "🥃", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_plate", contentType: "word", en: "plate", pt: "prato", emoji: "🥣", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_spoon", contentType: "word", en: "spoon", pt: "colher", emoji: "🥄", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_fork", contentType: "word", en: "fork", pt: "garfo", emoji: "🍴", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_lamp", contentType: "word", en: "lamp", pt: "luminária", emoji: "💡", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_key", contentType: "word", en: "key", pt: "chave", emoji: "🔑", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_clock", contentType: "word", en: "clock", pt: "relógio", emoji: "🕐", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_trash", contentType: "word", en: "trash", pt: "lixo", emoji: "🗑️", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_toothbrush", contentType: "word", en: "toothbrush", pt: "escova de dente", emoji: "🪥", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_soap", contentType: "word", en: "soap", pt: "sabonete", emoji: "🧼", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_toilet_paper", contentType: "word", en: "toilet paper", pt: "papel higiênico", emoji: "🧻", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_bathtub", contentType: "word", en: "bathtub", pt: "banheira", emoji: "🛁", category: "home", difficulty: 1, prerequisites: [] },
+  { id: "home_shower", contentType: "word", en: "shower", pt: "chuveiro", emoji: "🚿", category: "home", difficulty: 1, prerequisites: [] },
+
+  // ---- evolução natural: objeto de casa -> pedido de verdade (mesmo padrão de CONTENT_GUIDE.md
+  // seção 8) ----
+  { id: "home_can_i_watch_tv", contentType: "sentence", en: "Can I watch TV?", pt: "posso assistir TV?", emoji: "📺❓", category: "home", difficulty: 3, prerequisites: ["home_tv"] },
+
+  // ---- brinquedos (teddy bear fica de fora -- já existe school_toy genérico com o mesmo emoji) ----
+  { id: "toys_blocks", contentType: "word", en: "blocks", pt: "blocos", emoji: "🧱", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_puzzle", contentType: "word", en: "puzzle", pt: "quebra-cabeça", emoji: "🧩", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_car", contentType: "word", en: "car", pt: "carrinho", emoji: "🚗", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_train", contentType: "word", en: "train", pt: "trenzinho", emoji: "🚂", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_kite", contentType: "word", en: "kite", pt: "pipa", emoji: "🪁", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_balloon", contentType: "word", en: "balloon", pt: "balão", emoji: "🎈", category: "toys", difficulty: 1, prerequisites: [] },
+  { id: "toys_robot", contentType: "word", en: "robot", pt: "robô", emoji: "🤖", category: "toys", difficulty: 1, prerequisites: [] },
+
+  // ---- mais objetos de sala de aula ----
+  { id: "school_ruler", contentType: "word", en: "ruler", pt: "régua", emoji: "📏", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_globe", contentType: "word", en: "globe", pt: "globo", emoji: "🌍", category: "school", difficulty: 1, prerequisites: [] },
+  { id: "school_calendar", contentType: "word", en: "calendar", pt: "calendário", emoji: "📅", category: "school", difficulty: 1, prerequisites: [] },
 ];
