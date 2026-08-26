@@ -124,6 +124,11 @@ const CONTENT = [
   { id: "numbers_nineteen", contentType: "word", en: "nineteen", pt: "dezenove", emoji: "1️⃣9️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
   { id: "numbers_twenty", contentType: "word", en: "twenty", pt: "vinte", emoji: "2️⃣0️⃣", category: "numbers", difficulty: 2, prerequisites: [] },
 
+  // ---- evolução natural: número solto -> frase funcional (mesma pergunta que toda criança
+  // ouve na escola) ----
+  { id: "numbers_how_old_are_you", contentType: "phrase", en: "How old are you?", pt: "quantos anos você tem?", emoji: "🎂❓", category: "numbers", difficulty: 2, prerequisites: [] },
+  { id: "numbers_im_four", contentType: "sentence", en: "I am four", pt: "eu tenho quatro anos", emoji: "🙋4️⃣", category: "numbers", difficulty: 3, prerequisites: ["numbers_four", "numbers_how_old_are_you"] },
+
   // ---- shapes ----
   { id: "shapes_circle", contentType: "word", en: "circle", pt: "círculo", emoji: "⭕", category: "shapes", difficulty: 1, prerequisites: [] },
   { id: "shapes_square", contentType: "word", en: "square", pt: "quadrado", emoji: "⬛", category: "shapes", difficulty: 1, prerequisites: [] },
