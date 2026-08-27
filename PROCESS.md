@@ -90,6 +90,20 @@ sobre algo já decidido sem motivo novo.
   próprio usuário compartilhe. Se um dia quisermos gráfico dentro do próprio app (sem depender do
   Claude), o dado já está no formato certo — só falta a UI.
 
+### "Última vez que abriu o app" não pode ser a própria checagem
+
+- **Contexto**: usuário perguntou se dá pra saber quando o João abriu o app pela última vez.
+  `touchStreak()` já existia e marca o dia de hoje sempre que a Home renderiza — inclusive quando é
+  o próprio usuário (pai) abrindo o app só pra checar Configurações. Se a resposta lesse
+  `loadStreak()` depois desse touch, ia sempre mostrar "hoje", mesmo quando o João não abriu.
+- **Escolha**: `engine.js` tira uma foto (`streakAtLoad`) do streak assim que o script carrega, antes
+  de qualquer `touchStreak()` rodar nessa sessão. `buildProgressSummary()` (tela de Configurações) e
+  `buildStructuredReportData()` (relatório compartilhado) usam essa foto, não o valor ao vivo.
+- **Porquê**: sem isso, o próprio ato de checar corrompe a resposta — o dado vira mentiroso bem no
+  caso de uso que o motivou.
+- **Consequência**: `streakAtLoad` é a fonte certa pra "quando foi a última vez" em qualquer UI
+  futura; `loadStreak()`/`touchStreak()` continuam sendo pra lógica de streak em si (badge da Home).
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

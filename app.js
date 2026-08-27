@@ -799,7 +799,21 @@ document.getElementById("btn-reset-progress").addEventListener("click", () => {
   }
 });
 
+// "há quanto tempo" em texto — usa streakAtLoad (foto de antes desta sessão tocar o streak), não
+// loadStreak() direto, senão a resposta seria sempre "hoje" só por causa de alguém checando.
+function formatLastActive(dateStr) {
+  if (!dateStr) return "ainda não abriu o app";
+  const today = todayStr();
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (dateStr === today) return "hoje";
+  if (dateStr === yesterday) return "ontem";
+  const [y, m, d] = dateStr.split("-");
+  const days = Math.round((Date.parse(today) - Date.parse(dateStr)) / 86400000);
+  return `${d}/${m}/${y} (${days} dias atrás)`;
+}
+
 function buildProgressSummary() {
+  const lastActiveLine = `📅 Última vez que abriu: ${formatLastActive(streakAtLoad.lastActiveDate)}`;
   const lines = Object.keys(CATEGORY_META).map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
@@ -812,7 +826,7 @@ function buildProgressSummary() {
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
     .map((x) => x.it.en);
-  let text = lines.join("\n");
+  let text = lastActiveLine + "\n\n" + lines.join("\n");
   if (struggling.length) text += `\n\nCom mais dificuldade: ${struggling.join(", ")}`;
   return text;
 }
@@ -822,7 +836,7 @@ function buildProgressSummary() {
 // evolução (streak, atividade por dia, palavras dominadas por categoria) sem precisar de nenhum
 // servidor: tudo já mora no localStorage do aparelho, isso só empacota pra exportar.
 function buildStructuredReportData() {
-  const streak = loadStreak();
+  const streak = streakAtLoad;
   const byCategory = Object.keys(CATEGORY_META).map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);

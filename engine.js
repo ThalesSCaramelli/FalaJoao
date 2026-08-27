@@ -242,6 +242,11 @@ function loadStreak() {
     return { count: 0, lastActiveDate: null };
   }
 }
+// Snapshot ANTES de qualquer touchStreak() nesta sessão — é o que responde "quando foi a última
+// vez que abriu o app" de verdade. touchStreak() sempre marca o dia de hoje assim que a Home
+// renderiza, então se a gente perguntasse a mesma coisa DEPOIS do touch, a resposta seria sempre
+// "hoje" (mesmo quando é só alguém checando o relatório em Configurações, não o João praticando).
+const streakAtLoad = loadStreak();
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
