@@ -519,6 +519,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 1.6rem; height: 1.6rem; flex: 0 0 auto;
 }
 
+.situation-status {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: var(--space-2);
+}
 .situation-options {
   display: flex;
   flex-direction: column;
@@ -529,8 +535,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .situation-option {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--space-3);
   width: 100%;
+  /* sem isso herda aspect-ratio:1 de .quiz-option (pensado pro grid de 3 colunas) — cada opção
+     virava um quadrado gigante (375x375 num telão de celular) e estourava a tela, exigindo scroll
+     (achado ao vivo: João saindo clicando em tudo sem nem ver as 3 opções de uma vez). */
+  aspect-ratio: auto;
   text-align: left;
   background: var(--color-surface);
   border: 3px solid transparent;
@@ -540,6 +551,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   cursor: pointer;
   font-size: 1rem;
 }
+.situation-option.locked { opacity: 0.85; }
+.situation-option.locked .opt-emoji { opacity: 0.7; }
 .situation-option .opt-emoji { font-size: 1.6rem; flex: 0 0 auto; }
 .situation-option .opt-text { font-family: var(--font-display); font-weight: 700; }
 .situation-option.reading { border-color: var(--color-secondary); animation: option-pulse 0.6s ease infinite; }

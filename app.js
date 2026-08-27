@@ -599,15 +599,27 @@ function renderRound() {
         </div>
       </div>
       <div class="prompt-line">O que você fala? 🇬🇧</div>
+      <div class="situation-status" id="situation-status">🔊 ouvindo as opções... toque numa carta pra ouvir de novo</div>
       <div class="situation-options" id="situation-options"></div>`;
     const optionsWrap = document.getElementById("situation-options");
+    const statusEl = document.getElementById("situation-status");
+    // Trava a resposta até acabar de ler as 3 opções em voz alta — sem isso ele saía clicando em
+    // tudo antes de ouvir (achado ao vivo, LEARNING_PHILOSOPHY.md é sobre ENTENDER, não adivinhar).
+    // Enquanto travado, tocar numa carta só repete o áudio dela — não conta como resposta.
+    choiceLocked = true;
     const options = shuffle([round.item, ...scenario.distractorIds.map((id) => CONTENT_BY_ID[id])]);
     options.forEach((opt) => {
       const btn = document.createElement("button");
-      btn.className = "quiz-option situation-option";
+      btn.className = "quiz-option situation-option locked";
       btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span><span class="opt-text">${opt.en}</span>`;
       btn.dataset.itemId = opt.id;
-      btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+      btn.addEventListener("click", () => {
+        if (choiceLocked) {
+          speak(opt.en, opt.id);
+          return;
+        }
+        handleChoice(btn, opt, round.item, optionsWrap);
+      });
       optionsWrap.appendChild(btn);
     });
     document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt, scenario.id));
@@ -620,7 +632,11 @@ function renderRound() {
         speak(opt.en, opt.id);
       }, 2200 + i * 2000);
     });
-    setTimeout(() => optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading")), 2200 + options.length * 2000);
+    setTimeout(() => {
+      optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading", "locked"));
+      choiceLocked = false;
+      statusEl.textContent = "👉 toque na certa!";
+    }, 2200 + options.length * 2000);
     return;
   }
 
