@@ -104,6 +104,41 @@ sobre algo já decidido sem motivo novo.
 - **Consequência**: `streakAtLoad` é a fonte certa pra "quando foi a última vez" em qualquer UI
   futura; `loadStreak()`/`touchStreak()` continuam sendo pra lógica de streak em si (badge da Home).
 
+### Segundo perfil (André, 8 anos): lista fixa de 2, não um sistema geral de N perfis
+
+- **Contexto**: o irmão mais velho do João (8 anos, já fala/entende bastante inglês) quis algo pra
+  ajudá-lo a ler e escrever. Precisava separar o estado de aprendizagem de cada criança — até então
+  tudo (`learningState`, streak, activity, avatar, voz/velocidade) era um único blob global em
+  `localStorage`, sem noção de "de quem" era o progresso.
+- **Escolha**: `PROFILES` em engine.js é uma lista fixa de exatamente 2 (`joao`/`oral`,
+  `andre`/`literacy`) — não uma tela de "criar perfil". `profileKey(base)` sufixa toda chave
+  por-perfil (`<base>::<id>`); `meuIngles_active_profile` guarda qual está ativo. Migração automática
+  na primeira carga move as 6 chaves antigas sem sufixo pra `::joao`, preservando o progresso real
+  dele. Campo chamado `mode` (não `focus`) de propósito — deixa a porta aberta pra um perfil ter mais
+  de uma habilidade um dia, sem forçar isso agora.
+- **Ponto que exigiu mais cuidado**: não basta trocar a chave lida por `localStorage.getItem` — cada
+  variável de módulo já carregada em memória (`learningState`, `streakAtLoad`, `avatarState`,
+  `chosenVoiceURI`, `speechRate`, `adaptationLog`) precisa ser recarregada explicitamente ao trocar
+  de perfil (`reloadProfileState()`, app.js), senão a tela mostra dado do perfil errado até um F5.
+  `adaptationLog` (o único que vive em `sessionStorage`, não `localStorage` — achado só grepando os
+  dois) é só zerado em memória ao trocar, sem chave por perfil própria (é debug, não dado real).
+- **`pickRoundType` (engine.js)**: pro modo `literacy`, nunca escolhe `intro` — "não introduzido
+  nesse perfil" não é o mesmo que "desconhecido pela criança" (o André já fala inglês; mostrar a
+  tela de "palavra nova" pra ele seria condescendente). Todo item novo já entra direto como `read`
+  ou `write`; se ele acerta de cara, o SRS avança normalmente — funciona como teste de nível de
+  graça, sem precisar de um conceito de diagnóstico separado.
+- **`read`/`write` (app.js)**: quando o item tem `SCENARIO_BY_CORRECT_ID[item.id]`, usam o
+  `promptPt` do cenário como abertura comunicativa (ex. "você está com sede" → ler/escrever "Can I
+  have some water, please?") em vez de pedir a palavra isolada — mesmo princípio de problem-posing
+  que já rege o round `situation` do João, só que lendo/escrevendo em vez de ouvir/reconhecer.
+  Zero conteúdo novo em `CONTENT` pra essa leva — reaproveita os itens e cenários que já existiam.
+- **Porquê não um sistema geral de perfis**: só 2 pessoas usam o app hoje; construir criação/gestão
+  de N perfis seria complexidade sem necessidade real (mesmo princípio de "deterministic first, não
+  implementar antes de ter evidência" do `LEARNING_PHILOSOPHY.md`).
+- **Fica pra depois** (não esquecido, ver plano da sessão): progressão de leitura em mais níveis
+  (associação, compreensão narrativa) e escrita tipo "completar a frase" (`I want ___`) — exigem
+  conteúdo novo, não só motor; adaptação automática read↔write por desempenho do André.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

@@ -5,19 +5,63 @@
 
 const CONTENT_BY_ID = Object.fromEntries(CONTENT.map((it) => [it.id, it]));
 
-const LEARNING_KEY = "meuIngles_learning_v2"; // v2: substitui meuIngles_srs_v1 (schema novo, sem dado real em produção ainda — sem necessidade de migração)
+// ===================== Perfis (João + André) =====================
+// Lista fixa de propósito (só 2 pessoas usam o app hoje) — ver PROCESS.md pra decisão completa.
+// `mode` decide como o motor escolhe roundType (pickRoundType, mais abaixo): "oral" é o
+// comportamento original (intro/situation/speak/choice); "literacy" usa read/write.
+const PROFILES = [
+  { id: "joao", name: "João", emoji: "🐨", mode: "oral" },
+  { id: "andre", name: "André", emoji: "🦘", mode: "literacy" },
+];
+const ACTIVE_PROFILE_KEY = "meuIngles_active_profile";
+// As 6 chaves que existiam antes de perfis existirem — viram `<chave>::joao` na primeira carga
+// depois desse update, pra não perder o progresso real do João (ver migrateToProfiles abaixo).
+const LEGACY_KEYS = [
+  "meuIngles_learning_v2",
+  "meuIngles_streak_v1",
+  "meuIngles_activity_v1",
+  "meuIngles_avatar_v1",
+  "meuIngles_voice",
+  "meuIngles_rate",
+];
+function migrateToProfiles() {
+  if (localStorage.getItem(ACTIVE_PROFILE_KEY)) return; // já migrado
+  LEGACY_KEYS.forEach((key) => {
+    const value = localStorage.getItem(key);
+    if (value !== null) {
+      localStorage.setItem(`${key}::joao`, value);
+      localStorage.removeItem(key);
+    }
+  });
+  localStorage.setItem(ACTIVE_PROFILE_KEY, "joao");
+}
+migrateToProfiles();
+function getActiveProfileId() {
+  return localStorage.getItem(ACTIVE_PROFILE_KEY) || "joao";
+}
+function setActiveProfileId(id) {
+  localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+}
+function getActiveProfile() {
+  return PROFILES.find((p) => p.id === getActiveProfileId()) || PROFILES[0];
+}
+// Toda chave por-perfil passa por aqui — nunca usar `meuIngles_xxx` puro pra dado de aluno.
+function profileKey(base) {
+  return `${base}::${getActiveProfileId()}`;
+}
+
 const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 21];
 
 function loadLearningState() {
   try {
-    return JSON.parse(localStorage.getItem(LEARNING_KEY)) || {};
+    return JSON.parse(localStorage.getItem(profileKey("meuIngles_learning_v2"))) || {};
   } catch (e) {
     return {};
   }
 }
 let learningState = loadLearningState();
 function saveLearningState() {
-  localStorage.setItem(LEARNING_KEY, JSON.stringify(learningState));
+  localStorage.setItem(profileKey("meuIngles_learning_v2"), JSON.stringify(learningState));
 }
 
 function getState(id) {
@@ -225,6 +269,13 @@ function getScenarioForSituation(situationId) {
 
 function pickRoundType(item) {
   const st = getState(item.id);
+  if (getActiveProfile().mode === "literacy") {
+    // Nunca "intro" pro André: "não introduzido nesse perfil" != "desconhecido pela criança" — ele
+    // já fala inglês, mostrar a tela de "palavra nova" seria condescendente. Todo item novo já
+    // entra direto como leitura ou escrita (e funciona como teste de nível: se ele acerta de cara,
+    // o SRS avança normalmente, sem precisar de um conceito de diagnóstico separado).
+    return Math.random() < 0.5 ? "read" : "write";
+  }
   if (!st.introduced) return "intro";
   // já foi visto ao menos uma vez com sucesso -> às vezes vira um cenário de verdade em vez de
   // só reconhecer a imagem (problem-posing, LEARNING_PHILOSOPHY.md seção 2/5)
@@ -234,10 +285,9 @@ function pickRoundType(item) {
 }
 
 // ===================== Streak (dias seguidos de uso) =====================
-const STREAK_KEY = "meuIngles_streak_v1";
 function loadStreak() {
   try {
-    return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count: 0, lastActiveDate: null };
+    return JSON.parse(localStorage.getItem(profileKey("meuIngles_streak_v1"))) || { count: 0, lastActiveDate: null };
   } catch (e) {
     return { count: 0, lastActiveDate: null };
   }
@@ -246,7 +296,8 @@ function loadStreak() {
 // vez que abriu o app" de verdade. touchStreak() sempre marca o dia de hoje assim que a Home
 // renderiza, então se a gente perguntasse a mesma coisa DEPOIS do touch, a resposta seria sempre
 // "hoje" (mesmo quando é só alguém checando o relatório em Configurações, não o João praticando).
-const streakAtLoad = loadStreak();
+// `let`, não `const` — precisa ser recarregável ao trocar de perfil (reloadProfileState em app.js).
+let streakAtLoad = loadStreak();
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -258,7 +309,7 @@ function touchStreak() {
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   s.count = s.lastActiveDate === yesterday ? s.count + 1 : 1;
   s.lastActiveDate = today;
-  localStorage.setItem(STREAK_KEY, JSON.stringify(s));
+  localStorage.setItem(profileKey("meuIngles_streak_v1"), JSON.stringify(s));
   return s;
 }
 
@@ -266,11 +317,10 @@ function touchStreak() {
 // Guarda contagem por dia, não por evento (leve, não precisa de nenhum servidor). É o que dá pro
 // relatório mostrar EVOLUÇÃO ao longo do tempo, não só a foto de hoje — igual a streak resolve
 // "quantos dias seguidos" mas nada mais.
-const ACTIVITY_LOG_KEY = "meuIngles_activity_v1";
 const ACTIVITY_LOG_MAX_DAYS = 60;
 function loadActivityLog() {
   try {
-    return JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY)) || {};
+    return JSON.parse(localStorage.getItem(profileKey("meuIngles_activity_v1"))) || {};
   } catch (e) {
     return {};
   }
@@ -286,7 +336,7 @@ function logActivity(kind) {
   while (days.length > ACTIVITY_LOG_MAX_DAYS) {
     delete log[days.shift()];
   }
-  localStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(log));
+  localStorage.setItem(profileKey("meuIngles_activity_v1"), JSON.stringify(log));
 }
 
 // ===================== Progresso por categoria (usado na jornada + desbloqueio do avatar) =====================

@@ -77,15 +77,16 @@ function mascotSVG() {
   </svg>`;
 }
 
-let avatarState = (() => {
+function loadAvatarState() {
   try {
-    return JSON.parse(localStorage.getItem("meuIngles_avatar_v1")) || { shirt: "coral", hat: "none", backpack: "none" };
+    return JSON.parse(localStorage.getItem(profileKey("meuIngles_avatar_v1"))) || { shirt: "coral", hat: "none", backpack: "none" };
   } catch (e) {
     return { shirt: "coral", hat: "none", backpack: "none" };
   }
-})();
+}
+let avatarState = loadAvatarState();
 function saveAvatarState() {
-  localStorage.setItem("meuIngles_avatar_v1", JSON.stringify(avatarState));
+  localStorage.setItem(profileKey("meuIngles_avatar_v1"), JSON.stringify(avatarState));
 }
 
 function svgHat(item) {
@@ -225,8 +226,8 @@ document.getElementById("btn-world-banner").addEventListener("click", () => {
 
 // ===================== Voz (TTS) =====================
 let voices = [];
-let chosenVoiceURI = localStorage.getItem("meuIngles_voice") || null;
-let speechRate = parseFloat(localStorage.getItem("meuIngles_rate") || "0.85");
+let chosenVoiceURI = localStorage.getItem(profileKey("meuIngles_voice")) || null;
+let speechRate = parseFloat(localStorage.getItem(profileKey("meuIngles_rate")) || "0.85");
 
 function loadVoices() {
   voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
@@ -640,6 +641,127 @@ function renderRound() {
     return;
   }
 
+  if (round.roundType === "read") {
+    repeatBtn.style.display = "none";
+    wrongAttemptsThisRound = 0;
+    const scenario = SCENARIO_BY_CORRECT_ID[round.item.id];
+    if (scenario) {
+      // Com cenário: lê o promptPt (texto, não narrado) e escolhe a FRASE certa entre 3 — mesmo
+      // problem-posing do round "situation" do João, só que lendo em vez de ouvir.
+      container.innerHTML = `
+        <div class="situation-card">
+          <div class="scenario-emoji">${round.item.emoji}</div>
+          <div class="scenario-bubble">
+            <span class="avatar">👩‍🏫</span>
+            <span class="txt">"${scenario.promptPt}"</span>
+          </div>
+        </div>
+        <div class="prompt-line">Leia e escolha o que você fala 🇬🇧</div>
+        <div class="situation-options" id="situation-options"></div>`;
+      const optionsWrap = document.getElementById("situation-options");
+      const options = shuffle([round.item, ...scenario.distractorIds.map((id) => CONTENT_BY_ID[id])]);
+      options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-option situation-option";
+        btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span><span class="opt-text">${opt.en}</span>`;
+        btn.dataset.itemId = opt.id;
+        btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+        optionsWrap.appendChild(btn);
+      });
+      return;
+    }
+    // Sem cenário: mostra a palavra escrita (áudio só sob demanda — o desafio é ler, não ouvir) e
+    // escolhe a imagem certa entre 3.
+    container.innerHTML = `
+      <div class="read-card">
+        <span class="read-word">${round.item.en}</span>
+        <button class="word-pt-btn" id="read-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>
+        <span class="intro-hint">toque na tradução se precisar de ajuda · escolha a imagem certa</span>
+      </div>
+      <div class="read-image-options" id="read-image-options"></div>`;
+    document.getElementById("read-pt").addEventListener("click", () => speakPT(round.item.pt));
+    const optionsWrap = document.getElementById("read-image-options");
+    const distractors = getDistractors(round.item, 2);
+    const options = shuffle([round.item, ...distractors]);
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option";
+      btn.innerHTML = renderMedia(opt);
+      btn.dataset.itemId = opt.id;
+      btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+      optionsWrap.appendChild(btn);
+    });
+    return;
+  }
+
+  if (round.roundType === "write") {
+    repeatBtn.style.display = "none";
+    wrongAttemptsThisRound = 0;
+    const scenario = SCENARIO_BY_CORRECT_ID[round.item.id];
+    container.innerHTML = `
+      <div class="write-card">
+        ${
+          scenario
+            ? `<div class="scenario-emoji">${round.item.emoji}</div>
+               <div class="scenario-bubble"><span class="avatar">👩‍🏫</span><span class="txt">"${scenario.promptPt}"</span></div>`
+            : `<span class="word-emoji-big">${renderMedia(round.item)}</span>
+               <button class="word-pt-btn" id="write-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>`
+        }
+        <input type="text" id="write-input" class="write-input" inputmode="text" autocapitalize="off"
+               autocomplete="off" autocorrect="off" spellcheck="false" placeholder="escreva em inglês..." />
+        <button class="big-btn" id="write-submit">Confirmar</button>
+        <div class="write-feedback" id="write-feedback"></div>
+      </div>`;
+    if (!scenario) document.getElementById("write-pt").addEventListener("click", () => speakPT(round.item.pt));
+    const input = document.getElementById("write-input");
+    const feedback = document.getElementById("write-feedback");
+    // acceptedAnswers (data.js) são escritas sem nenhuma pontuação interna (ex. "can i have some
+    // water please", sem vírgula antes de "please") -- tira TODA pontuação, não só a do final, ou
+    // uma resposta certa com vírgula/interrogação naturais seria marcada como errada.
+    const normalize = (s) => s.toLowerCase().trim().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ").trim();
+    const target = round.item.acceptedAnswers && round.item.acceptedAnswers.length ? round.item.acceptedAnswers : [round.item.en];
+    const acceptedNormalized = target.map(normalize);
+    const checkWrite = () => {
+      if (choiceLocked) return;
+      const typed = normalize(input.value);
+      if (!typed) return;
+      if (acceptedNormalized.includes(typed)) {
+        choiceLocked = true;
+        feedback.textContent = "🌟 Isso aí!";
+        playCheer();
+        recordResult(round.item.id, wrongAttemptsThisRound === 0);
+        quizScore.correct++;
+        quizScore.total++;
+        setTimeout(() => {
+          quizIndex++;
+          renderRound();
+        }, 900);
+      } else {
+        wrongAttemptsThisRound++;
+        quizScore.total++;
+        playGentle();
+        if (wrongAttemptsThisRound >= 2) {
+          choiceLocked = true;
+          recordResult(round.item.id, false);
+          feedback.textContent = `A resposta certa era: "${round.item.en}"`;
+          speak(round.item.en, round.item.id);
+          setTimeout(() => {
+            quizIndex++;
+            renderRound();
+          }, 1800);
+        } else {
+          feedback.textContent = "Quase! Tenta de novo.";
+          input.value = "";
+        }
+      }
+    };
+    document.getElementById("write-submit").addEventListener("click", checkWrite);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") checkWrite();
+    });
+    return;
+  }
+
   // choice
   repeatBtn.style.display = "";
   wrongAttemptsThisRound = 0;
@@ -798,11 +920,11 @@ document.getElementById("btn-play-again").addEventListener("click", () => startQ
 // ===================== Configurações + progresso =====================
 document.getElementById("voice-select").addEventListener("change", (e) => {
   chosenVoiceURI = e.target.value;
-  localStorage.setItem("meuIngles_voice", chosenVoiceURI);
+  localStorage.setItem(profileKey("meuIngles_voice"), chosenVoiceURI);
 });
 document.getElementById("rate-slider").addEventListener("input", (e) => {
   speechRate = parseFloat(e.target.value);
-  localStorage.setItem("meuIngles_rate", String(speechRate));
+  localStorage.setItem(profileKey("meuIngles_rate"), String(speechRate));
 });
 document.getElementById("btn-test-voice").addEventListener("click", () => speak("Hello! This is my voice."));
 
@@ -938,7 +1060,46 @@ document.getElementById("btn-clear-log").addEventListener("click", () => {
   renderAdaptationLog();
 });
 
+// Troca de perfil: reatribui a chave ativa e recarrega TODO estado de módulo que depende de
+// perfil (não basta trocar a chave do localStorage — cada variável já carregada em memória
+// precisa ser relida, senão a tela continua mostrando dado do perfil anterior até um F5).
+// Lista auditada (grep em todo *.js por localStorage/sessionStorage): learningState, streakAtLoad,
+// avatarState, chosenVoiceURI, speechRate, adaptationLog. buildProgressSummary/
+// buildStructuredReportData/reset-progress/desbloqueio de avatar não precisam de correção própria
+// — todos leem só essas variáveis, não chaves diretamente.
+function reloadProfileState() {
+  learningState = loadLearningState();
+  streakAtLoad = loadStreak();
+  avatarState = loadAvatarState();
+  chosenVoiceURI = localStorage.getItem(profileKey("meuIngles_voice")) || null;
+  speechRate = parseFloat(localStorage.getItem(profileKey("meuIngles_rate")) || "0.85");
+  adaptationLog = [];
+  try {
+    sessionStorage.removeItem(ADAPTATION_LOG_KEY);
+  } catch (e) {}
+}
+
+function switchProfile(id) {
+  if (id === getActiveProfileId()) return;
+  setActiveProfileId(id);
+  reloadProfileState();
+  renderSettings();
+  renderHome();
+}
+
+function renderProfileSwitcher() {
+  const el = document.getElementById("profile-switcher");
+  const activeId = getActiveProfileId();
+  el.innerHTML = PROFILES.map(
+    (p) => `<button class="profile-btn${p.id === activeId ? " active" : ""}" data-profile-id="${p.id}">${p.emoji} ${p.name}</button>`
+  ).join("");
+  el.querySelectorAll(".profile-btn").forEach((btn) => {
+    btn.addEventListener("click", () => switchProfile(btn.dataset.profileId));
+  });
+}
+
 function renderSettings() {
+  renderProfileSwitcher();
   populateVoiceSelect();
   document.getElementById("rate-slider").value = speechRate;
   document.getElementById("progress-summary").textContent = buildProgressSummary();

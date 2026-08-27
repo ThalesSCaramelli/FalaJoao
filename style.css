@@ -439,7 +439,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
    1ª coluna da grade de 3 colunas (achado ao vivo: intro-card ficando espremido no canto). */
 .quiz-options:has(.situation-card),
 .quiz-options:has(.intro-card),
-.quiz-options:has(.speak-round) {
+.quiz-options:has(.speak-round),
+.quiz-options:has(.read-card),
+.quiz-options:has(.write-card) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -634,6 +636,60 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 0.9rem;
 }
 
+/* QUIZ - modo leitura (André) — mesma estrutura visual do intro-card, o texto vira o desafio em
+   vez de já vir com a palavra falada de graça (o áudio fica disponível, mas sob demanda). */
+.read-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.read-card .read-word {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-primary-dark);
+  background: var(--cap-help-soft);
+  padding: 8px 24px;
+  border-radius: var(--radius-pill);
+  max-width: 320px;
+}
+.read-image-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--space-2);
+}
+
+/* QUIZ - modo escrita (André) — teclado nativo do celular, sem componente customizado. */
+.write-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+.write-input {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  border: 3px solid var(--color-border, #ddd);
+  box-shadow: var(--shadow-btn);
+}
+.write-input:focus { outline: none; border-color: var(--color-primary); }
+.write-feedback {
+  min-height: 1.4em;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
 /* QUIZ - modo Fala comigo */
 .speak-round {
   display: flex;
@@ -798,6 +854,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 100%;
   padding: 8px;
   font-size: 1rem;
+}
+
+.profile-switcher {
+  display: flex;
+  gap: 8px;
+}
+.profile-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: var(--radius-lg);
+  border: 3px solid transparent;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-btn);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.profile-btn.active {
+  border-color: var(--color-primary);
+  background: var(--cap-communicate-soft);
 }
 
 .progress-summary {
