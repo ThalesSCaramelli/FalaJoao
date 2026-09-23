@@ -5,13 +5,18 @@
 
 const CONTENT_BY_ID = Object.fromEntries(CONTENT.map((it) => [it.id, it]));
 
-// ===================== Perfis (João + André) =====================
-// Lista fixa de propósito (só 2 pessoas usam o app hoje) — ver PROCESS.md pra decisão completa.
+// ===================== Perfis (João + André + Thales) =====================
+// Lista fixa de propósito (só 3 pessoas usam o app hoje) — ver PROCESS.md pra decisão completa.
 // `mode` decide como o motor escolhe roundType (pickRoundType, mais abaixo): "oral" é o
-// comportamento original (intro/situation/speak/choice); "literacy" usa read/write.
+// comportamento original (intro/situation/speak/choice); "literacy" usa read/write; "adult"
+// mistura tudo (intro → situation/read/write/meaning/speak), com frases longas.
+// `track` decide QUAL conteúdo o perfil enxerga (ver profileContent): "kids" é todo item sem
+// campo `track` em data.js; "adult" só os itens marcados `track: "adult"`. São trilhas separadas —
+// o João nunca vê "Would it be possible to extend the deadline?", e o adulto não vê "red"/"dog".
 const PROFILES = [
-  { id: "joao", name: "João", emoji: "🐨", mode: "oral" },
-  { id: "andre", name: "André", emoji: "🦘", mode: "literacy" },
+  { id: "joao", name: "João", emoji: "🐨", mode: "oral", track: "kids" },
+  { id: "andre", name: "André", emoji: "🦘", mode: "literacy", track: "kids" },
+  { id: "thales", name: "Thales", emoji: "🦜", mode: "adult", track: "adult" },
 ];
 const ACTIVE_PROFILE_KEY = "meuIngles_active_profile";
 // As 6 chaves que existiam antes de perfis existirem — viram `<chave>::joao` na primeira carga
@@ -48,6 +53,26 @@ function getActiveProfile() {
 // Toda chave por-perfil passa por aqui — nunca usar `meuIngles_xxx` puro pra dado de aluno.
 function profileKey(base) {
   return `${base}::${getActiveProfileId()}`;
+}
+
+// ---- Trilha de conteúdo do perfil ativo ----
+// Item sem `track` = "kids" (todo o conteúdo que já existia, sem precisar mexer nele).
+// Sempre calculado na hora (não cacheado): o perfil pode trocar sem recarregar a página.
+function itemTrack(obj) {
+  return obj.track || "kids";
+}
+function profileContent() {
+  const track = getActiveProfile().track;
+  return CONTENT.filter((it) => itemTrack(it) === track);
+}
+function profileSituations() {
+  const track = getActiveProfile().track;
+  return SITUATIONS.filter((s) => itemTrack(s) === track);
+}
+// Só as categorias que têm algum item na trilha do perfil (mantém a ordem de CATEGORY_META).
+function profileCategoryIds() {
+  const used = new Set(profileContent().map((it) => it.category));
+  return Object.keys(CATEGORY_META).filter((catId) => used.has(catId));
 }
 
 const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 21];
@@ -139,12 +164,17 @@ function recordSpeechAttempt(id, matched) {
 function matchesAcceptedAnswer(item, transcript) {
   const accepted = item.acceptedAnswers || [item.en.toLowerCase()];
   const t = transcript.toLowerCase().trim();
+  if (!t) return false;
+  // Trilha adulta: frase longa não pode bater com um pedaço solto ("i", "the deadline") — o
+  // `a.includes(t)` generoso é de propósito pras crianças (communication before perfection:
+  // "bathroom" já comunica), mas pro adulto a frase inteira é o objetivo. Exige ~70% do tamanho.
+  if (itemTrack(item) === "adult") return accepted.some((a) => t.includes(a) || (a.includes(t) && t.length >= a.length * 0.7));
   return accepted.some((a) => t.includes(a) || a.includes(t));
 }
 
 function getDueItems() {
   const now = Date.now();
-  return CONTENT.filter((it) => {
+  return profileContent().filter((it) => {
     const st = getState(it.id);
     return st.introduced && st.nextDue <= now;
   });
@@ -153,7 +183,7 @@ function getDueItems() {
 // Prioriza survival, depois por dificuldade (não existe mais "tier" como campo — isso é só uma
 // heurística de ORDEM de introdução, reaproveitando category+difficulty que já existem).
 function getNewCandidates(limit) {
-  const notIntroduced = CONTENT.filter((it) => !getState(it.id).introduced);
+  const notIntroduced = profileContent().filter((it) => !getState(it.id).introduced);
   notIntroduced.sort((a, b) => {
     const aPriority = a.category === "survival" ? 0 : 1;
     const bPriority = b.category === "survival" ? 0 : 1;
@@ -165,7 +195,7 @@ function getNewCandidates(limit) {
 
 function getDistractors(item, count) {
   const sameCategory = CONTENT.filter((it) => it.category === item.category && it.id !== item.id);
-  const pool = sameCategory.length >= count ? sameCategory : CONTENT.filter((it) => it.id !== item.id);
+  const pool = sameCategory.length >= count ? sameCategory : profileContent().filter((it) => it.id !== item.id);
   return shuffle(pool).slice(0, count);
 }
 
@@ -218,7 +248,7 @@ function buildSession() {
   let session = [...dueSlice, ...newItems].slice(0, MAX_SESSION);
 
   if (session.length === 0) {
-    const introduced = CONTENT.filter((it) => getState(it.id).introduced);
+    const introduced = profileContent().filter((it) => getState(it.id).introduced);
     session = shuffle(introduced).slice(0, 10);
   }
 
@@ -248,12 +278,14 @@ function buildSession() {
   const seen = new Set();
   const deduped = expanded.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
 
-  return shuffle(deduped).map((it) => {
-    const roundType = pickRoundType(it);
-    const round = { item: it, roundType };
-    if (roundType === "situation") round.scenario = SCENARIO_BY_CORRECT_ID[it.id];
-    return round;
-  });
+  return shuffle(deduped).map(makeRound);
+}
+
+function makeRound(it) {
+  const roundType = pickRoundType(it);
+  const round = { item: it, roundType };
+  if (roundType === "situation") round.scenario = SCENARIO_BY_CORRECT_ID[it.id];
+  return round;
 }
 
 function speechRecognitionAvailable() {
@@ -276,12 +308,29 @@ function pickRoundType(item) {
     // o SRS avança normalmente, sem precisar de um conceito de diagnóstico separado).
     return Math.random() < 0.5 ? "read" : "write";
   }
+  if (getActiveProfile().mode === "adult") return pickAdultRoundType(item, st);
   if (!st.introduced) return "intro";
   // já foi visto ao menos uma vez com sucesso -> às vezes vira um cenário de verdade em vez de
   // só reconhecer a imagem (problem-posing, LEARNING_PHILOSOPHY.md seção 2/5)
   if (st.box >= 1 && SCENARIO_BY_CORRECT_ID[item.id] && Math.random() < 0.4) return "situation";
   if (st.box >= 3 && speechRecognitionAvailable() && navigator.onLine && Math.random() < 0.3) return "speak";
   return "choice";
+}
+
+// Adulto: item novo passa pela tela de "palavra nova" (vocabulário complexo é novo de verdade, ao
+// contrário do André). Depois, varia a atividade em cima do MESMO item (repetition without
+// monotony, LEARNING_PHILOSOPHY.md seção 12): cenário (ouvir/ler + escolher), escrever a frase a
+// partir do português, entender o sentido (inglês → escolher a tradução) e, mais pra frente, falar.
+// Sem "choice" por imagem: pra "nevertheless" ou "I'd rather not commit to that yet" um emoji não
+// carrega o significado — o round de sentido ("meaning") faz esse papel.
+function pickAdultRoundType(item, st) {
+  if (!st.introduced) return "intro";
+  const options = ["meaning", "write"];
+  if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("situation", "read");
+  if (st.box >= 2 && speechRecognitionAvailable() && navigator.onLine) options.push("speak");
+  // Na caixa 0/1 (acabou de conhecer), reconhecer vem antes de produzir: tira a escrita.
+  const pool = st.box <= 1 ? options.filter((t) => t !== "write") : options;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // ===================== Streak (dias seguidos de uso) =====================

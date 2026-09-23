@@ -1022,3 +1022,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .world-avatar.walking { animation: avatar-bounce 0.35s ease infinite; }
 @keyframes avatar-bounce { 0%,100% { transform: translate(-50%,-50%) translateY(0); } 50% { transform: translate(-50%,-50%) translateY(-6px); } }
 .world-avatar svg { display: block; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.18)); }
+
+/* ===== Trilha adulta (perfil mode "adult") =====
+   Frases longas ("Would it be possible to extend the deadline until Friday?"): sem caixa alta,
+   fonte menor e quebra de linha — o tamanho gigante/UPPERCASE foi pensado pra "DOG" do João. */
+body[data-mode="adult"] .intro-card .word-en {
+  font-size: 1.35rem;
+  text-transform: none;
+  letter-spacing: 0;
+  border-radius: 18px;
+  padding: 8px 18px;
+  max-width: 340px;
+  text-align: center;
+}
+body[data-mode="adult"] .intro-card .word-emoji-big {
+  font-size: 3.5rem;
+}
+body[data-mode="adult"] .word-en {
+  text-transform: none;
+}
+body[data-mode="adult"] .read-card .read-word {
+  font-size: 1.3rem;
+  border-radius: 18px;
+}
+body[data-mode="adult"] .situation-option .opt-text {
+  text-align: left;
+}

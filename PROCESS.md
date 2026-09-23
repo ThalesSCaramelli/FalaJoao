@@ -139,6 +139,37 @@ sobre algo já decidido sem motivo novo.
   (associação, compreensão narrativa) e escrita tipo "completar a frase" (`I want ___`) — exigem
   conteúdo novo, não só motor; adaptação automática read↔write por desempenho do André.
 
+### Terceiro perfil (Thales, adulto): trilha de conteúdo separada, não "dificuldade 6+"
+
+- **Contexto**: o usuário (pai) quis uma trilha pra ele mesmo — vocabulário mais complexo e frases
+  longas, seguindo a mesma metodologia. Até aqui todo `CONTENT` era visto por todos os perfis
+  (André e João só mudavam o *tipo* de rodada, não o conteúdo).
+- **Escolha**: campo opcional `track` em `CONTENT`/`SITUATIONS` (ausente = `"kids"`, então nenhum
+  item antigo precisou mudar) e `track` no perfil. `profileContent()`/`profileSituations()`/
+  `profileCategoryIds()` (engine.js) filtram tudo que monta sessão, mapa, grade de categorias e
+  relatório. Categorias adultas têm prefixo `adult_` e ids de item também (`adult_work_deadline`).
+- **Porquê não só `difficulty` mais alta**: `getNewCandidates` ordena por difficulty — o João
+  acabaria recebendo "Would it be possible to extend the deadline?" depois de dominar o básico, e
+  o adulto teria que atravessar "red"/"dog" antes de chegar no que interessa. É outro público, não
+  o próximo degrau.
+- **Modo `adult`** (`pickAdultRoundType`): item novo passa pelo `intro` (vocabulário complexo é
+  novo de verdade, diferente do André); depois sorteia entre `meaning` (novo: frase em inglês →
+  escolher o sentido em português, distratores do mesmo contentType), `write`, e — quando o item
+  tem cenário — `situation`/`read`; `speak` a partir da caixa 2. Sem `choice` por imagem: emoji
+  não carrega o sentido de "nevertheless". Na caixa 0/1 não tem `write` (reconhecer antes de
+  produzir). Mesmos degraus 1→5 e cadeias de evolução por `prerequisites` do resto do conteúdo.
+- **Speaking do adulto**: `matchesAcceptedAnswer` exige ~70% do tamanho da frase aceita pra
+  trilha adulta (um "the deadline" solto não conta como a frase inteira); pras crianças continua
+  generoso de propósito (communication before perfection).
+- **Escrita**: `normalize` do round `write` agora também tira apóstrofo (reto e curvo) — o teclado
+  do iPhone troca `'` por `’` sozinho; vale pro André também (só fica mais tolerante).
+- **Cenários**: vários por lugar (o primeiro de cada `situationId` abre a visita no mapa); campo
+  opcional `speaker` troca o 👩‍🏫 do balão (colega, recepção da clínica, imobiliária, vizinho).
+- **Fica pra depois**: avatar não desbloqueia nada na trilha adulta (`unlockedBy` aponta pra
+  categorias infantis) — não parece fazer falta pra adulto; se fizer, é só apontar itens de
+  `AVATAR_ITEMS` pra categorias `adult_*`. Áudio neural dos 70 itens/22 cenários/6 lugares novos
+  ainda não gerado (ver checklist em `CONTENT_GUIDE.md`) — até lá cai no TTS do navegador.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

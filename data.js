@@ -20,6 +20,14 @@ const CATEGORY_META = {
   seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
   home: { namePt: "Casa", icon: "🏠", color: "#FFCF9C" },
   toys: { namePt: "Brinquedos", icon: "🧸", color: "#B5EAD7" },
+  // ---- trilha adulta (perfil Thales) — só aparecem pra perfis com track "adult" (engine.js) ----
+  adult_work: { namePt: "Trabalho", icon: "💼", color: "#9FB7E8" },
+  adult_health: { namePt: "Saúde e Médico", icon: "🩺", color: "#F2A7A7" },
+  adult_housing: { namePt: "Aluguel e Consertos", icon: "🔧", color: "#F6C98F" },
+  adult_parenting: { namePt: "Escola dos Filhos", icon: "🏫", color: "#B8DDB0" },
+  adult_social: { namePt: "Conversa e Small Talk", icon: "☕", color: "#D9B99B" },
+  adult_opinion: { namePt: "Opinião e Argumento", icon: "🗣️", color: "#C3B1E1" },
+  adult_connectors: { namePt: "Conectores", icon: "🔗", color: "#A7D8DE" },
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -61,6 +69,13 @@ const SITUATIONS = [
   { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
   { id: "home", namePt: "Casa", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
   { id: "toys", namePt: "Brinquedos", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
+  // ---- trilha adulta: mesmo mapa, outros lugares (profileSituations em engine.js filtra por track) ----
+  { id: "work", track: "adult", namePt: "Trabalho", icon: "💼", mapPos: { top: "18%", left: "22%" }, categoryId: "adult_work" },
+  { id: "doctor", track: "adult", namePt: "Médico", icon: "🩺", mapPos: { top: "18%", left: "72%" }, categoryId: "adult_health" },
+  { id: "rental", track: "adult", namePt: "Imobiliária", icon: "🔑", mapPos: { top: "45%", left: "15%" }, categoryId: "adult_housing" },
+  { id: "parent_teacher", track: "adult", namePt: "Reunião na Escola", icon: "🏫", mapPos: { top: "45%", left: "58%" }, categoryId: "adult_parenting" },
+  { id: "small_talk", track: "adult", namePt: "Papo com Vizinhos", icon: "☕", mapPos: { top: "72%", left: "28%" }, categoryId: "adult_social" },
+  { id: "discussion", track: "adult", namePt: "Discussão e Opinião", icon: "🗣️", mapPos: { top: "75%", left: "75%" }, categoryId: "adult_opinion" },
 ];
 
 // Cenários de "problem-posing": a professora/situação apresenta um problema em português (ele
@@ -81,6 +96,32 @@ const SCENARIOS = [
   { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
   { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
   { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
+
+  // ---- trilha adulta: vários cenários por lugar (o primeiro de cada situationId abre a visita no
+  // mapa; os outros entram nas rodadas situation/read/write via SCENARIO_BY_CORRECT_ID). `speaker`
+  // troca o 👩‍🏫 do balão — no trabalho quem fala é um colega, no médico a recepção, etc.
+  { id: "scn_work_deadline", situationId: "work", speaker: "🧑‍💼", promptPt: "O projeto atrasou e você precisa avisar o seu chefe que a entrega não vai sair a tempo.", correctId: "adult_work_wont_meet_deadline", distractorIds: ["adult_work_postpone_meeting", "adult_work_whats_your_availability"] },
+  { id: "scn_work_extend", situationId: "work", speaker: "🧑‍💼", promptPt: "Você precisa de mais alguns dias para terminar o relatório e quer pedir isso com educação.", correctId: "adult_work_extend_deadline", distractorIds: ["adult_work_ill_follow_up", "adult_work_clarify"] },
+  { id: "scn_work_clarify", situationId: "work", speaker: "🧑‍💼", promptPt: "Na reunião, um colega usou um termo que você não entendeu direito.", correctId: "adult_work_clarify", distractorIds: ["adult_work_whats_your_availability", "adult_work_postpone_meeting"] },
+  { id: "scn_work_postpone", situationId: "work", speaker: "🧑‍💼", promptPt: "Surgiu um imprevisto e você não vai conseguir ir à reunião de amanhã.", correctId: "adult_work_postpone_meeting", distractorIds: ["adult_work_ill_follow_up", "adult_work_whats_your_availability"] },
+  { id: "scn_health_book", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "Você liga para a clínica porque quer ser atendido por um clínico geral.", correctId: "adult_health_id_like_to_book", distractorIds: ["adult_health_repeat_prescription", "adult_health_side_effects"] },
+  { id: "scn_health_symptoms", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "O médico pergunta o que você está sentindo. Sua garganta está doendo há três dias.", correctId: "adult_health_sore_throat", distractorIds: ["adult_health_allergic", "adult_health_anything_earlier"] },
+  { id: "scn_health_earlier", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "A recepcionista oferece um horário só para daqui a duas semanas, mas você precisava antes.", correctId: "adult_health_anything_earlier", distractorIds: ["adult_health_side_effects", "adult_health_repeat_prescription"] },
+  { id: "scn_health_side_effects", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "O médico receitou um remédio novo e você quer saber se ele pode causar alguma reação.", correctId: "adult_health_side_effects", distractorIds: ["adult_health_repeat_prescription", "adult_health_anything_earlier"] },
+  { id: "scn_housing_repair", situationId: "rental", speaker: "🧑‍💼", promptPt: "O chuveiro está só com água fria desde ontem. Você liga para a imobiliária.", correctId: "adult_housing_stopped_working", distractorIds: ["adult_housing_rent_due", "adult_housing_give_notice"] },
+  { id: "scn_housing_send", situationId: "rental", speaker: "🧑‍💼", promptPt: "A imobiliária anotou o problema. Agora você quer que alguém venha consertar.", correctId: "adult_housing_send_someone", distractorIds: ["adult_housing_renew_lease", "adult_housing_get_bond_back"] },
+  { id: "scn_housing_renew", situationId: "rental", speaker: "🧑‍💼", promptPt: "O contrato está acabando e vocês querem continuar morando na casa.", correctId: "adult_housing_renew_lease", distractorIds: ["adult_housing_give_notice", "adult_housing_rent_due"] },
+  { id: "scn_housing_moving", situationId: "rental", speaker: "🧑‍💼", promptPt: "Vocês decidiram se mudar e precisam avisar a imobiliária.", correctId: "adult_housing_give_notice", distractorIds: ["adult_housing_renew_lease", "adult_housing_leaking"] },
+  { id: "scn_parent_meeting", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "Na reunião de pais, você quer saber como seu filho está indo nas primeiras semanas de aula.", correctId: "adult_parenting_settling_in", distractorIds: ["adult_parenting_absent", "adult_parenting_pick_up_early"] },
+  { id: "scn_parent_home", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "A professora contou que seu filho está com dificuldade. Você quer ajudar em casa.", correctId: "adult_parenting_support_at_home", distractorIds: ["adult_parenting_absent", "adult_parenting_pick_up_early"] },
+  { id: "scn_parent_context", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "A professora pergunta se o seu filho fala inglês em casa.", correctId: "adult_parenting_bilingual", distractorIds: ["adult_parenting_struggling", "adult_parenting_settling_in"] },
+  { id: "scn_parent_early", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "Seu filho tem médico às duas da tarde e você precisa buscá-lo antes do horário.", correctId: "adult_parenting_pick_up_early", distractorIds: ["adult_parenting_absent", "adult_parenting_settling_in"] },
+  { id: "scn_social_origin", situationId: "small_talk", speaker: "🧑", promptPt: "Um vizinho percebe o seu sotaque e pergunta de onde você é.", correctId: "adult_social_originally_from", distractorIds: ["adult_social_what_do_you_do", "adult_social_looking_forward"] },
+  { id: "scn_social_work_q", situationId: "small_talk", speaker: "🧑", promptPt: "Numa festa de aniversário, você quer puxar conversa com outro pai sobre o trabalho dele.", correctId: "adult_social_what_do_you_do", distractorIds: ["adult_social_originally_from", "adult_social_long_time"] },
+  { id: "scn_social_catch_up", situationId: "small_talk", speaker: "🧑", promptPt: "Você encontra um amigo no supermercado, mas está com pressa. Quer marcar de conversar outro dia.", correctId: "adult_social_we_should_catch_up", distractorIds: ["adult_social_looking_forward", "adult_social_what_do_you_do"] },
+  { id: "scn_opinion_disagree", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Um colega apresenta uma ideia. Você reconhece que faz sentido, mas ainda tem dúvidas.", correctId: "adult_opinion_see_your_point", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_rather_not"] },
+  { id: "scn_opinion_end", situationId: "discussion", speaker: "🧑‍💼", promptPt: "A discussão não chega a lugar nenhum e vocês querem encerrar o assunto numa boa.", correctId: "adult_opinion_agree_to_disagree", distractorIds: ["adult_opinion_fair_point", "adult_opinion_what_do_you_think"] },
+  { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
 const CONTENT = [
@@ -450,4 +491,322 @@ const CONTENT = [
   { id: "school_ruler", contentType: "word", en: "ruler", pt: "régua", emoji: "📏", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_globe", contentType: "word", en: "globe", pt: "globo", emoji: "🌍", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_calendar", contentType: "word", en: "calendar", pt: "calendário", emoji: "📅", category: "school", difficulty: 1, prerequisites: [] },
+
+  // ======================================================================================
+  // ---- TRILHA ADULTA (perfil Thales) ----
+  // `track: "adult"` tira esses itens da trilha das crianças (engine.js, profileContent). Mesma
+  // metodologia do resto: palavra (1) → chunk (2) → sentença curta (3) → sentença completa (4) →
+  // versão mais natural/complexa (5), ligadas por `prerequisites` (cadeias de evolução,
+  // CONTENT_GUIDE.md seção 8), e cada lugar do mapa abre com um cenário de problem-posing.
+  // acceptedAnswers sempre presentes nas sentenças (sem pontuação, com e sem contração).
+  // ======================================================================================
+
+  // ---- trabalho ----
+  { id: "adult_work_deadline", track: "adult", contentType: "word", en: "deadline", pt: "prazo", emoji: "⏰", category: "adult_work", difficulty: 1, prerequisites: [] },
+  { id: "adult_work_meet_the_deadline", track: "adult", contentType: "phrase", en: "meet the deadline", pt: "cumprir o prazo", emoji: "⏰✅", category: "adult_work", difficulty: 2, prerequisites: ["adult_work_deadline"] },
+  {
+    id: "adult_work_wont_meet_deadline", track: "adult", contentType: "sentence",
+    en: "I'm afraid we won't meet the deadline.", pt: "infelizmente não vamos conseguir cumprir o prazo.", emoji: "⚠️⏰",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_meet_the_deadline"],
+    acceptedAnswers: ["i'm afraid we won't meet the deadline", "i am afraid we will not meet the deadline", "i'm afraid we will not meet the deadline"],
+  },
+  {
+    id: "adult_work_extend_deadline", track: "adult", contentType: "sentence",
+    en: "Would it be possible to extend the deadline until Friday?", pt: "seria possível estender o prazo até sexta?", emoji: "📅🙏",
+    category: "adult_work", difficulty: 5, prerequisites: ["adult_work_wont_meet_deadline"],
+    acceptedAnswers: ["would it be possible to extend the deadline until friday", "would it be possible to extend the deadline to friday"],
+  },
+  { id: "adult_work_postpone", track: "adult", contentType: "word", en: "postpone", pt: "adiar", emoji: "⏸️", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_postpone_meeting", track: "adult", contentType: "sentence",
+    en: "Could we postpone the meeting to next week?", pt: "podemos adiar a reunião para a semana que vem?", emoji: "⏸️📆",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_postpone"],
+    acceptedAnswers: ["could we postpone the meeting to next week", "could we postpone the meeting until next week"],
+  },
+  { id: "adult_work_follow_up", track: "adult", contentType: "phrase", en: "follow up", pt: "dar um retorno", emoji: "🔁", category: "adult_work", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_work_ill_follow_up", track: "adult", contentType: "sentence",
+    en: "I'll follow up with an email this afternoon.", pt: "vou dar um retorno por e-mail hoje à tarde.", emoji: "📧🔁",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_follow_up"],
+    acceptedAnswers: ["i'll follow up with an email this afternoon", "i will follow up with an email this afternoon"],
+  },
+  { id: "adult_work_availability", track: "adult", contentType: "word", en: "availability", pt: "disponibilidade", emoji: "🗓️", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_whats_your_availability", track: "adult", contentType: "sentence",
+    en: "What's your availability later this week?", pt: "qual é a sua disponibilidade no fim desta semana?", emoji: "🗓️❓",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_availability"],
+    acceptedAnswers: ["what's your availability later this week", "what is your availability later this week"],
+  },
+  { id: "adult_work_workload", track: "adult", contentType: "word", en: "workload", pt: "carga de trabalho", emoji: "📚", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_overwhelmed", track: "adult", contentType: "sentence",
+    en: "I'm a bit overwhelmed with my workload at the moment.", pt: "estou um pouco sobrecarregado com o trabalho no momento.", emoji: "😵📚",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_workload"],
+    acceptedAnswers: ["i'm a bit overwhelmed with my workload at the moment", "i am a bit overwhelmed with my workload at the moment"],
+  },
+  {
+    id: "adult_work_clarify", track: "adult", contentType: "sentence",
+    en: "Could you clarify what you mean by that?", pt: "você pode esclarecer o que quer dizer com isso?", emoji: "🤔",
+    category: "adult_work", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["could you clarify what you mean by that", "could you clarify what you mean"],
+  },
+  {
+    id: "adult_work_same_page", track: "adult", contentType: "sentence",
+    en: "Let me make sure we're on the same page.", pt: "deixa eu garantir que estamos alinhados.", emoji: "🤝📄",
+    category: "adult_work", difficulty: 5, prerequisites: ["adult_work_clarify"],
+    acceptedAnswers: ["let me make sure we're on the same page", "let me make sure we are on the same page"],
+  },
+
+  // ---- saúde e médico ----
+  { id: "adult_health_appointment", track: "adult", contentType: "word", en: "appointment", pt: "consulta (horário marcado)", emoji: "📋", category: "adult_health", difficulty: 1, prerequisites: [] },
+  { id: "adult_health_book_appointment", track: "adult", contentType: "phrase", en: "book an appointment", pt: "marcar uma consulta", emoji: "📋✍️", category: "adult_health", difficulty: 2, prerequisites: ["adult_health_appointment"] },
+  {
+    id: "adult_health_id_like_to_book", track: "adult", contentType: "sentence",
+    en: "I'd like to book an appointment with a GP, please.", pt: "eu gostaria de marcar uma consulta com um clínico geral, por favor.", emoji: "☎️🩺",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_book_appointment"],
+    acceptedAnswers: ["i'd like to book an appointment with a gp please", "i would like to book an appointment with a gp please", "i'd like to book an appointment with a gp", "i would like to book an appointment with a gp"],
+  },
+  {
+    id: "adult_health_anything_earlier", track: "adult", contentType: "sentence",
+    en: "Is there anything available earlier this week?", pt: "tem algum horário disponível mais cedo nesta semana?", emoji: "⏪🗓️",
+    category: "adult_health", difficulty: 5, prerequisites: ["adult_health_id_like_to_book"],
+    acceptedAnswers: ["is there anything available earlier this week"],
+  },
+  { id: "adult_health_symptoms", track: "adult", contentType: "word", en: "symptoms", pt: "sintomas", emoji: "🤒", category: "adult_health", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_health_sore_throat", track: "adult", contentType: "sentence",
+    en: "I've had a sore throat for three days.", pt: "estou com dor de garganta há três dias.", emoji: "🤒🗣️",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_symptoms"],
+    acceptedAnswers: ["i've had a sore throat for three days", "i have had a sore throat for three days"],
+  },
+  { id: "adult_health_prescription", track: "adult", contentType: "word", en: "prescription", pt: "receita médica", emoji: "💊📝", category: "adult_health", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_health_repeat_prescription", track: "adult", contentType: "sentence",
+    en: "Could I get a repeat prescription, please?", pt: "posso pegar uma nova receita do mesmo remédio, por favor?", emoji: "💊🔁",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_prescription"],
+    acceptedAnswers: ["could i get a repeat prescription please", "could i get a repeat prescription"],
+  },
+  {
+    id: "adult_health_allergic", track: "adult", contentType: "sentence",
+    en: "I'm allergic to penicillin.", pt: "sou alérgico a penicilina.", emoji: "🚫💉",
+    category: "adult_health", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["i'm allergic to penicillin", "i am allergic to penicillin"],
+  },
+  {
+    id: "adult_health_side_effects", track: "adult", contentType: "sentence",
+    en: "Are there any side effects I should be aware of?", pt: "tem algum efeito colateral que eu deveria saber?", emoji: "💊❓",
+    category: "adult_health", difficulty: 5, prerequisites: ["adult_health_prescription"],
+    acceptedAnswers: ["are there any side effects i should be aware of", "are there any side effects"],
+  },
+
+  // ---- aluguel e consertos ----
+  { id: "adult_housing_landlord", track: "adult", contentType: "word", en: "landlord", pt: "proprietário do imóvel", emoji: "🏠🔑", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  { id: "adult_housing_lease", track: "adult", contentType: "word", en: "lease", pt: "contrato de aluguel", emoji: "📄", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  { id: "adult_housing_bond", track: "adult", contentType: "word", en: "bond", pt: "caução do aluguel", emoji: "💰", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_housing_rent_due", track: "adult", contentType: "sentence",
+    en: "When is the rent due?", pt: "quando vence o aluguel?", emoji: "📅💵",
+    category: "adult_housing", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["when is the rent due"],
+  },
+  {
+    id: "adult_housing_stopped_working", track: "adult", contentType: "sentence",
+    en: "The hot water system has stopped working.", pt: "o aquecedor de água parou de funcionar.", emoji: "🚿❄️",
+    category: "adult_housing", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["the hot water system has stopped working", "the hot water system stopped working"],
+  },
+  {
+    id: "adult_housing_send_someone", track: "adult", contentType: "sentence",
+    en: "Could you send someone to take a look at it?", pt: "você pode mandar alguém para dar uma olhada?", emoji: "🔧👷",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_stopped_working"],
+    acceptedAnswers: ["could you send someone to take a look at it", "could you send someone to have a look at it"],
+  },
+  {
+    id: "adult_housing_leaking", track: "adult", contentType: "sentence",
+    en: "There's a leak under the kitchen sink.", pt: "tem um vazamento embaixo da pia da cozinha.", emoji: "💧🚰",
+    category: "adult_housing", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["there's a leak under the kitchen sink", "there is a leak under the kitchen sink"],
+  },
+  {
+    id: "adult_housing_get_bond_back", track: "adult", contentType: "sentence",
+    en: "When will we get our bond back?", pt: "quando vamos receber a caução de volta?", emoji: "💰🔙",
+    category: "adult_housing", difficulty: 4, prerequisites: ["adult_housing_bond"],
+    acceptedAnswers: ["when will we get our bond back"],
+  },
+  {
+    id: "adult_housing_renew_lease", track: "adult", contentType: "sentence",
+    en: "We'd like to renew the lease for another twelve months.", pt: "gostaríamos de renovar o contrato por mais doze meses.", emoji: "📄🔁",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_lease"],
+    acceptedAnswers: ["we'd like to renew the lease for another twelve months", "we would like to renew the lease for another twelve months", "we'd like to renew the lease for another 12 months", "we would like to renew the lease for another 12 months"],
+  },
+  {
+    id: "adult_housing_give_notice", track: "adult", contentType: "sentence",
+    en: "I'm calling to give notice that we're moving out.", pt: "estou ligando para avisar que vamos sair do imóvel.", emoji: "📦🚚",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_landlord"],
+    acceptedAnswers: ["i'm calling to give notice that we're moving out", "i am calling to give notice that we are moving out"],
+  },
+
+  // ---- escola dos filhos ----
+  {
+    id: "adult_parenting_settling_in", track: "adult", contentType: "sentence",
+    en: "How is he settling in?", pt: "como ele está se adaptando?", emoji: "🏫🙂",
+    category: "adult_parenting", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["how is he settling in", "how's he settling in"],
+  },
+  { id: "adult_parenting_permission_slip", track: "adult", contentType: "phrase", en: "permission slip", pt: "autorização (bilhete da escola)", emoji: "📝✍️", category: "adult_parenting", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_parenting_absent", track: "adult", contentType: "sentence",
+    en: "He'll be absent tomorrow because he's unwell.", pt: "ele vai faltar amanhã porque não está bem.", emoji: "🤒🏠",
+    category: "adult_parenting", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["he'll be absent tomorrow because he's unwell", "he will be absent tomorrow because he is unwell"],
+  },
+  {
+    id: "adult_parenting_struggling", track: "adult", contentType: "sentence",
+    en: "He's been struggling to follow the instructions in class.", pt: "ele tem tido dificuldade para acompanhar as instruções na sala.", emoji: "😕📋",
+    category: "adult_parenting", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["he's been struggling to follow the instructions in class", "he has been struggling to follow the instructions in class"],
+  },
+  {
+    id: "adult_parenting_support_at_home", track: "adult", contentType: "sentence",
+    en: "Is there anything we can do at home to support his learning?", pt: "tem algo que a gente possa fazer em casa para apoiar o aprendizado dele?", emoji: "🏠📚",
+    category: "adult_parenting", difficulty: 5, prerequisites: ["adult_parenting_struggling"],
+    acceptedAnswers: ["is there anything we can do at home to support his learning"],
+  },
+  {
+    id: "adult_parenting_pick_up_early", track: "adult", contentType: "sentence",
+    en: "I need to pick him up early today because of a medical appointment.", pt: "preciso buscá-lo mais cedo hoje por causa de uma consulta médica.", emoji: "🚗🩺",
+    category: "adult_parenting", difficulty: 5, prerequisites: ["adult_health_appointment"],
+    acceptedAnswers: ["i need to pick him up early today because of a medical appointment", "i need to pick him up early today"],
+  },
+  {
+    id: "adult_parenting_bilingual", track: "adult", contentType: "sentence",
+    en: "We speak Portuguese at home, so English is still new for him.", pt: "falamos português em casa, então o inglês ainda é novo para ele.", emoji: "🇧🇷🇦🇺",
+    category: "adult_parenting", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["we speak portuguese at home so english is still new for him", "we speak portuguese at home so english is still new to him"],
+  },
+
+  // ---- conversa e small talk ----
+  {
+    id: "adult_social_hows_your_week", track: "adult", contentType: "sentence",
+    en: "How's your week been so far?", pt: "como está sendo a sua semana?", emoji: "☕🙂",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["how's your week been so far", "how has your week been so far", "how's your week been"],
+  },
+  {
+    id: "adult_social_what_do_you_do", track: "adult", contentType: "sentence",
+    en: "What do you do for a living?", pt: "você trabalha com o quê?", emoji: "💼❓",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["what do you do for a living"],
+  },
+  {
+    id: "adult_social_originally_from", track: "adult", contentType: "sentence",
+    en: "I'm originally from Brazil.", pt: "eu sou do Brasil, originalmente.", emoji: "🇧🇷",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["i'm originally from brazil", "i am originally from brazil"],
+  },
+  {
+    id: "adult_social_been_living_here", track: "adult", contentType: "sentence",
+    en: "We've been living here for about two years.", pt: "moramos aqui há mais ou menos dois anos.", emoji: "🏡⏳",
+    category: "adult_social", difficulty: 4, prerequisites: ["adult_social_originally_from"],
+    acceptedAnswers: ["we've been living here for about two years", "we have been living here for about two years", "we've been living here for about 2 years", "we have been living here for about 2 years"],
+  },
+  { id: "adult_social_catch_up", track: "adult", contentType: "phrase", en: "catch up", pt: "colocar o papo em dia", emoji: "🤝", category: "adult_social", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_social_we_should_catch_up", track: "adult", contentType: "sentence",
+    en: "We should catch up for a coffee sometime.", pt: "a gente devia marcar um café qualquer dia.", emoji: "☕🤝",
+    category: "adult_social", difficulty: 4, prerequisites: ["adult_social_catch_up"],
+    acceptedAnswers: ["we should catch up for a coffee sometime", "we should catch up for coffee sometime"],
+  },
+  {
+    id: "adult_social_long_time", track: "adult", contentType: "sentence",
+    en: "It's been ages since we last saw each other!", pt: "faz séculos que a gente não se vê!", emoji: "⌛😄",
+    category: "adult_social", difficulty: 5, prerequisites: ["adult_social_we_should_catch_up"],
+    acceptedAnswers: ["it's been ages since we last saw each other", "it has been ages since we last saw each other"],
+  },
+  {
+    id: "adult_social_looking_forward", track: "adult", contentType: "sentence",
+    en: "I'm really looking forward to the weekend.", pt: "estou muito animado para o fim de semana.", emoji: "🎉📅",
+    category: "adult_social", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["i'm really looking forward to the weekend", "i am really looking forward to the weekend"],
+  },
+
+  // ---- opinião e argumento ----
+  { id: "adult_opinion_in_my_opinion", track: "adult", contentType: "phrase", en: "in my opinion", pt: "na minha opinião", emoji: "💭", category: "adult_opinion", difficulty: 2, prerequisites: [] },
+  { id: "adult_opinion_to_be_honest", track: "adult", contentType: "phrase", en: "to be honest", pt: "pra ser sincero", emoji: "🙂", category: "adult_opinion", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_opinion_what_do_you_think", track: "adult", contentType: "sentence",
+    en: "What do you think about it?", pt: "o que você acha disso?", emoji: "🤔💬",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["what do you think about it", "what do you think"],
+  },
+  {
+    id: "adult_opinion_fair_point", track: "adult", contentType: "sentence",
+    en: "That's a fair point.", pt: "é um argumento válido.", emoji: "👍💬",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["that's a fair point", "that is a fair point"],
+  },
+  {
+    id: "adult_opinion_depends", track: "adult", contentType: "sentence",
+    en: "It depends on the circumstances.", pt: "depende das circunstâncias.", emoji: "⚖️",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["it depends on the circumstances"],
+  },
+  {
+    id: "adult_opinion_see_your_point", track: "adult", contentType: "sentence",
+    en: "I see your point, but I'm not entirely convinced.", pt: "entendo o seu ponto, mas não estou totalmente convencido.", emoji: "🤨💬",
+    category: "adult_opinion", difficulty: 5, prerequisites: ["adult_opinion_fair_point"],
+    acceptedAnswers: ["i see your point but i'm not entirely convinced", "i see your point but i am not entirely convinced"],
+  },
+  {
+    id: "adult_opinion_agree_to_disagree", track: "adult", contentType: "sentence",
+    en: "Let's agree to disagree.", pt: "vamos concordar em discordar.", emoji: "🤝🙃",
+    category: "adult_opinion", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["let's agree to disagree", "let us agree to disagree"],
+  },
+  {
+    id: "adult_opinion_rather_not", track: "adult", contentType: "sentence",
+    en: "To be honest, I'd rather not commit to that yet.", pt: "pra ser sincero, prefiro não me comprometer com isso ainda.", emoji: "✋⏳",
+    category: "adult_opinion", difficulty: 5, prerequisites: ["adult_opinion_to_be_honest"],
+    acceptedAnswers: ["to be honest i'd rather not commit to that yet", "to be honest i would rather not commit to that yet", "i'd rather not commit to that yet"],
+  },
+
+  // ---- conectores (palavra isolada → a mesma palavra fazendo trabalho numa frase de verdade) ----
+  { id: "adult_conn_however", track: "adult", contentType: "word", en: "however", pt: "no entanto", emoji: "↔️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_although", track: "adult", contentType: "word", en: "although", pt: "embora", emoji: "🌦️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_therefore", track: "adult", contentType: "word", en: "therefore", pt: "portanto", emoji: "➡️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_unless", track: "adult", contentType: "word", en: "unless", pt: "a menos que", emoji: "🚧", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_meanwhile", track: "adult", contentType: "word", en: "meanwhile", pt: "enquanto isso", emoji: "⏱️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_nevertheless", track: "adult", contentType: "word", en: "nevertheless", pt: "mesmo assim", emoji: "💪", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_whereas", track: "adult", contentType: "word", en: "whereas", pt: "ao passo que", emoji: "⚖️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_furthermore", track: "adult", contentType: "word", en: "furthermore", pt: "além disso", emoji: "➕", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_conn_although_sentence", track: "adult", contentType: "sentence",
+    en: "Although it was raining, we went to the beach.", pt: "embora estivesse chovendo, fomos à praia.", emoji: "🌧️🏖️",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_although"],
+    acceptedAnswers: ["although it was raining we went to the beach"],
+  },
+  {
+    id: "adult_conn_unless_sentence", track: "adult", contentType: "sentence",
+    en: "I'll be there on time unless the train is late.", pt: "vou chegar na hora, a menos que o trem atrase.", emoji: "🚆⏰",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_unless"],
+    acceptedAnswers: ["i'll be there on time unless the train is late", "i will be there on time unless the train is late"],
+  },
+  {
+    id: "adult_conn_however_sentence", track: "adult", contentType: "sentence",
+    en: "The plan is good; however, it's too expensive.", pt: "o plano é bom; no entanto, é caro demais.", emoji: "📝💸",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_however"],
+    acceptedAnswers: ["the plan is good however it's too expensive", "the plan is good however it is too expensive"],
+  },
+  {
+    id: "adult_conn_therefore_sentence", track: "adult", contentType: "sentence",
+    en: "The flight was cancelled; therefore, we stayed another night.", pt: "o voo foi cancelado; portanto, ficamos mais uma noite.", emoji: "✈️🏨",
+    category: "adult_connectors", difficulty: 5, prerequisites: ["adult_conn_therefore"],
+    acceptedAnswers: ["the flight was cancelled therefore we stayed another night", "the flight was canceled therefore we stayed another night"],
+  },
+  {
+    id: "adult_conn_whereas_sentence", track: "adult", contentType: "sentence",
+    en: "I prefer working from home, whereas my colleague prefers the office.", pt: "eu prefiro trabalhar de casa, ao passo que meu colega prefere o escritório.", emoji: "🏠🏢",
+    category: "adult_connectors", difficulty: 5, prerequisites: ["adult_conn_whereas"],
+    acceptedAnswers: ["i prefer working from home whereas my colleague prefers the office"],
+  },
 ];

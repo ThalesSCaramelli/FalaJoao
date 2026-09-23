@@ -180,7 +180,7 @@ function renderWorldMap() {
   const pinsWrap = document.getElementById("world-pins");
   pinsWrap.innerHTML = "";
   renderCategoryGrid();
-  SITUATIONS.forEach((situation) => {
+  profileSituations().forEach((situation) => {
     const ratio = getSituationProgressRatio(situation);
     const pin = document.createElement("button");
     pin.className = "pin";
@@ -193,7 +193,7 @@ function renderWorldMap() {
   document.getElementById("world-avatar").innerHTML = avatarSVG(avatarState);
   const hintEl = document.querySelector("#world-map .world-hint");
   if (hintEl) {
-    const anyIntroduced = CONTENT.some((it) => getState(it.id).introduced);
+    const anyIntroduced = profileContent().some((it) => getState(it.id).introduced);
     hintEl.textContent = anyIntroduced ? "👉 Toque num lugar pra ir e jogar lá!" : "🌱 Sua aventura começa aqui — toque num lugar!";
   }
 }
@@ -207,7 +207,11 @@ function goToSituation(situation) {
   setTimeout(() => {
     avatarEl.classList.remove("walking");
     const items = getSituationItems(situation);
-    const queue = shuffle(items).slice(0, 7).map((it) => ({ item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
+    // Adulto: usa o mesmo sorteio de atividade da sessão (meaning/write/situation...) — "choice"
+    // por imagem não carrega o sentido de uma frase longa (ver pickAdultRoundType, engine.js).
+    const queue = shuffle(items)
+      .slice(0, 7)
+      .map((it) => (getActiveProfile().mode === "adult" ? makeRound(it) : { item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
     // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
     // do lugar vem depois, como prática complementar.
     const scenario = getScenarioForSituation(situation.id);
@@ -425,6 +429,8 @@ document.getElementById("btn-result-back").addEventListener("click", goToQuizRet
 
 // ===================== Home =====================
 function renderHome() {
+  // CSS por modo (ex. frase longa do adulto não pode vir em CAIXA ALTA gigante no card de intro).
+  document.body.dataset.mode = getActiveProfile().mode;
   document.getElementById("home-mascot").innerHTML = mascotSVG();
   renderAllAvatarMounts();
   renderAvatarScreen();
@@ -445,7 +451,7 @@ function renderHome() {
   document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
 
   // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
-  const nextSituations = [...SITUATIONS].sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
+  const nextSituations = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
   document.getElementById("world-banner-preview").innerHTML = nextSituations
     .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${s.namePt}</div>`)
     .join("");
@@ -456,7 +462,7 @@ function renderCategoryGrid() {
   const grid = document.getElementById("category-grid");
   if (!grid) return;
   grid.innerHTML = "";
-  Object.keys(CATEGORY_META).forEach((catId) => {
+  profileCategoryIds().forEach((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     const masteredCount = items.filter((it) => getLearningStage(it.id) === "mastered").length;
@@ -494,7 +500,7 @@ function openCategory(catId) {
 document.getElementById("btn-play-quiz").addEventListener("click", () => {
   const items = CONTENT.filter((it) => it.category === currentCategoryId);
   quizReturnScreen = "category";
-  startQuiz(shuffle(items).slice(0, 10).map((it) => ({ item: it, roundType: "choice" })));
+  startQuiz(shuffle(items).slice(0, 10).map((it) => (getActiveProfile().mode === "adult" ? makeRound(it) : { item: it, roundType: "choice" })));
 });
 
 document.getElementById("btn-session").addEventListener("click", () => {
@@ -579,7 +585,11 @@ function renderRound() {
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
         <button class="mic-btn" id="mic-btn" aria-label="Falar">${icon("mic")}</button>
         <span class="speak-status" id="speak-status">Toque no microfone e fale: "${round.item.en}"</span>
-        <span class="speak-note">É só uma brincadeira de praticar a fala — não avalia a pronúncia dele.</span>
+        <span class="speak-note">${
+          getActiveProfile().mode === "adult"
+            ? "Prática de fala — conta se a frase inteira for reconhecida; não avalia sotaque."
+            : "É só uma brincadeira de praticar a fala — não avalia a pronúncia dele."
+        }</span>
       </div>`;
     speak(round.item.en, round.item.id);
     document.getElementById("mic-btn").addEventListener("click", () => startSpeakAttempt(round.item));
@@ -594,7 +604,7 @@ function renderRound() {
       <div class="situation-card">
         <div class="scenario-emoji">${round.item.emoji}</div>
         <div class="scenario-bubble">
-          <span class="avatar">👩‍🏫</span>
+          <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
           <span class="txt">"${scenario.promptPt}"</span>
           <button class="speaker" id="scenario-replay" aria-label="Ouvir de novo">${icon("sound")}</button>
         </div>
@@ -652,7 +662,7 @@ function renderRound() {
         <div class="situation-card">
           <div class="scenario-emoji">${round.item.emoji}</div>
           <div class="scenario-bubble">
-            <span class="avatar">👩‍🏫</span>
+            <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
             <span class="txt">"${scenario.promptPt}"</span>
           </div>
         </div>
@@ -703,7 +713,7 @@ function renderRound() {
         ${
           scenario
             ? `<div class="scenario-emoji">${round.item.emoji}</div>
-               <div class="scenario-bubble"><span class="avatar">👩‍🏫</span><span class="txt">"${scenario.promptPt}"</span></div>`
+               <div class="scenario-bubble"><span class="avatar">${scenario.speaker || "👩‍🏫"}</span><span class="txt">"${scenario.promptPt}"</span></div>`
             : `<span class="word-emoji-big">${renderMedia(round.item)}</span>
                <button class="word-pt-btn" id="write-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>`
         }
@@ -718,7 +728,9 @@ function renderRound() {
     // acceptedAnswers (data.js) são escritas sem nenhuma pontuação interna (ex. "can i have some
     // water please", sem vírgula antes de "please") -- tira TODA pontuação, não só a do final, ou
     // uma resposta certa com vírgula/interrogação naturais seria marcada como errada.
-    const normalize = (s) => s.toLowerCase().trim().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ").trim();
+    // Apóstrofo também sai (reto e curvo): o teclado do iPhone troca ' por ’ sozinho, e "I’d like"
+    // digitado assim não pode ser marcado errado contra "i'd like" do acceptedAnswers.
+    const normalize = (s) => s.toLowerCase().trim().replace(/[.,!?;:'’]/g, "").replace(/\s+/g, " ").trim();
     const target = round.item.acceptedAnswers && round.item.acceptedAnswers.length ? round.item.acceptedAnswers : [round.item.en];
     const acceptedNormalized = target.map(normalize);
     const checkWrite = () => {
@@ -759,6 +771,37 @@ function renderRound() {
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") checkWrite();
     });
+    return;
+  }
+
+  if (round.roundType === "meaning") {
+    // Trilha adulta: mostra (e toca) a frase em inglês e pede o SENTIDO — escolher a tradução
+    // certa entre 3 da mesma categoria. É o "understand" antes do "produce" (write/speak):
+    // pra "It depends on the circumstances" o que importa é entender, não reconhecer um emoji.
+    repeatBtn.style.display = "";
+    wrongAttemptsThisRound = 0;
+    container.innerHTML = `
+      <div class="read-card">
+        <span class="read-word">${round.item.en}</span>
+        <span class="intro-hint">o que isso quer dizer?</span>
+      </div>
+      <div class="situation-options" id="meaning-options"></div>`;
+    const optionsWrap = document.getElementById("meaning-options");
+    // Distratores do mesmo tipo (sentença contra sentença): frase longa contra "disponibilidade"
+    // entrega a resposta pelo tamanho, sem precisar entender nada.
+    const sameType = profileContent().filter((it) => it.id !== round.item.id && it.contentType === round.item.contentType);
+    const sameTypeAndCategory = sameType.filter((it) => it.category === round.item.category);
+    const distractors = shuffle(sameTypeAndCategory.length >= 2 ? sameTypeAndCategory : sameType).slice(0, 2);
+    const options = shuffle([round.item, ...distractors]);
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option situation-option";
+      btn.innerHTML = `<span class="opt-text">${opt.pt}</span>`;
+      btn.dataset.itemId = opt.id;
+      btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+      optionsWrap.appendChild(btn);
+    });
+    speak(round.item.en, round.item.id);
     return;
   }
 
@@ -952,14 +995,14 @@ function formatLastActive(dateStr) {
 
 function buildProgressSummary() {
   const lastActiveLine = `📅 Última vez que abriu: ${formatLastActive(streakAtLoad.lastActiveDate)}`;
-  const lines = Object.keys(CATEGORY_META).map((catId) => {
+  const lines = profileCategoryIds().map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     const introduced = items.filter((it) => getState(it.id).introduced).length;
     const mastered = items.filter((it) => getLearningStage(it.id) === "mastered").length;
     return `${meta.icon} ${meta.namePt}: ${mastered}/${items.length} dominadas (${introduced} vistas)`;
   });
-  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
+  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
     .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
@@ -975,7 +1018,7 @@ function buildProgressSummary() {
 // servidor: tudo já mora no localStorage do aparelho, isso só empacota pra exportar.
 function buildStructuredReportData() {
   const streak = streakAtLoad;
-  const byCategory = Object.keys(CATEGORY_META).map((catId) => {
+  const byCategory = profileCategoryIds().map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     return {
@@ -987,15 +1030,16 @@ function buildStructuredReportData() {
     };
   });
   const totals = { new: 0, learning: 0, consolidating: 0, mastered: 0 };
-  CONTENT.forEach((it) => { totals[getLearningStage(it.id)]++; });
-  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
+  profileContent().forEach((it) => { totals[getLearningStage(it.id)]++; });
+  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
     .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
     .map((x) => ({ id: x.it.id, en: x.it.en, wrongCount: x.st.wrongCount }));
   return {
     exportedAt: todayStr(),
-    totalContentItems: CONTENT.length,
+    profile: getActiveProfile().id,
+    totalContentItems: profileContent().length,
     stageTotals: totals,
     streak: { current: streak.count, lastActiveDate: streak.lastActiveDate },
     byCategory,

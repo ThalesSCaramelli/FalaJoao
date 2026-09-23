@@ -145,6 +145,30 @@ going?" em vez de só "Hello") — **gírias mais pesadas (comida/eventos: "snag
 etc.) ficam de fora por enquanto**, só entram depois que as cadeias de evolução "natural" já
 estiverem rodando com o João por um tempo (decisão do usuário, 2026-08-26).
 
+## 8b. Trilha adulta (`track: "adult"`)
+
+Conteúdo pro perfil adulto (Thales) vive no mesmo `CONTENT`, marcado com `track: "adult"` — sem
+esse campo, o item é da trilha infantil (João/André). Os perfis nunca se misturam: ver
+`profileContent()` em `engine.js` e a decisão em `PROCESS.md`.
+
+```js
+{
+  id: "adult_health_sore_throat", track: "adult", contentType: "sentence",
+  en: "I've had a sore throat for three days.", pt: "estou com dor de garganta há três dias.", emoji: "🤒🗣️",
+  category: "adult_health", difficulty: 4, prerequisites: ["adult_health_symptoms"],
+  acceptedAnswers: ["i've had a sore throat for three days", "i have had a sore throat for three days"],
+}
+```
+
+- Categoria sempre com prefixo `adult_` (em `CATEGORY_META`); id de item também começa com `adult_`.
+- Situação nova da trilha adulta leva `track: "adult"` em `SITUATIONS`. Cenários (`SCENARIOS`) não
+  precisam do campo — seguem o item de `correctId`; distratores têm que ser da mesma trilha.
+  `speaker` (opcional) troca o 👩‍🏫 do balão.
+- Toda `sentence` adulta tem `acceptedAnswers` (minúsculas, sem pontuação), com a versão
+  contraída e a por extenso (`i'm`/`i am`) — o `write` e o `speak` comparam contra essa lista.
+- Mesma escala de `difficulty` e mesmas cadeias de evolução (seção 8): palavra (1) → chunk (2) →
+  sentença curta (3) → sentença completa (4) → versão mais natural/complexa (5).
+
 ## 9. Checklist antes de publicar conteúdo novo
 
 - [ ] Item(ns) adicionados em `CONTENT` com id estável e único
