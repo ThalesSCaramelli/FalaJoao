@@ -337,6 +337,12 @@ function pickRoundType(item) {
 function pickLiteracyRoundType(item) {
   const options = itemTrack(item) === "spelling" ? ["dictation", "dictation", "read"] : ["dictation", "read"];
   if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("write");
+  // Minigames também aparecem na sessão normal (repetition without monotony), pra palavras de
+  // ortografia que ele já viu ao menos uma vez — palavra nova entra por ditado/leitura.
+  if (isGameWord(item) && getState(item.id).introduced) {
+    const games = isSoundBasedWord(item) ? ["build", "pick_spelling", "missing_sound"] : ["pick_spelling"];
+    options.push(games[Math.floor(Math.random() * games.length)]);
+  }
   return options[Math.floor(Math.random() * options.length)];
 }
 
@@ -642,4 +648,145 @@ function dictionaryExample(entry, excludeId) {
     (it) => itemTrack(it) === "adult" && it.contentType === "sentence" && findDictionaryTerms(it.en).some((f) => f.entry === entry)
   );
   return withTerm.find((it) => it.id !== excludeId) || withTerm[0] || null;
+}
+
+// ===================== Minigames do André (ortografia por som) =====================
+// Três jogos (app.js): "build" (montar a palavra com blocos de SOM), "pick_spelling" (escolher a
+// grafia certa entre 3) e "missing_sound" (completar o pedaço que falta). Tudo em cima da mesma
+// ideia de phonics do feedback de escrita: a palavra é uma sequência de grafemas (letras que
+// fazem UM som: "sch-oo-l" não, "s-ch-oo-l" sim), e o erro típico é trocar um grafema por outro
+// que soa igual ("oo" → "u", "ch" → "k"). Os distratores são justamente essas trocas.
+
+// Grafemas de mais de uma letra, do mais longo pro mais curto (busca gulosa).
+const GRAPHEMES = ["igh", "tch", "dge", "ck", "ng", "nk", "sh", "ch", "th", "ph", "wh", "qu", "kn", "wr", "oo", "ee", "ea", "ai", "ay", "oa", "ow", "ou", "oi", "oy", "ar", "or", "er", "ir", "ur", "aw", "au", "ew", "ll", "ss", "ff", "zz"];
+function segmentGraphemes(word) {
+  const w = word.toLowerCase();
+  const out = [];
+  let i = 0;
+  while (i < w.length) {
+    const g = GRAPHEMES.find((x) => w.startsWith(x, i));
+    if (g) {
+      out.push(g);
+      i += g.length;
+    } else {
+      out.push(w[i]);
+      i++;
+    }
+  }
+  return out;
+}
+// Grafias que soam igual (ou quase) — o que ele confunde. Fonte dos distratores dos três jogos.
+const GRAPHEME_ALTERNATES = {
+  oo: ["u", "ew", "o"], ch: ["k", "c", "sh"], ee: ["ea", "e"], ea: ["ee", "e"], ai: ["ay", "a"], ay: ["ai", "a"],
+  ck: ["k", "c"], igh: ["i", "y"], ow: ["o", "oa"], oa: ["ow", "o"], ou: ["ow", "o"], oi: ["oy"], oy: ["oi"],
+  ar: ["a", "er"], or: ["aw", "a"], er: ["ir", "ur"], ir: ["er", "ur"], ur: ["er", "ir"], aw: ["or", "au"], au: ["aw", "or"],
+  sh: ["s", "ch"], th: ["f", "t"], ng: ["n", "nk"], nk: ["ng", "n"], ph: ["f"], wh: ["w"], kn: ["n"], wr: ["r"],
+  ll: ["l"], ss: ["s"], ff: ["f"], k: ["c", "ck"], c: ["k", "s"], s: ["z", "c"], f: ["ph"], e: ["ee", "a"], i: ["e", "y"],
+  a: ["u", "e"], u: ["oo", "o"], o: ["oa", "u"], y: ["i", "ee"], w: ["wh"], n: ["kn"], r: ["wr"], j: ["g"], g: ["j"],
+};
+function alternatesFor(g) {
+  return (GRAPHEME_ALTERNATES[g] || []).filter((x) => x !== g);
+}
+
+// Padrões (PHONICS_PATTERNS) em que o perfil mais erra — os jogos puxam palavras com eles.
+function topSpellingPatternIds(limit) {
+  const log = loadSpellingLog();
+  return Object.keys(log)
+    .filter((k) => k !== "other" && k !== "tricky")
+    .sort((a, b) => log[b].count - log[a].count)
+    .slice(0, limit);
+}
+function wordHasPattern(word, patternId) {
+  const p = PHONICS_PATTERNS.find((x) => x.id === patternId);
+  if (!p) return false;
+  p.re.lastIndex = 0;
+  const hit = p.re.test(normalizeAnswer(word));
+  p.re.lastIndex = 0;
+  return hit;
+}
+
+// Palavras pros jogos: só palavras isoladas da trilha de ortografia (frase não cabe em blocos de
+// som). Ordem: as que ele mais erra / estão vencidas, depois as que têm os padrões em que ele
+// mais erra, depois o resto — sempre um pouco embaralhado pra não repetir a mesma sequência.
+// `soundBased`: só palavras que seguem regra de som (blocos e pedaço faltando não fazem sentido
+// pra tricky words — "laugh" não se divide em sons; elas entram só no "pick_spelling").
+function isGameWord(it) {
+  return itemTrack(it) === "spelling" && it.contentType === "word" && !/\s/.test(it.en);
+}
+function isSoundBasedWord(it) {
+  return isGameWord(it) && !it.spellingTip && it.en === it.en.toLowerCase();
+}
+function selectGameItems(n, soundBased) {
+  const words = profileContent().filter(soundBased ? isSoundBasedWord : isGameWord);
+  const weak = topSpellingPatternIds(3);
+  const now = Date.now();
+  const score = (it) => {
+    const st = getState(it.id);
+    let sc = Math.random();
+    if (st.introduced && st.box <= 1 && (st.wrongCount || 0) > 0) sc += 4;
+    if (st.introduced && st.nextDue <= now) sc += 2;
+    if (weak.some((pid) => wordHasPattern(it.en, pid))) sc += 2;
+    if (!st.introduced) sc += 0.5;
+    return sc;
+  };
+  return words
+    .map((it) => ({ it, sc: score(it) }))
+    .sort((a, b) => b.sc - a.sc)
+    .slice(0, n)
+    .map((x) => x.it);
+}
+
+// Grafias erradas plausíveis pro "pick_spelling": primeiro os erros REAIS dele com essa palavra
+// (registro do logSpellingMistake: "school → scull"), depois trocas de um grafema por outro que
+// soa igual. Nunca devolve a grafia certa.
+// Toda palavra que aparece em qualquer item do app (inclusive dentro das frases: "sink" está em
+// "There's a leak under the kitchen sink").
+const REAL_WORDS = new Set(CONTENT.flatMap((it) => normalizeAnswer(it.en).split(" ")));
+function misspellingsFor(item, n) {
+  const target = normalizeAnswer(item.en);
+  const out = [];
+  const log = loadSpellingLog();
+  Object.values(log).forEach((entry) =>
+    (entry.examples || []).forEach((ex) => {
+      const [t, typed] = ex.split(" → ");
+      if (t === target && typed && typed !== target && !out.includes(typed) && !/\s/.test(typed)) out.push(typed);
+    })
+  );
+  const gs = segmentGraphemes(target);
+  const candidates = [];
+  gs.forEach((g, i) =>
+    alternatesFor(g).forEach((alt) => {
+      const w = [...gs.slice(0, i), alt, ...gs.slice(i + 1)].join("");
+      // Não oferece outra palavra de verdade como "grafia errada" ("sink" pra "sing"): confundiria.
+      if (w !== target && !REAL_WORDS.has(w)) candidates.push({ w, multi: g.length > 1 });
+    })
+  );
+  shuffle(candidates)
+    .sort((a, b) => b.multi - a.multi) // trocar um grafema de 2+ letras é o erro mais típico
+    .forEach((c) => {
+      if (!out.includes(c.w)) out.push(c.w);
+    });
+  return out.slice(0, n);
+}
+
+// Qual pedaço esconder no "missing_sound": de preferência um grafema de padrão em que ele erra,
+// senão um de 2+ letras, senão uma vogal. Devolve {graphemes, gapIndex, options}.
+function missingSoundPuzzle(item) {
+  const gs = segmentGraphemes(normalizeAnswer(item.en));
+  const weak = topSpellingPatternIds(3);
+  const idx = gs.map((g, i) => i).filter((i) => alternatesFor(gs[i]).length > 0);
+  const inWeak = idx.filter((i) => weak.some((pid) => {
+    const p = PHONICS_PATTERNS.find((x) => x.id === pid);
+    if (!p) return false;
+    p.re.lastIndex = 0;
+    const ok = p.re.test(gs[i]);
+    p.re.lastIndex = 0;
+    return ok;
+  }));
+  const multi = idx.filter((i) => gs[i].length > 1);
+  const vowels = idx.filter((i) => /[aeiou]/.test(gs[i]));
+  const pool = inWeak.length ? inWeak : multi.length ? multi : vowels.length ? vowels : idx;
+  const gapIndex = pool[Math.floor(Math.random() * pool.length)];
+  const options = shuffle([gs[gapIndex], ...shuffle(alternatesFor(gs[gapIndex])).slice(0, 2)]);
+  return { graphemes: gs, gapIndex, options };
 }

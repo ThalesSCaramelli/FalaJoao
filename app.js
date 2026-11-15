@@ -431,6 +431,9 @@ function goToQuizReturnScreen() {
     showScreen("world");
   } else if (quizReturnScreen === "category") {
     showScreen("category");
+  } else if (quizReturnScreen === "games") {
+    renderHome();
+    showScreen("games");
   } else {
     renderHome();
     showScreen("home");
@@ -454,6 +457,7 @@ function renderHome() {
     streak.count > 1 ? tr(`${streak.count} days in a row!`, `${streak.count} dias seguidos!`) : tr("Hi! 👋", "Olá! 👋");
   renderHomeStaticTexts();
   document.getElementById("btn-dictionary").style.display = getActiveProfile().mode === "adult" ? "" : "none";
+  document.getElementById("btn-games").style.display = getActiveProfile().mode === "literacy" ? "" : "none";
 
   // missão do dia (sessão adaptativa, com carinha de missão)
   const session = buildSession();
@@ -771,6 +775,11 @@ function renderRound() {
     // saber O QUE dizer e COMO se escreve).
     else if (scenario && isImmersion() && scenario.promptEn) speak(scenario.promptEn, scenario.id);
     setupTypingCheck(round, isDictation);
+    return;
+  }
+
+  if (round.roundType === "build" || round.roundType === "pick_spelling" || round.roundType === "missing_sound") {
+    renderSpellingGameRound(round, container, repeatBtn);
     return;
   }
 
@@ -1331,6 +1340,208 @@ function renderSettings() {
   document.getElementById("progress-summary").textContent = buildProgressSummary();
   renderAdaptationLog();
 }
+
+// ===================== Minigames do André (engine.js: segmentGraphemes, misspellingsFor...) =====================
+// Três jogos de ortografia por som, em inglês. Contam como prática no SRS (acerto de primeira =
+// recordResult(true)); erro nunca pune além disso, sempre dá pra terminar (scaffolding). Sem
+// pontos/XP (LEARNING_PHILOSOPHY.md §29, §46) — a recompensa é a palavra montada + as estrelas do
+// fim, iguais às do resto do app.
+function gameHead(item) {
+  return `<span class="word-emoji-big dictation-media">${renderMedia(item)}</span>
+          <button class="big-btn listen-btn" id="game-listen">${icon("sound")} Listen</button>`;
+}
+function finishGameRound(item) {
+  choiceLocked = true;
+  playCheer();
+  recordResult(item.id, wrongAttemptsThisRound === 0);
+  if (wrongAttemptsThisRound === 0) quizScore.correct++;
+  quizScore.total++;
+  setTimeout(() => {
+    quizIndex++;
+    renderRound();
+  }, 1100);
+}
+function shakeEl(el) {
+  el.style.animation = "none";
+  void el.offsetWidth;
+  el.style.animation = "shake 0.4s";
+}
+
+function renderSpellingGameRound(round, container, repeatBtn) {
+  const item = round.item;
+  const word = normalizeAnswer(item.en);
+  repeatBtn.style.display = "none";
+  wrongAttemptsThisRound = 0;
+  choiceLocked = false;
+
+  if (round.roundType === "build") {
+    // 🧱 Build it: blocos de SOM (s·ch·oo·l), misturados com as grafias que soam igual (u, k).
+    const gs = segmentGraphemes(word);
+    const distractors = [];
+    shuffle(gs.filter((g) => alternatesFor(g).length)).forEach((g) => {
+      alternatesFor(g).forEach((alt) => {
+        if (distractors.length < 3 && !gs.includes(alt) && !distractors.includes(alt)) distractors.push(alt);
+      });
+    });
+    const tiles = shuffle([...gs.map((g, i) => ({ g, i })), ...distractors.map((g) => ({ g, i: -1 }))]);
+    container.innerHTML = `
+      <div class="write-card">
+        ${gameHead(item)}
+        <span class="intro-hint">🧱 Build the word with sound blocks</span>
+        <div class="build-slots" id="build-slots">${gs.map(() => `<span class="build-slot"></span>`).join("")}</div>
+        <div class="build-tiles" id="build-tiles"></div>
+        <div class="write-feedback" id="game-feedback"></div>
+      </div>`;
+    let next = 0;
+    const slots = document.getElementById("build-slots").children;
+    const tilesWrap = document.getElementById("build-tiles");
+    const feedback = document.getElementById("game-feedback");
+    tiles.forEach((t) => {
+      const btn = document.createElement("button");
+      btn.className = "build-tile";
+      btn.textContent = t.g;
+      btn.addEventListener("click", () => {
+        if (choiceLocked || btn.disabled) return;
+        if (t.g === gs[next]) {
+          slots[next].textContent = t.g;
+          slots[next].classList.add("filled");
+          btn.disabled = true;
+          next++;
+          feedback.textContent = "";
+          if (next === gs.length) {
+            feedback.textContent = "🌟 You built it!";
+            speak(item.en, item.id);
+            finishGameRound(item);
+          }
+        } else {
+          wrongAttemptsThisRound++;
+          playGentle();
+          shakeEl(btn);
+          // Não vai pro registro de erros de grafia: tocar num bloco errado é muitas vezes só um
+          // toque ao acaso, não uma grafia que ele acredita ser a certa (poluiria o relatório dos
+          // pais e as opções do "Which one is right?").
+          // Depois de 2 erros no mesmo pedaço, o bloco certo pisca (menor passo pra seguir).
+          if (wrongAttemptsThisRound >= 2) {
+            const right = [...tilesWrap.children].find((b) => !b.disabled && b.textContent === gs[next]);
+            if (right) right.classList.add("hint");
+            feedback.textContent = `Listen again: the next sound is spelled "${gs[next]}"`;
+          } else {
+            feedback.textContent = "Almost! Listen again and try another block.";
+          }
+          speak(item.en, item.id);
+        }
+      });
+      tilesWrap.appendChild(btn);
+    });
+  } else if (round.roundType === "pick_spelling") {
+    // 🔍 Which one is right?: a certa + erros REAIS dele (ou trocas plausíveis de um som).
+    const options = shuffle([word, ...misspellingsFor(item, 2)]);
+    container.innerHTML = `
+      <div class="write-card">
+        ${gameHead(item)}
+        <span class="intro-hint">🔍 Which one is spelled right?</span>
+        <div class="situation-options" id="pick-options"></div>
+        <div class="write-feedback" id="game-feedback"></div>
+      </div>`;
+    const wrap = document.getElementById("pick-options");
+    const feedback = document.getElementById("game-feedback");
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option situation-option spelling-option";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        if (choiceLocked || btn.disabled) return;
+        if (opt === word) {
+          btn.classList.add("correct");
+          feedback.textContent = "🌟 Yes!";
+          finishGameRound(item);
+        } else {
+          wrongAttemptsThisRound++;
+          btn.classList.add("wrong");
+          btn.disabled = true;
+          playGentle();
+          const analysis = analyzeSpelling(item, opt);
+          if (isImmersion()) logSpellingMistake(analysis, item);
+          feedback.innerHTML = renderTipsHtml(analysis, item) || "Almost! Try again.";
+        }
+      });
+      wrap.appendChild(btn);
+    });
+  } else {
+    // 🕳️ Missing sound: a palavra com um pedaço faltando (de preferência um padrão em que ele erra).
+    const { graphemes, gapIndex, options } = missingSoundPuzzle(item);
+    const renderWord = (fill) =>
+      graphemes.map((g, i) => (i === gapIndex ? `<span class="gap${fill ? " filled" : ""}">${fill || "?"}</span>` : escapeHtml(g))).join("");
+    container.innerHTML = `
+      <div class="write-card">
+        ${gameHead(item)}
+        <span class="intro-hint">🕳️ Which sound is missing?</span>
+        <div class="gap-word" id="gap-word">${renderWord("")}</div>
+        <div class="build-tiles" id="gap-options"></div>
+        <div class="write-feedback" id="game-feedback"></div>
+      </div>`;
+    const wrap = document.getElementById("gap-options");
+    const feedback = document.getElementById("game-feedback");
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "build-tile";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        if (choiceLocked || btn.disabled) return;
+        if (opt === graphemes[gapIndex]) {
+          document.getElementById("gap-word").innerHTML = renderWord(opt);
+          feedback.textContent = "🌟 That's it!";
+          speak(item.en, item.id);
+          finishGameRound(item);
+        } else {
+          wrongAttemptsThisRound++;
+          btn.disabled = true;
+          playGentle();
+          shakeEl(btn);
+          const typed = graphemes.map((g, i) => (i === gapIndex ? opt : g)).join("");
+          const analysis = analyzeSpelling(item, typed);
+          if (isImmersion()) logSpellingMistake(analysis, item);
+          feedback.innerHTML = renderTipsHtml(analysis, item) || "Almost! Listen again.";
+          speak(item.en, item.id);
+        }
+      });
+      wrap.appendChild(btn);
+    });
+  }
+  document.getElementById("game-listen").addEventListener("click", () => speak(item.en, item.id));
+  speak(item.en, item.id);
+}
+
+// Tela "Word Games" (Home do André): cada jogo é uma rodada curta de 8 palavras, escolhidas pelo
+// motor (as que ele mais erra / estão vencidas / têm os padrões em que mais erra).
+const SPELLING_GAMES = [
+  { type: "build", icon: "🧱", name: "Build it", desc: "Listen and build the word with sound blocks" },
+  { type: "pick_spelling", icon: "🔍", name: "Which one is right?", desc: "Find the word that is spelled right" },
+  { type: "missing_sound", icon: "🕳️", name: "Missing sound", desc: "Choose the sound that is missing" },
+];
+function renderGamesScreen() {
+  const el = document.getElementById("games-list");
+  el.innerHTML = SPELLING_GAMES.map(
+    (g) => `<button class="game-card" data-game="${g.type}">
+      <span class="game-icon">${g.icon}</span>
+      <span class="game-txt"><b>${g.name}</b><small>${g.desc}</small></span>
+      ${icon("play")}
+    </button>`
+  ).join("");
+  el.querySelectorAll(".game-card").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const type = btn.dataset.game;
+      const items = selectGameItems(8, type !== "pick_spelling");
+      if (!items.length) return;
+      quizReturnScreen = "games";
+      startQuiz(items.map((it) => ({ item: it, roundType: type })));
+    })
+  );
+}
+document.getElementById("btn-games").addEventListener("click", () => {
+  renderGamesScreen();
+  showScreen("games");
+});
 
 // ===================== Dicionário do adulto (ADULT_DICTIONARY, data.js) =====================
 // Palavras difíceis ficam sublinhadas nas frases (intro e "meaning"); tocar abre o verbete:

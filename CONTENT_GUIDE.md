@@ -195,6 +195,8 @@ Palavras pro André treinar ESCRITA, agrupadas por padrão de som (phonics) — 
   `promptEn` — é o que libera o round `write` (sem cenário, só ditado e leitura).
 - Padrão de grafia novo (ex. "ew", "kn") vai em `PHONICS_PATTERNS` (engine.js): `re` sobre o texto
   normalizado, `tip` em inglês pra criança, `labelPt` pro relatório dos pais.
+  Se for um grafema novo (ex. "ew"), ele também entra em `GRAPHEMES` e em `GRAPHEME_ALTERNATES`
+  (as grafias que soam igual), que são a base dos minigames do André.
 - **Cenário infantil novo**: sempre com `promptEn` também (o André vê a situação em inglês).
   **Lugar ou categoria infantil novo**: sempre com `nameEn` também (o André vê e ouve o nome em
   inglês; o áudio do lugar é `place_<id>`, gerado pelo `generate_audio.py`).

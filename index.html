@@ -54,6 +54,15 @@
       <div class="world-banner-preview" id="world-banner-preview"></div>
     </button>
 
+    <!-- Minigames de ortografia — só aparece no perfil do André (renderHome). -->
+    <button id="btn-games" class="world-banner dict-banner" style="display:none">
+      <div class="world-banner-head">
+        <span class="ic">🎮</span>
+        <div class="txt">Word Games<small>Build, find and fix words</small></div>
+        <span>›</span>
+      </div>
+    </button>
+
     <!-- Dicionário — só aparece no perfil adulto (renderHome). -->
     <button id="btn-dictionary" class="world-banner dict-banner" style="display:none">
       <div class="world-banner-head">
@@ -67,6 +76,15 @@
       <div id="home-avatar-mount" class="voxel-avatar"></div>
       <span class="avatar-hero-hint" id="avatar-unlock-hint-home"></span>
     </button>
+  </section>
+
+  <!-- TELA MINIGAMES (perfil do André) -->
+  <section id="screen-games" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2>🎮 Word Games</h2>
+    </header>
+    <div id="games-list" class="games-list"></div>
   </section>
 
   <!-- TELA DICIONÁRIO (perfil adulto) -->

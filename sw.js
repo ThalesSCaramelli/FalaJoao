@@ -1,6 +1,11 @@
-// Service Worker — cache do app shell pra funcionar offline.
-// Bump o CACHE_NAME sempre que mudar algum arquivo do shell (força atualização nos aparelhos).
-const CACHE_NAME = "meu-ingles-v41";
+// Service Worker — cache pra funcionar offline. Dois caches separados (ver PROCESS.md):
+// - CACHE_NAME: o código do app (html/css/js/ícones/fontes). Pequeno. Bump sempre que mudar
+//   qualquer arquivo do app ou entrar áudio novo nas listas abaixo (força a atualização).
+// - MEDIA_CACHE: áudios e imagens. ESTÁVEL entre versões — uma atualização só baixa o que falta,
+//   em vez de baixar de novo os ~600 áudios (~9 MB) a cada versão. Só mude o nome dele se um
+//   áudio/imagem EXISTENTE for regravado com o mesmo nome e precisar ser trocado nos aparelhos.
+const CACHE_NAME = "meu-ingles-v43";
+const MEDIA_CACHE = "meu-ingles-media-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -638,28 +643,75 @@ const PT_AUDIO_SHELL = [
   "assets/audio/pt/work.mp3",
 ];
 
+const isMedia = (url) => url.includes("/assets/audio/") || url.includes("/assets/images/");
+
+// Baixa pro MEDIA_CACHE só o que ainda não está em NENHUM cache (inclusive caches de versões
+// antigas — na primeira vez depois desta mudança, os áudios que já estavam no aparelho são
+// copiados, não baixados de novo). Arquivo por arquivo, com allSettled: um áudio que falhar
+// (sinal fraco) não derruba a atualização inteira — ele é baixado depois, quando tocar.
+async function fillMediaCache() {
+  const media = await caches.open(MEDIA_CACHE);
+  const urls = AUDIO_SHELL.concat(PT_AUDIO_SHELL).map((u) => new URL(u, self.registration.scope).href);
+  await Promise.allSettled(
+    urls.map(async (url) => {
+      if (await media.match(url)) return;
+      const old = await caches.match(url);
+      if (old) return media.put(url, old);
+      const response = await fetch(url);
+      if (response.ok) await media.put(url, response);
+    })
+  );
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL.concat(AUDIO_SHELL, PT_AUDIO_SHELL))));
+  // O código do app é pequeno e precisa vir inteiro (addAll); a mídia vem à parte, tolerante a falha.
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(fillMediaCache)
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
+  // Apaga versões antigas do código; o MEDIA_CACHE fica.
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && k !== MEDIA_CACHE).map((k) => caches.delete(k))))
   );
   self.clients.claim();
 });
 
-// Cache-first pro app shell, com atualização em segundo plano pra conteúdo novo (mesma origem).
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = event.request.url;
+  const sameOrigin = url.startsWith(self.location.origin);
+  // Áudio/imagem: cache primeiro e PRONTO — não baixa de novo a cada vez que toca (antes, todo
+  // toque de áudio disparava um download em segundo plano, gastando dado à toa).
+  if (sameOrigin && isMedia(url)) {
+    event.respondWith(
+      caches.match(event.request).then(
+        (cached) =>
+          cached ||
+          fetch(event.request).then((response) => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(MEDIA_CACHE).then((cache) => cache.put(event.request, clone));
+            }
+            return response;
+          })
+      )
+    );
+    return;
+  }
+  // Código do app: cache primeiro, com atualização em segundo plano (stale-while-revalidate).
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((response) => {
-          if (response.ok && event.request.url.startsWith(self.location.origin)) {
+          if (response.ok && sameOrigin) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
