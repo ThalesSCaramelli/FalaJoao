@@ -358,7 +358,7 @@ button.home-card { cursor: pointer; font-family: var(--font-body); }
 .an-eyebrow {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.75rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase;
-  color: var(--color-primary-dark);
+  color: color-mix(in srgb, var(--color-primary-dark) 78%, var(--color-text)); /* AA no branco */
 }
 .an-eyebrow .icon { width: 1.25em; height: 1.25em; }
 .an-row { display: flex; align-items: center; gap: var(--space-3); }
@@ -2337,7 +2337,7 @@ body[data-mode="adult"] .result-chips { flex-direction: column; flex-wrap: nowra
 .result-clean {
   display: flex; align-items: center; justify-content: center; gap: var(--space-2);
   width: 100%; margin: 0; padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md); background: var(--cap-communicate-soft); color: var(--color-success);
+  border-radius: var(--radius-md); background: var(--cap-communicate-soft); color: color-mix(in srgb, var(--color-success) 65%, var(--color-text));
   font-weight: 800; font-size: 0.92rem;
 }
 .result-clean .icon { width: 1.2em; height: 1.2em; }
