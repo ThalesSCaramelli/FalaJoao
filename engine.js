@@ -5,13 +5,21 @@
 
 const CONTENT_BY_ID = Object.fromEntries(CONTENT.map((it) => [it.id, it]));
 
-// ===================== Perfis (João + André) =====================
-// Lista fixa de propósito (só 2 pessoas usam o app hoje) — ver PROCESS.md pra decisão completa.
+// ===================== Perfis (João + André + Thales) =====================
+// Lista fixa de propósito (só 3 pessoas usam o app hoje) — ver PROCESS.md pra decisão completa.
 // `mode` decide como o motor escolhe roundType (pickRoundType, mais abaixo): "oral" é o
-// comportamento original (intro/situation/speak/choice); "literacy" usa read/write.
+// comportamento original (intro/situation/speak/choice); "literacy" usa read/write; "adult"
+// mistura tudo (intro → situation/read/write/meaning/speak), com frases longas.
+// `tracks` decide QUAL conteúdo o perfil enxerga (ver profileContent): "kids" é todo item sem
+// campo `track` em data.js; "adult" e "spelling" só os itens marcados com esse `track`. O João
+// nunca vê "Would it be possible to extend the deadline?", o adulto não vê "red"/"dog", e as
+// palavras de ortografia por padrão de som (phonics) são só do André.
+// `focusTrack`: trilha cujos itens novos entram primeiro (getNewCandidates) — pro André, a
+// ortografia é o objetivo; o vocabulário infantil ele já sabe e só serve de revisão/teste.
 const PROFILES = [
-  { id: "joao", name: "João", emoji: "🐨", mode: "oral" },
-  { id: "andre", name: "André", emoji: "🦘", mode: "literacy" },
+  { id: "joao", name: "João", emoji: "🐨", mode: "oral", tracks: ["kids"] },
+  { id: "andre", name: "André", emoji: "🦘", mode: "literacy", tracks: ["kids", "spelling"], focusTrack: "spelling" },
+  { id: "thales", name: "Thales", emoji: "🦜", mode: "adult", tracks: ["adult"] },
 ];
 const ACTIVE_PROFILE_KEY = "meuIngles_active_profile";
 // As 6 chaves que existiam antes de perfis existirem — viram `<chave>::joao` na primeira carga
@@ -48,6 +56,26 @@ function getActiveProfile() {
 // Toda chave por-perfil passa por aqui — nunca usar `meuIngles_xxx` puro pra dado de aluno.
 function profileKey(base) {
   return `${base}::${getActiveProfileId()}`;
+}
+
+// ---- Trilha de conteúdo do perfil ativo ----
+// Item sem `track` = "kids" (todo o conteúdo que já existia, sem precisar mexer nele).
+// Sempre calculado na hora (não cacheado): o perfil pode trocar sem recarregar a página.
+function itemTrack(obj) {
+  return obj.track || "kids";
+}
+function profileContent() {
+  const tracks = getActiveProfile().tracks;
+  return CONTENT.filter((it) => tracks.includes(itemTrack(it)));
+}
+function profileSituations() {
+  const tracks = getActiveProfile().tracks;
+  return SITUATIONS.filter((s) => tracks.includes(itemTrack(s)));
+}
+// Só as categorias que têm algum item na trilha do perfil (mantém a ordem de CATEGORY_META).
+function profileCategoryIds() {
+  const used = new Set(profileContent().map((it) => it.category));
+  return Object.keys(CATEGORY_META).filter((catId) => used.has(catId));
 }
 
 const BOX_INTERVAL_DAYS = [0, 1, 3, 7, 21];
@@ -139,24 +167,31 @@ function recordSpeechAttempt(id, matched) {
 function matchesAcceptedAnswer(item, transcript) {
   const accepted = item.acceptedAnswers || [item.en.toLowerCase()];
   const t = transcript.toLowerCase().trim();
+  if (!t) return false;
+  // Trilha adulta: frase longa não pode bater com um pedaço solto ("i", "the deadline") — o
+  // `a.includes(t)` generoso é de propósito pras crianças (communication before perfection:
+  // "bathroom" já comunica), mas pro adulto a frase inteira é o objetivo. Exige ~70% do tamanho.
+  if (itemTrack(item) === "adult") return accepted.some((a) => t.includes(a) || (a.includes(t) && t.length >= a.length * 0.7));
   return accepted.some((a) => t.includes(a) || a.includes(t));
 }
 
 function getDueItems() {
   const now = Date.now();
-  return CONTENT.filter((it) => {
+  return profileContent().filter((it) => {
     const st = getState(it.id);
     return st.introduced && st.nextDue <= now;
   });
 }
 
-// Prioriza survival, depois por dificuldade (não existe mais "tier" como campo — isso é só uma
-// heurística de ORDEM de introdução, reaproveitando category+difficulty que já existem).
+// Prioriza a trilha de foco do perfil (se tiver), depois survival, depois por dificuldade (não
+// existe mais "tier" como campo — isso é só uma heurística de ORDEM de introdução).
 function getNewCandidates(limit) {
-  const notIntroduced = CONTENT.filter((it) => !getState(it.id).introduced);
+  const notIntroduced = profileContent().filter((it) => !getState(it.id).introduced);
+  const focusTrack = getActiveProfile().focusTrack;
+  const priority = (it) => (focusTrack && itemTrack(it) === focusTrack ? 0 : it.category === "survival" ? 1 : 2);
   notIntroduced.sort((a, b) => {
-    const aPriority = a.category === "survival" ? 0 : 1;
-    const bPriority = b.category === "survival" ? 0 : 1;
+    const aPriority = priority(a);
+    const bPriority = priority(b);
     if (aPriority !== bPriority) return aPriority - bPriority;
     return a.difficulty - b.difficulty;
   });
@@ -165,7 +200,7 @@ function getNewCandidates(limit) {
 
 function getDistractors(item, count) {
   const sameCategory = CONTENT.filter((it) => it.category === item.category && it.id !== item.id);
-  const pool = sameCategory.length >= count ? sameCategory : CONTENT.filter((it) => it.id !== item.id);
+  const pool = sameCategory.length >= count ? sameCategory : profileContent().filter((it) => it.id !== item.id);
   return shuffle(pool).slice(0, count);
 }
 
@@ -218,7 +253,7 @@ function buildSession() {
   let session = [...dueSlice, ...newItems].slice(0, MAX_SESSION);
 
   if (session.length === 0) {
-    const introduced = CONTENT.filter((it) => getState(it.id).introduced);
+    const introduced = profileContent().filter((it) => getState(it.id).introduced);
     session = shuffle(introduced).slice(0, 10);
   }
 
@@ -248,12 +283,14 @@ function buildSession() {
   const seen = new Set();
   const deduped = expanded.filter((it) => (seen.has(it.id) ? false : (seen.add(it.id), true)));
 
-  return shuffle(deduped).map((it) => {
-    const roundType = pickRoundType(it);
-    const round = { item: it, roundType };
-    if (roundType === "situation") round.scenario = SCENARIO_BY_CORRECT_ID[it.id];
-    return round;
-  });
+  return shuffle(deduped).map(makeRound);
+}
+
+function makeRound(it) {
+  const roundType = pickRoundType(it);
+  const round = { item: it, roundType };
+  if (roundType === "situation") round.scenario = SCENARIO_BY_CORRECT_ID[it.id];
+  return round;
 }
 
 function speechRecognitionAvailable() {
@@ -263,8 +300,14 @@ function speechRecognitionAvailable() {
 // Cenário associado a um item, quando ele é a resposta "certa" de algum problem-posing
 // (SCENARIOS em data.js). Um item pode ter no máximo um cenário como alvo principal.
 const SCENARIO_BY_CORRECT_ID = Object.fromEntries((typeof SCENARIOS !== "undefined" ? SCENARIOS : []).map((s) => [s.correctId, s]));
+// Só cenários cuja resposta é da trilha do perfil ativo: um lugar das crianças pode ter cenário da
+// trilha de ortografia (ex. "Lanche" → "We had chicken for lunch", do André) e o João não pode
+// abrir a visita com um item que nem está na trilha dele.
 function getScenarioForSituation(situationId) {
-  return (typeof SCENARIOS !== "undefined" ? SCENARIOS : []).find((s) => s.situationId === situationId);
+  const tracks = getActiveProfile().tracks;
+  return (typeof SCENARIOS !== "undefined" ? SCENARIOS : []).find(
+    (s) => s.situationId === situationId && CONTENT_BY_ID[s.correctId] && tracks.includes(itemTrack(CONTENT_BY_ID[s.correctId]))
+  );
 }
 
 function pickRoundType(item) {
@@ -274,14 +317,43 @@ function pickRoundType(item) {
     // já fala inglês, mostrar a tela de "palavra nova" seria condescendente. Todo item novo já
     // entra direto como leitura ou escrita (e funciona como teste de nível: se ele acerta de cara,
     // o SRS avança normalmente, sem precisar de um conceito de diagnóstico separado).
-    return Math.random() < 0.5 ? "read" : "write";
+    return pickLiteracyRoundType(item);
   }
+  if (getActiveProfile().mode === "adult") return pickAdultRoundType(item, st);
   if (!st.introduced) return "intro";
   // já foi visto ao menos uma vez com sucesso -> às vezes vira um cenário de verdade em vez de
   // só reconhecer a imagem (problem-posing, LEARNING_PHILOSOPHY.md seção 2/5)
   if (st.box >= 1 && SCENARIO_BY_CORRECT_ID[item.id] && Math.random() < 0.4) return "situation";
   if (st.box >= 3 && speechRecognitionAvailable() && navigator.onLine && Math.random() < 0.3) return "speak";
   return "choice";
+}
+
+// André (tudo em inglês, foco em ESCREVER CERTO): o round principal é o ditado — ouve a palavra
+// que ele já conhece de ouvido e escreve. É exatamente a lacuna dele ("school" → "scull": o som
+// ele tem, a grafia não). "write" só quando o item tem cenário (a situação em inglês diz o que
+// escrever); sem cenário, imagem sozinha é ambígua demais pra pedir escrita ("sunny" ou "summer"?)
+// e a tradução em português saiu de propósito (imersão). Palavras da trilha de ortografia pesam
+// mais pro ditado; "read" continua pra leitura (ler a palavra/frase e escolher a imagem/frase).
+function pickLiteracyRoundType(item) {
+  const options = itemTrack(item) === "spelling" ? ["dictation", "dictation", "read"] : ["dictation", "read"];
+  if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("write");
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Adulto: item novo passa pela tela de "palavra nova" (vocabulário complexo é novo de verdade, ao
+// contrário do André). Depois, varia a atividade em cima do MESMO item (repetition without
+// monotony, LEARNING_PHILOSOPHY.md seção 12): cenário (ouvir/ler + escolher), escrever a frase a
+// partir do português, entender o sentido (inglês → escolher a tradução) e, mais pra frente, falar.
+// Sem "choice" por imagem: pra "nevertheless" ou "I'd rather not commit to that yet" um emoji não
+// carrega o significado — o round de sentido ("meaning") faz esse papel.
+function pickAdultRoundType(item, st) {
+  if (!st.introduced) return "intro";
+  const options = ["meaning", "write"];
+  if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("situation", "read");
+  if (st.box >= 2 && speechRecognitionAvailable() && navigator.onLine) options.push("speak");
+  // Na caixa 0/1 (acabou de conhecer), reconhecer vem antes de produzir: tira a escrita.
+  const pool = st.box <= 1 ? options.filter((t) => t !== "write") : options;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // ===================== Streak (dias seguidos de uso) =====================
@@ -370,4 +442,165 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// ===================== Ortografia (André): onde errou + qual padrão de som ensinar =====================
+// Alfabetização em inglês é por phonics: cada SOM tem algumas grafias possíveis (/oo/ = "oo" em
+// school/moon; /k/ = "c", "k", "ck" e às vezes "ch"). "scull" pra "school" não é falta de ouvido —
+// ele acertou os sons — é não saber QUAL grafia aquele som usa naquela palavra. Por isso o feedback
+// aponta (1) quais letras dele estão certas/erradas e (2) a regra do pedaço que errou, com outras
+// palavras do app que seguem a mesma regra. Tudo determinístico (LEARNING_PHILOSOPHY.md seção 39).
+
+// Mesma normalização do round de escrita: sem caixa, pontuação nem apóstrofo (reto ou curvo).
+function normalizeAnswer(s) {
+  return s.toLowerCase().trim().replace(/[.,!?;:'’]/g, "").replace(/\s+/g, " ").trim();
+}
+
+// Alinhamento letra a letra (Levenshtein com caminho de volta). Devolve a lista de operações na
+// ordem do texto: {op: "ok"|"sub"|"del"|"ins", t: letra do alvo, y: letra digitada, ti: índice no
+// alvo}. "del" = letra do alvo que faltou; "ins" = letra a mais que ele digitou.
+function alignSpelling(typed, target) {
+  const n = typed.length, m = target.length;
+  const d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = 0; i <= n; i++) d[i][0] = i;
+  for (let j = 0; j <= m; j++) d[0][j] = j;
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const cost = typed[i - 1] === target[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+    }
+  }
+  const ops = [];
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + (typed[i - 1] === target[j - 1] ? 0 : 1)) {
+      ops.unshift({ op: typed[i - 1] === target[j - 1] ? "ok" : "sub", y: typed[i - 1], t: target[j - 1], ti: j - 1 });
+      i--; j--;
+    } else if (j > 0 && d[i][j] === d[i][j - 1] + 1) {
+      ops.unshift({ op: "del", t: target[j - 1], ti: j - 1 });
+      j--;
+    } else {
+      ops.unshift({ op: "ins", y: typed[i - 1], ti: j }); // letra a mais: conta como erro perto de j
+      i--;
+    }
+  }
+  return { distance: d[n][m], ops };
+}
+
+// Entre as respostas aceitas, a mais parecida com o que ele digitou (é contra ela que o erro é
+// mostrado — "can i have water please" e "can i have some water please" são ambas certas).
+function closestAccepted(item, typedNorm) {
+  const accepted = (item.acceptedAnswers && item.acceptedAnswers.length ? item.acceptedAnswers : [item.en]).map(normalizeAnswer);
+  let best = accepted[0], bestDist = Infinity;
+  accepted.forEach((a) => {
+    const { distance } = alignSpelling(typedNorm, a);
+    if (distance < bestDist) { best = a; bestDist = distance; }
+  });
+  return best;
+}
+
+// Padrões de grafia (phonics) — ordem importa: os mais longos primeiro ("igh" antes de "gh").
+// `re` roda sobre a resposta normalizada; `tip` é em inglês (o André usa o app em imersão);
+// `labelPt` é o nome do padrão no relatório dos pais (Configurações / compartilhar relatório).
+const PHONICS_PATTERNS = [
+  { id: "igh", labelPt: "'igh' (night)", re: /igh/g, tip: "'igh' says /eye/" },
+  { id: "tion", labelPt: "'tion'", re: /tion/g, tip: "'tion' says /shun/" },
+  { id: "magic_e", labelPt: "magic e (bike, cake)", re: /(?<![aeiou])[aeiou][^aeiou\s]e(?= |$)/g, except: ["one", "some", "come", "done", "have", "give", "love", "gone", "were", "there", "where"], tip: "Magic e: the 'e' at the end is silent and makes the vowel say its name" },
+  { id: "ch_k", labelPt: "'ch' com som de /k/ (school)", re: /(?<=s)ch|ch(?=r)/g, tip: "Here 'ch' says /k/, like in school and Christmas" },
+  { id: "ch", labelPt: "'ch'", re: /ch/g, tip: "'ch' usually says /ch/ (lunch) — but in some words it says /k/ (school)" },
+  { id: "sh", labelPt: "'sh'", re: /sh/g, tip: "'sh' says /sh/ — two letters, one sound" },
+  { id: "th", labelPt: "'th'", re: /th/g, tip: "'th' — put your tongue between your teeth" },
+  { id: "ph", labelPt: "'ph' com som de /f/", re: /ph/g, tip: "'ph' says /f/" },
+  { id: "wh", labelPt: "'wh'", re: /wh/g, tip: "'wh' says /w/" },
+  { id: "ck", labelPt: "'ck'", re: /ck/g, tip: "'ck' says /k/ — it comes right after a short vowel" },
+  { id: "silent", labelPt: "letra muda (kn, wr, mb)", re: /kn|wr|mb(?= |$)/g, tip: "There's a silent letter here — you write it but don't say it" },
+  { id: "nk", labelPt: "'nk' (drink, think)", re: /nk/g, tip: "'nk' says /ngk/ at the end of a word" },
+  { id: "ng", labelPt: "'ng' (sing)", re: /ng/g, tip: "'ng' is one sound, made in your nose" },
+  { id: "oo", labelPt: "'oo' (moon, school)", re: /oo/g, tip: "'oo' says /oo/" },
+  { id: "ee", labelPt: "'ee' (tree)", re: /ee/g, tip: "'ee' says /ee/" },
+  { id: "ea", labelPt: "'ea' (beach)", re: /ea/g, tip: "'ea' often says /ee/" },
+  { id: "ai", labelPt: "'ai' (rain)", re: /ai/g, tip: "'ai' says /ay/ in the middle of a word" },
+  { id: "ay", labelPt: "'ay' (day)", re: /ay/g, tip: "'ay' says /ay/ at the end of a word" },
+  { id: "oa", labelPt: "'oa'", re: /oa/g, tip: "'oa' says /oh/" },
+  { id: "ow", labelPt: "'ow' (snow, cow)", re: /ow/g, tip: "'ow' can say /oh/ (snow) or /ow/ (cow)" },
+  { id: "ou", labelPt: "'ou' (house)", re: /ou/g, tip: "'ou' often says /ow/ (house)" },
+  { id: "oi_oy", labelPt: "'oi' / 'oy'", re: /oi|oy/g, tip: "'oi' and 'oy' say /oy/" },
+  { id: "ar", labelPt: "'ar' (park)", re: /ar/g, tip: "'ar' says /ar/ (car, park)" },
+  { id: "or", labelPt: "'or' (storm)", re: /or/g, tip: "'or' says /or/ (fork, storm)" },
+  { id: "er_ir_ur", labelPt: "'er' / 'ir' / 'ur' (girl, nurse)", re: /er|ir|ur/g, tip: "'er', 'ir' and 'ur' all say /er/ — you have to learn which one each word uses" },
+  { id: "double", labelPt: "letra dobrada (ll, ss...)", re: /([bdfglmnprstz])\1/g, tip: "This word has a double letter" },
+  { id: "y_end", labelPt: "'y' no final", re: /(?<=[^aeiou ])y(?= |$)/g, tip: "'y' at the end can say /ee/ (happy) or /eye/ (my)" },
+];
+
+// Palavras do app (da trilha do perfil) que usam o mesmo padrão — "like moon, food, pool". As da
+// trilha de ortografia vêm primeiro (foram escolhidas justamente como exemplos limpos do padrão).
+function phonicsExamples(pattern, excludeNorm) {
+  const out = [];
+  const pool = [...profileContent()].sort((a, b) => (itemTrack(b) === "spelling") - (itemTrack(a) === "spelling"));
+  for (const it of pool) {
+    if (it.contentType !== "word" || it.spellingTip) continue; // tricky words não são exemplo de regra
+    const w = normalizeAnswer(it.en);
+    if (w === excludeNorm || out.includes(w) || (pattern.except || []).includes(w)) continue;
+    pattern.re.lastIndex = 0;
+    if (pattern.re.test(w)) out.push(w);
+    if (out.length >= 3) break;
+  }
+  pattern.re.lastIndex = 0;
+  return out;
+}
+
+// Analisa uma tentativa errada: alinhamento, quais posições do alvo erraram, e quais padrões de
+// grafia cobrem essas posições (no máximo 2 dicas — mais que isso vira texto demais pra criança).
+function analyzeSpelling(item, typed) {
+  const typedNorm = normalizeAnswer(typed);
+  const target = closestAccepted(item, typedNorm);
+  const { ops } = alignSpelling(typedNorm, target);
+  const wrongIdx = new Set();
+  ops.forEach((o) => {
+    if (o.op === "sub" || o.op === "del") wrongIdx.add(o.ti);
+    if (o.op === "ins") { wrongIdx.add(Math.max(0, o.ti - 1)); wrongIdx.add(Math.min(target.length - 1, o.ti)); }
+  });
+  const tips = [];
+  const patternIds = [];
+  const covered = new Set();
+  PHONICS_PATTERNS.forEach((p) => {
+    p.re.lastIndex = 0;
+    let m;
+    while ((m = p.re.exec(target)) !== null) {
+      const start = m.index, end = m.index + m[0].length;
+      let hit = false;
+      for (let k = start; k < end; k++) if (wrongIdx.has(k) && !covered.has(k)) hit = true;
+      if (hit && !patternIds.includes(p.id)) {
+        for (let k = start; k < end; k++) covered.add(k);
+        patternIds.push(p.id);
+        tips.push({ pattern: p, range: [start, end], examples: phonicsExamples(p, target) });
+      }
+      if (m[0].length === 0) p.re.lastIndex++;
+    }
+    p.re.lastIndex = 0;
+  });
+  return { typedNorm, target, ops, wrongIdx, tips: tips.slice(0, 2), patternIds };
+}
+
+// Registro por perfil dos padrões em que ele erra — vai pro relatório dos pais ("pratique 'oo':
+// school → scull"). Lido direto do localStorage quando precisa (sem variável em memória, então
+// não precisa entrar em reloadProfileState).
+function loadSpellingLog() {
+  try {
+    return JSON.parse(localStorage.getItem(profileKey("meuIngles_spelling_v1"))) || {};
+  } catch (e) {
+    return {};
+  }
+}
+function logSpellingMistake(analysis, item) {
+  const log = loadSpellingLog();
+  const keys = analysis.patternIds.length ? analysis.patternIds : item.spellingTip ? ["tricky"] : ["other"];
+  keys.forEach((k) => {
+    const entry = log[k] || { count: 0, examples: [] };
+    entry.count++;
+    const example = `${analysis.target} → ${analysis.typedNorm}`;
+    entry.examples = [example, ...entry.examples.filter((e) => e !== example)].slice(0, 3);
+    log[k] = entry;
+  });
+  localStorage.setItem(profileKey("meuIngles_spelling_v1"), JSON.stringify(log));
 }

@@ -139,6 +139,79 @@ sobre algo já decidido sem motivo novo.
   (associação, compreensão narrativa) e escrita tipo "completar a frase" (`I want ___`) — exigem
   conteúdo novo, não só motor; adaptação automática read↔write por desempenho do André.
 
+### Terceiro perfil (Thales, adulto): trilha de conteúdo separada, não "dificuldade 6+"
+
+- **Contexto**: o usuário (pai) quis uma trilha pra ele mesmo — vocabulário mais complexo e frases
+  longas, seguindo a mesma metodologia. Até aqui todo `CONTENT` era visto por todos os perfis
+  (André e João só mudavam o *tipo* de rodada, não o conteúdo).
+- **Escolha**: campo opcional `track` em `CONTENT`/`SITUATIONS` (ausente = `"kids"`, então nenhum
+  item antigo precisou mudar) e `track` no perfil. `profileContent()`/`profileSituations()`/
+  `profileCategoryIds()` (engine.js) filtram tudo que monta sessão, mapa, grade de categorias e
+  relatório. Categorias adultas têm prefixo `adult_` e ids de item também (`adult_work_deadline`).
+- **Porquê não só `difficulty` mais alta**: `getNewCandidates` ordena por difficulty — o João
+  acabaria recebendo "Would it be possible to extend the deadline?" depois de dominar o básico, e
+  o adulto teria que atravessar "red"/"dog" antes de chegar no que interessa. É outro público, não
+  o próximo degrau.
+- **Modo `adult`** (`pickAdultRoundType`): item novo passa pelo `intro` (vocabulário complexo é
+  novo de verdade, diferente do André); depois sorteia entre `meaning` (novo: frase em inglês →
+  escolher o sentido em português, distratores do mesmo contentType), `write`, e — quando o item
+  tem cenário — `situation`/`read`; `speak` a partir da caixa 2. Sem `choice` por imagem: emoji
+  não carrega o sentido de "nevertheless". Na caixa 0/1 não tem `write` (reconhecer antes de
+  produzir). Mesmos degraus 1→5 e cadeias de evolução por `prerequisites` do resto do conteúdo.
+- **Speaking do adulto**: `matchesAcceptedAnswer` exige ~70% do tamanho da frase aceita pra
+  trilha adulta (um "the deadline" solto não conta como a frase inteira); pras crianças continua
+  generoso de propósito (communication before perfection).
+- **Escrita**: `normalize` do round `write` agora também tira apóstrofo (reto e curvo) — o teclado
+  do iPhone troca `'` por `’` sozinho; vale pro André também (só fica mais tolerante).
+- **Cenários**: vários por lugar (o primeiro de cada `situationId` abre a visita no mapa); campo
+  opcional `speaker` troca o 👩‍🏫 do balão (colega, recepção da clínica, imobiliária, vizinho).
+- **Fica pra depois**: avatar não desbloqueia nada na trilha adulta (`unlockedBy` aponta pra
+  categorias infantis) — não parece fazer falta pra adulto; se fizer, é só apontar itens de
+  `AVATAR_ITEMS` pra categorias `adult_*`. Áudio neural dos 70 itens/22 cenários/6 lugares novos
+  ainda não gerado (ver checklist em `CONTENT_GUIDE.md`) — até lá cai no TTS do navegador.
+
+### André: imersão em inglês + ditado + correção por padrão de som (phonics)
+
+- **Contexto**: o usuário contou que o André (8 anos) tem muita dificuldade de escrever certo —
+  "school" vira "scull". Ele já fala e entende inglês; o round `write` pedia a palavra a partir da
+  tradução em português e, no erro, só dizia "Quase!". Pedido: foco em escrever certo, tudo em inglês.
+- **Diagnóstico**: "scull" acerta os SONS (s-k-oo-l) e erra a GRAFIA de dois deles ("ch" com som
+  de /k/, "oo"). Alfabetização em inglês é ensinada assim (phonics): cada som tem algumas grafias e
+  a criança aprende os padrões. Então o app precisa ensinar o padrão, não só marcar errado.
+- **Escolha** (4 peças, todas determinísticas):
+  1. **Imersão** (`isImmersion`/`tr`, app.js): no modo `literacy` todo texto do quiz é em inglês;
+     cenários ganharam `promptEn` (com áudio em inglês); a ajuda é ouvir em inglês, não traduzir.
+     João e Thales não mudam.
+  2. **Ditado** (`roundType: "dictation"`): ouve e escreve. Vira o round principal do André
+     (`pickLiteracyRoundType`, engine.js). `write` só com cenário — sem a tradução, imagem sozinha
+     é ambígua demais pra pedir escrita.
+  3. **Correção que ensina** (`analyzeSpelling`, engine.js; `setupTypingCheck`, app.js): 1º erro
+     mostra as letras dele (verde/vermelho/riscado/"_") + a dica do padrão de som do pedaço que
+     errou, com outras palavras do app que seguem a regra ("'oo' says /oo/ — like moon, food,
+     pool"), sem entregar a palavra. 2º erro conta no SRS, mostra a grafia certa com o padrão
+     destacado e pede pra digitar certo uma vez (não pontua; dá pra pular).
+  4. **Trilha `spelling`** (60 itens): palavras agrupadas por padrão (oo, sh/ch/th, ee/ea, ai/ay,
+     magic e, igh/ow/ou, ar/or/ir/ur, tricky words com `spellingTip`), cada grupo com frase(s) que
+     usam as palavras e 4 cenários. Perfil passa a ter `tracks` (lista) e `focusTrack` (o que entra
+     primeiro como novo); o André vê `["kids", "spelling"]`.
+- **Relatório dos pais**: `logSpellingMistake` guarda por perfil quais padrões ele erra, com
+  exemplo ("'ch' com som de /k/: school → scull") — aparece em Configurações e no relatório
+  compartilhado (`spellingPatterns` no JSON). É o dado mais útil pra ajudar em casa.
+- **Porquê assim**: scaffolding em vez de punição (LEARNING_PHILOSOPHY.md seções 16, 35, 36): o
+  menor passo que deixa ele acertar sozinho é ver QUAIS letras e QUAL regra. Regra por regex, sem
+  "IA" (seção 39) — dá pra explicar exatamente por que cada dica apareceu.
+- **Correção (15/11/2026, feedback do usuário: "muito áudio em português")**: sobravam dois
+  caminhos com narração em PT pro André — o nome do lugar ao tocar no mapa e o cenário que abre
+  cada visita (round `situation`, que ainda não olhava o modo). Agora: lugares e categorias têm
+  `nameEn` (mostrado e falado em inglês, áudio `place_<id>`); o cenário de abertura vira `write`
+  pra ele (foco em escrita) com a situação em inglês tocando sozinha; o round `situation` também
+  respeita a imersão; textos da Home e do mapa seguem o idioma do perfil (`renderHomeStaticTexts`).
+  Regra daqui pra frente: **nada falado em português no perfil do André** — todo `speakPT` novo
+  precisa de um caminho em inglês quando `isImmersion()`.
+- **Fica pra depois**: montar a frase com blocos de palavras (apoio quando ele trava numa frase
+  longa) e completar a frase (`I want ___`); historinhas curtas com pergunta de compreensão;
+  mais grupos de padrão conforme o relatório mostrar onde ele mais erra.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
@@ -199,6 +272,10 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
 
 ### NEXT
 
+- **Plano de conteúdo dez/2026 → mai/2027** em `CONTENT_PLAN.md`: um tema da família por mês
+  (as três trilhas no mesmo assunto), regras de qualidade para item novo e revisão mensal guiada
+  pelo relatório. As pendências de conteúdo abaixo (cadeias de evolução, cenário do lugar
+  "Família") estão encaixadas nele.
 - Mais cadeias de "evolução natural" além de água/saudação (padrão documentado em
   `CONTENT_GUIDE.md` seção 8, pronto pra reaproveitar).
 - 4 `SITUATIONS` ainda sem `SCENARIO` de problem-posing: `cafeteria`, `classroom`, `family`,

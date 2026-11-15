@@ -5,21 +5,41 @@
 // (engine.js), porque é sobre o aluno, não sobre o conteúdo.
 
 const CATEGORY_META = {
-  survival: { namePt: "Sobrevivência", icon: "🚸", color: "#FF8FA3" },
-  colors: { namePt: "Cores", icon: "🎨", color: "#FF6B6B" },
-  numbers: { namePt: "Números", icon: "🔢", color: "#4ECDC4" },
-  shapes: { namePt: "Formas", icon: "🔺", color: "#FFD93D" },
-  animals: { namePt: "Animais", icon: "🐶", color: "#95E1D3" },
-  food: { namePt: "Comida", icon: "🍎", color: "#F38181" },
-  body: { namePt: "Corpo", icon: "🧑", color: "#AA96DA" },
-  family: { namePt: "Família", icon: "👨‍👩‍👧", color: "#FCBAD3" },
-  clothes: { namePt: "Roupas", icon: "👕", color: "#A8D8EA" },
-  school: { namePt: "Escola", icon: "🎒", color: "#FFAAA6" },
-  combos: { namePt: "Combinações", icon: "🧩", color: "#C9A7EB" },
-  phrases: { namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1" },
-  seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
-  home: { namePt: "Casa", icon: "🏠", color: "#FFCF9C" },
-  toys: { namePt: "Brinquedos", icon: "🧸", color: "#B5EAD7" },
+  survival: { namePt: "Sobrevivência", nameEn: "School survival", icon: "🚸", color: "#FF8FA3" },
+  colors: { namePt: "Cores", nameEn: "Colours", icon: "🎨", color: "#FF6B6B" },
+  numbers: { namePt: "Números", nameEn: "Numbers", icon: "🔢", color: "#4ECDC4" },
+  shapes: { namePt: "Formas", nameEn: "Shapes", icon: "🔺", color: "#FFD93D" },
+  animals: { namePt: "Animais", nameEn: "Animals", icon: "🐶", color: "#95E1D3" },
+  food: { namePt: "Comida", nameEn: "Food", icon: "🍎", color: "#F38181" },
+  body: { namePt: "Corpo", nameEn: "My body", icon: "🧑", color: "#AA96DA" },
+  family: { namePt: "Família", nameEn: "Family", icon: "👨‍👩‍👧", color: "#FCBAD3" },
+  clothes: { namePt: "Roupas", nameEn: "Clothes", icon: "👕", color: "#A8D8EA" },
+  school: { namePt: "Escola", nameEn: "School", icon: "🎒", color: "#FFAAA6" },
+  combos: { namePt: "Combinações", nameEn: "Word combos", icon: "🧩", color: "#C9A7EB" },
+  phrases: { namePt: "Frases do dia a dia", nameEn: "Everyday phrases", icon: "💬", color: "#8AC6D1" },
+  seasons: { namePt: "Estações e Clima", nameEn: "Seasons & weather", icon: "🌤️", color: "#A0D2EB" },
+  home: { namePt: "Casa", nameEn: "Home", icon: "🏠", color: "#FFCF9C" },
+  toys: { namePt: "Brinquedos", nameEn: "Toys", icon: "🧸", color: "#B5EAD7" },
+  beach: { namePt: "Praia", nameEn: "Beach", icon: "🏖️", color: "#FFE3A3" }, // CONTENT_PLAN.md, dez/2026
+  // ---- trilha adulta (perfil Thales) — só aparecem pra perfis com track "adult" (engine.js) ----
+  adult_work: { namePt: "Trabalho", icon: "💼", color: "#9FB7E8" },
+  adult_health: { namePt: "Saúde e Médico", icon: "🩺", color: "#F2A7A7" },
+  adult_housing: { namePt: "Aluguel e Consertos", icon: "🔧", color: "#F6C98F" },
+  adult_parenting: { namePt: "Escola dos Filhos", icon: "🏫", color: "#B8DDB0" },
+  adult_social: { namePt: "Conversa e Small Talk", icon: "☕", color: "#D9B99B" },
+  adult_opinion: { namePt: "Opinião e Argumento", icon: "🗣️", color: "#C3B1E1" },
+  adult_connectors: { namePt: "Conectores", icon: "🔗", color: "#A7D8DE" },
+  adult_travel: { namePt: "Viagem", icon: "✈️", color: "#B4D8F0" }, // CONTENT_PLAN.md, dez/2026
+  // ---- trilha de ortografia (André) — agrupada por padrão de som (phonics), não por tema ----
+  spell_oo: { namePt: "Spelling · oo", icon: "🌙", color: "#B9C6F2" },
+  spell_digraphs: { namePt: "Spelling · sh ch th", icon: "🐚", color: "#F5C2C7" },
+  spell_ee_ea: { namePt: "Spelling · ee ea", icon: "🌳", color: "#BFE3C0" },
+  spell_ai_ay: { namePt: "Spelling · ai ay", icon: "🌧️", color: "#C7E3F5" },
+  spell_magic_e: { namePt: "Spelling · magic e", icon: "🚲", color: "#FFE0A3" },
+  spell_igh_ow: { namePt: "Spelling · igh ow ou", icon: "💡", color: "#E5D4F5" },
+  spell_r_vowels: { namePt: "Spelling · ar or ir ur", icon: "🦈", color: "#A8DDE0" },
+  spell_tricky: { namePt: "Spelling · tricky words", icon: "🧠", color: "#F7C6A3" },
+  spell_ck_ng_nk: { namePt: "Spelling · ck ng nk", icon: "🚚", color: "#D6E8B5" }, // CONTENT_PLAN.md, dez/2026
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -31,6 +51,7 @@ const AVATAR_ITEMS = {
     { id: "yellow", color: "#FFB648", unlockedBy: "colors" },
     { id: "green", color: "#5FC98D", unlockedBy: "animals" },
     { id: "purple", color: "#B18CD9", unlockedBy: "school" },
+    { id: "sand", color: "#E8C98A", unlockedBy: "beach" },
   ],
   hat: [
     { id: "none", type: null, unlockedBy: null },
@@ -40,27 +61,54 @@ const AVATAR_ITEMS = {
   backpack: [
     { id: "none", color: null, unlockedBy: null },
     { id: "red", color: "#FF6B5B", unlockedBy: "food" },
+    { id: "blue", color: "#5B8DEF", unlockedBy: "spell_oo" },
+    { id: "lime", color: "#9BCB4B", unlockedBy: "spell_ck_ng_nk" },
   ],
 };
 
-// Situações — "My English World". Cada uma reaproveita conteúdo que já existe (categoria inteira ou
+// Tema da família do mês (CONTENT_PLAN.md seção 2): as três trilhas no mesmo assunto, e dicas pros
+// pais levarem o tema pra vida real (LEARNING_PHILOSOPHY.md §32-34). `id` = "AAAA-MM"; o app mostra o
+// tema do mês atual (ou o último que já começou) em Configurações e no relatório compartilhado.
+const FAMILY_THEMES = [
+  {
+    id: "2026-12", namePt: "Praia, verão e Natal", icon: "☀️",
+    homeTipsPt: [
+      "No fim do dia, cada um conta em inglês uma coisa que gostou: \"I liked the beach!\"",
+      "Na praia, antes de entrar no mar, espere o João pedir: \"Can I go swimming?\"",
+      "Peça pro André escrever a lista de presentes de Natal em inglês e conferir a grafia no app.",
+      "Quando alguém der um presente, todo mundo agradece em inglês: \"Thank you for the present!\"",
+    ],
+  },
+];
+
+// Situações — "My English World". `nameEn`: nome do lugar no perfil em imersão (André) — mostrado
+// no mapa e falado em inglês ao tocar (áudio em assets/audio/en/place_<id>.mp3). Cada uma reaproveita conteúdo que já existe (categoria inteira ou
 // uma lista de ids específica pra grupos temáticos que cruzam categorias, tipo "banheiro" que usa
 // survival + phrases). Nada de currículo novo, só uma segunda forma de agrupar o que já foi curado.
 const SITUATIONS = [
-  { id: "greetings", namePt: "Se Apresentar", icon: "👋", mapPos: { top: "15%", left: "20%" }, itemIds: ["survival_hello", "survival_bye_bye", "survival_my_name_is", "phrase_your_name"] },
-  { id: "help", namePt: "Pedir Ajuda", icon: "🆘", mapPos: { top: "15%", left: "75%" }, itemIds: ["survival_help", "phrase_help_please"] },
-  { id: "bathroom", namePt: "Banheiro", icon: "🚻", mapPos: { top: "40%", left: "12%" }, itemIds: ["survival_bathroom", "survival_please", "survival_go_to_the_bathroom", "phrase_bathroom_please"] },
-  { id: "water", namePt: "Água", icon: "💧", mapPos: { top: "38%", left: "50%" }, itemIds: ["survival_water", "combo_i_want_water", "phrase_water_please"] },
-  { id: "cafeteria", namePt: "Lanche", icon: "🍎", mapPos: { top: "40%", left: "85%" }, categoryId: "food" },
-  { id: "classroom", namePt: "Sala de Aula", icon: "🎒", mapPos: { top: "68%", left: "25%" }, categoryId: "school" },
-  { id: "family", namePt: "Família", icon: "👨‍👩‍👧", mapPos: { top: "70%", left: "60%" }, categoryId: "family" },
-  { id: "animals", namePt: "Bichinhos", icon: "🐶", mapPos: { top: "85%", left: "85%" }, categoryId: "animals" },
-  { id: "friends", namePt: "Fazer Amigos", icon: "🤝", mapPos: { top: "15%", left: "48%" }, itemIds: ["phrase_play_with_you", "phrase_lets_play", "phrase_my_turn", "phrase_your_turn"] },
-  { id: "sharing", namePt: "Dividir e Emprestar", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
-  { id: "teacher_tell", namePt: "Avisar a Professora", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
-  { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
-  { id: "home", namePt: "Casa", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
-  { id: "toys", namePt: "Brinquedos", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
+  { id: "greetings", namePt: "Se Apresentar", nameEn: "Saying hello", icon: "👋", mapPos: { top: "15%", left: "20%" }, itemIds: ["survival_hello", "survival_bye_bye", "survival_my_name_is", "phrase_your_name"] },
+  { id: "help", namePt: "Pedir Ajuda", nameEn: "Asking for help", icon: "🆘", mapPos: { top: "15%", left: "75%" }, itemIds: ["survival_help", "phrase_help_please"] },
+  { id: "bathroom", namePt: "Banheiro", nameEn: "Bathroom", icon: "🚻", mapPos: { top: "40%", left: "12%" }, itemIds: ["survival_bathroom", "survival_please", "survival_go_to_the_bathroom", "phrase_bathroom_please"] },
+  { id: "water", namePt: "Água", nameEn: "Water", icon: "💧", mapPos: { top: "38%", left: "50%" }, itemIds: ["survival_water", "combo_i_want_water", "phrase_water_please"] },
+  { id: "cafeteria", namePt: "Lanche", nameEn: "Lunch time", icon: "🍎", mapPos: { top: "40%", left: "85%" }, categoryId: "food" },
+  { id: "classroom", namePt: "Sala de Aula", nameEn: "Classroom", icon: "🎒", mapPos: { top: "68%", left: "25%" }, categoryId: "school" },
+  { id: "family", namePt: "Família", nameEn: "Family", icon: "👨‍👩‍👧", mapPos: { top: "70%", left: "60%" }, categoryId: "family" },
+  { id: "animals", namePt: "Bichinhos", nameEn: "Animals", icon: "🐶", mapPos: { top: "85%", left: "85%" }, categoryId: "animals" },
+  { id: "friends", namePt: "Fazer Amigos", nameEn: "Making friends", icon: "🤝", mapPos: { top: "15%", left: "48%" }, itemIds: ["phrase_play_with_you", "phrase_lets_play", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "sharing", namePt: "Dividir e Emprestar", nameEn: "Sharing", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "teacher_tell", namePt: "Avisar a Professora", nameEn: "Telling the teacher", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
+  { id: "goodbye", namePt: "Hora de ir Embora", nameEn: "Home time", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
+  { id: "home", namePt: "Casa", nameEn: "Home", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
+  { id: "toys", namePt: "Brinquedos", nameEn: "Toys", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
+  { id: "beach", namePt: "Praia", nameEn: "Beach", icon: "🏖️", mapPos: { top: "31%", left: "70%" }, categoryId: "beach" },
+  // ---- trilha adulta: mesmo mapa, outros lugares (profileSituations em engine.js filtra por track) ----
+  { id: "work", track: "adult", namePt: "Trabalho", icon: "💼", mapPos: { top: "18%", left: "22%" }, categoryId: "adult_work" },
+  { id: "doctor", track: "adult", namePt: "Médico", icon: "🩺", mapPos: { top: "18%", left: "72%" }, categoryId: "adult_health" },
+  { id: "rental", track: "adult", namePt: "Imobiliária", icon: "🔑", mapPos: { top: "45%", left: "15%" }, categoryId: "adult_housing" },
+  { id: "parent_teacher", track: "adult", namePt: "Reunião na Escola", icon: "🏫", mapPos: { top: "45%", left: "58%" }, categoryId: "adult_parenting" },
+  { id: "small_talk", track: "adult", namePt: "Papo com Vizinhos", icon: "☕", mapPos: { top: "72%", left: "28%" }, categoryId: "adult_social" },
+  { id: "travel", track: "adult", namePt: "Viagem", icon: "✈️", mapPos: { top: "88%", left: "50%" }, categoryId: "adult_travel" },
+  { id: "discussion", track: "adult", namePt: "Discussão e Opinião", icon: "🗣️", mapPos: { top: "75%", left: "75%" }, categoryId: "adult_opinion" },
 ];
 
 // Cenários de "problem-posing": a professora/situação apresenta um problema em português (ele
@@ -68,19 +116,67 @@ const SITUATIONS = [
 // em inglês pra resolver — a atividade central do LEARNING_PHILOSOPHY.md ("learn through doing",
 // seção 2/5/9.2). correctId/distractorIds sempre apontam pra itens reais de CONTENT (mesmo áudio,
 // mesmo registro de progresso — não é conteúdo paralelo).
+// `promptEn`: a mesma situação em inglês, usada pelo perfil em imersão (André, modo "literacy") —
+// ele já entende inglês, então o problema chega em inglês também (áudio em assets/audio/en/<id>).
 const SCENARIOS = [
-  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_water_please", "phrase_help_please"] },
-  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", correctId: "phrase_water_please", distractorIds: ["phrase_bathroom_please", "phrase_help_please"] },
-  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", correctId: "phrase_help_please", distractorIds: ["phrase_bathroom_please", "phrase_water_please"] },
-  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", correctId: "survival_my_name_is", distractorIds: ["phrase_your_name", "phrase_excuse_me"] },
-  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", correctId: "phrase_play_with_you", distractorIds: ["phrase_can_i_borrow", "phrase_can_i_have_this"] },
-  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
-  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
-  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
-  { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
-  { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
-  { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
-  { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
+  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", promptEn: "You don't know where the bathroom is.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_water_please", "phrase_help_please"] },
+  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", promptEn: "You are really thirsty.", correctId: "phrase_water_please", distractorIds: ["phrase_bathroom_please", "phrase_help_please"] },
+  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", promptEn: "You can't do an activity by yourself.", correctId: "phrase_help_please", distractorIds: ["phrase_bathroom_please", "phrase_water_please"] },
+  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", promptEn: "A new kid asks what your name is.", correctId: "survival_my_name_is", distractorIds: ["phrase_your_name", "phrase_excuse_me"] },
+  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", promptEn: "You want to play with a kid at the playground.", correctId: "phrase_play_with_you", distractorIds: ["phrase_can_i_borrow", "phrase_can_i_have_this"] },
+  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", promptEn: "You want to play with your friend's toy.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
+  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", promptEn: "You got hurt at the playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
+  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", promptEn: "School is over and your parents are here.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
+  { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", promptEn: "Your friend asks which pet you like best.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
+  { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", promptEn: "You finished your homework and want to relax. What do you ask your parents?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
+  { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", promptEn: "Your friend has a cool toy and you want to play with it.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
+  { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", promptEn: "The teacher talked too fast and you didn't understand.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
+
+  // ---- dez/2026 (CONTENT_PLAN.md): praia e Natal. "Família" ganha o primeiro cenário. ----
+  { id: "scn_beach_hat", situationId: "beach", promptPt: "O sol está muito forte e você está sem chapéu.", promptEn: "The sun is really strong and you don't have your hat on.", correctId: "beach_need_my_hat", distractorIds: ["beach_go_swimming", "beach_build_sandcastle"] },
+  { id: "scn_beach_swim", situationId: "beach", promptPt: "Você quer entrar no mar.", promptEn: "You want to go in the water.", correctId: "beach_go_swimming", distractorIds: ["beach_need_my_hat", "beach_sit_in_shade"] },
+  { id: "scn_beach_hot", situationId: "beach", promptPt: "Você brincou muito no sol e agora está com calor e com sede.", promptEn: "You played in the sun for a long time. Now you're hot and thirsty.", correctId: "beach_hot_water", distractorIds: ["beach_go_swimming", "beach_build_sandcastle"] },
+  { id: "scn_family_christmas", situationId: "family", promptPt: "É Natal e a vovó acabou de chegar.", promptEn: "It's Christmas and Grandma just arrived.", correctId: "family_merry_christmas_grandma", distractorIds: ["family_thank_you_present", "phrase_see_you_later"] },
+  { id: "scn_family_present", situationId: "family", promptPt: "A vovó te deu um presente de Natal.", promptEn: "Grandma gave you a Christmas present.", correctId: "family_thank_you_present", distractorIds: ["family_merry_christmas_grandma", "phrase_can_i_have_this"] },
+
+  // ---- trilha adulta: vários cenários por lugar (o primeiro de cada situationId abre a visita no
+  // mapa; os outros entram nas rodadas situation/read/write via SCENARIO_BY_CORRECT_ID). `speaker`
+  // troca o 👩‍🏫 do balão — no trabalho quem fala é um colega, no médico a recepção, etc.
+  { id: "scn_work_deadline", situationId: "work", speaker: "🧑‍💼", promptPt: "O projeto atrasou e você precisa avisar o seu chefe que a entrega não vai sair a tempo.", correctId: "adult_work_wont_meet_deadline", distractorIds: ["adult_work_postpone_meeting", "adult_work_whats_your_availability"] },
+  { id: "scn_work_extend", situationId: "work", speaker: "🧑‍💼", promptPt: "Você precisa de mais alguns dias para terminar o relatório e quer pedir isso com educação.", correctId: "adult_work_extend_deadline", distractorIds: ["adult_work_ill_follow_up", "adult_work_clarify"] },
+  { id: "scn_work_clarify", situationId: "work", speaker: "🧑‍💼", promptPt: "Na reunião, um colega usou um termo que você não entendeu direito.", correctId: "adult_work_clarify", distractorIds: ["adult_work_whats_your_availability", "adult_work_postpone_meeting"] },
+  { id: "scn_work_postpone", situationId: "work", speaker: "🧑‍💼", promptPt: "Surgiu um imprevisto e você não vai conseguir ir à reunião de amanhã.", correctId: "adult_work_postpone_meeting", distractorIds: ["adult_work_ill_follow_up", "adult_work_whats_your_availability"] },
+  { id: "scn_health_book", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "Você liga para a clínica porque quer ser atendido por um clínico geral.", correctId: "adult_health_id_like_to_book", distractorIds: ["adult_health_repeat_prescription", "adult_health_side_effects"] },
+  { id: "scn_health_symptoms", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "O médico pergunta o que você está sentindo. Sua garganta está doendo há três dias.", correctId: "adult_health_sore_throat", distractorIds: ["adult_health_allergic", "adult_health_anything_earlier"] },
+  { id: "scn_health_earlier", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "A recepcionista oferece um horário só para daqui a duas semanas, mas você precisava antes.", correctId: "adult_health_anything_earlier", distractorIds: ["adult_health_side_effects", "adult_health_repeat_prescription"] },
+  { id: "scn_health_side_effects", situationId: "doctor", speaker: "👩‍⚕️", promptPt: "O médico receitou um remédio novo e você quer saber se ele pode causar alguma reação.", correctId: "adult_health_side_effects", distractorIds: ["adult_health_repeat_prescription", "adult_health_anything_earlier"] },
+  { id: "scn_housing_repair", situationId: "rental", speaker: "🧑‍💼", promptPt: "O chuveiro está só com água fria desde ontem. Você liga para a imobiliária.", correctId: "adult_housing_stopped_working", distractorIds: ["adult_housing_rent_due", "adult_housing_give_notice"] },
+  { id: "scn_housing_send", situationId: "rental", speaker: "🧑‍💼", promptPt: "A imobiliária anotou o problema. Agora você quer que alguém venha consertar.", correctId: "adult_housing_send_someone", distractorIds: ["adult_housing_renew_lease", "adult_housing_get_bond_back"] },
+  { id: "scn_housing_renew", situationId: "rental", speaker: "🧑‍💼", promptPt: "O contrato está acabando e vocês querem continuar morando na casa.", correctId: "adult_housing_renew_lease", distractorIds: ["adult_housing_give_notice", "adult_housing_rent_due"] },
+  { id: "scn_housing_moving", situationId: "rental", speaker: "🧑‍💼", promptPt: "Vocês decidiram se mudar e precisam avisar a imobiliária.", correctId: "adult_housing_give_notice", distractorIds: ["adult_housing_renew_lease", "adult_housing_leaking"] },
+  { id: "scn_parent_meeting", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "Na reunião de pais, você quer saber como seu filho está indo nas primeiras semanas de aula.", correctId: "adult_parenting_settling_in", distractorIds: ["adult_parenting_absent", "adult_parenting_pick_up_early"] },
+  { id: "scn_parent_home", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "A professora contou que seu filho está com dificuldade. Você quer ajudar em casa.", correctId: "adult_parenting_support_at_home", distractorIds: ["adult_parenting_absent", "adult_parenting_pick_up_early"] },
+  { id: "scn_parent_context", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "A professora pergunta se o seu filho fala inglês em casa.", correctId: "adult_parenting_bilingual", distractorIds: ["adult_parenting_struggling", "adult_parenting_settling_in"] },
+  { id: "scn_parent_early", situationId: "parent_teacher", speaker: "👩‍🏫", promptPt: "Seu filho tem médico às duas da tarde e você precisa buscá-lo antes do horário.", correctId: "adult_parenting_pick_up_early", distractorIds: ["adult_parenting_absent", "adult_parenting_settling_in"] },
+  { id: "scn_social_origin", situationId: "small_talk", speaker: "🧑", promptPt: "Um vizinho percebe o seu sotaque e pergunta de onde você é.", correctId: "adult_social_originally_from", distractorIds: ["adult_social_what_do_you_do", "adult_social_looking_forward"] },
+  { id: "scn_social_work_q", situationId: "small_talk", speaker: "🧑", promptPt: "Numa festa de aniversário, você quer puxar conversa com outro pai sobre o trabalho dele.", correctId: "adult_social_what_do_you_do", distractorIds: ["adult_social_originally_from", "adult_social_long_time"] },
+  { id: "scn_social_catch_up", situationId: "small_talk", speaker: "🧑", promptPt: "Você encontra um amigo no supermercado, mas está com pressa. Quer marcar de conversar outro dia.", correctId: "adult_social_we_should_catch_up", distractorIds: ["adult_social_looking_forward", "adult_social_what_do_you_do"] },
+  { id: "scn_opinion_disagree", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Um colega apresenta uma ideia. Você reconhece que faz sentido, mas ainda tem dúvidas.", correctId: "adult_opinion_see_your_point", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_rather_not"] },
+  { id: "scn_opinion_end", situationId: "discussion", speaker: "🧑‍💼", promptPt: "A discussão não chega a lugar nenhum e vocês querem encerrar o assunto numa boa.", correctId: "adult_opinion_agree_to_disagree", distractorIds: ["adult_opinion_fair_point", "adult_opinion_what_do_you_think"] },
+  // ---- trilha de ortografia (André): a frase de cada grupo de som vira resposta de um problema
+  // real, pra escrita não ser só ditado. situationId reaproveita lugares das crianças (não muda
+  // quem abre a visita no mapa — o primeiro cenário de cada lugar continua o mesmo).
+  { id: "scn_spell_school", situationId: "classroom", promptPt: "A professora pergunta como você vai para a escola.", promptEn: "Your teacher asks how you get to school.", correctId: "spell_walk_to_school", distractorIds: ["spell_bike_home", "spell_chicken_lunch"] },
+  { id: "scn_spell_lunch", situationId: "cafeteria", promptPt: "Sua mãe pergunta o que você comeu na escola hoje.", promptEn: "Mum asks what you ate at school today.", correctId: "spell_chicken_lunch", distractorIds: ["spell_read_tree", "spell_walk_to_school"] },
+  { id: "scn_spell_rain", situationId: "home", promptPt: "Seu pai pergunta o que vocês fizeram no dia de chuva.", promptEn: "Dad asks what you did on the rainy day.", correctId: "spell_rained_played", distractorIds: ["spell_park_storm", "spell_bike_home"] },
+  { id: "scn_spell_birthday", situationId: "friends", promptPt: "A professora pergunta por que seus amigos vão na sua casa.", promptEn: "Your teacher asks why your friends are coming to your house.", correctId: "spell_friends_because", distractorIds: ["spell_friend_said", "spell_walk_to_school"] },
+  { id: "scn_spell_beach", situationId: "beach", promptPt: "Seu primo pergunta o que aconteceu na praia.", promptEn: "Your cousin asks what happened at the beach.", correctId: "spell_truck_sand", distractorIds: ["spell_sing_swing", "spell_read_tree"] },
+  { id: "scn_travel_delay", situationId: "travel", speaker: "🧑‍✈️", promptPt: "No aeroporto, você precisa avisar a família que o voo vai sair duas horas depois.", correctId: "adult_travel_flight_delayed", distractorIds: ["adult_travel_late_checkout", "adult_travel_recommend"] },
+  { id: "scn_travel_connection", situationId: "travel", speaker: "🧑‍✈️", promptPt: "Seu voo atrasou e você tem medo de perder a conexão.", correctId: "adult_travel_connection", distractorIds: ["adult_travel_check_in_early", "adult_travel_luggage_who"] },
+  { id: "scn_travel_luggage", situationId: "travel", speaker: "🧑‍✈️", promptPt: "A esteira parou e a sua mala não apareceu.", correctId: "adult_travel_luggage_who", distractorIds: ["adult_travel_connection", "adult_travel_late_checkout"] },
+  { id: "scn_travel_checkout", situationId: "travel", speaker: "🛎️", promptPt: "O voo de volta é só à noite e vocês queriam ficar mais tempo no quarto do hotel.", correctId: "adult_travel_late_checkout", distractorIds: ["adult_travel_check_in_early", "adult_travel_recommend"] },
+  { id: "scn_travel_recommend", situationId: "travel", speaker: "🛎️", promptPt: "Você quer pedir ao recepcionista uma dica de restaurante por perto.", correctId: "adult_travel_recommend", distractorIds: ["adult_travel_late_checkout", "adult_travel_itinerary"] },
+  { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
 const CONTENT = [
@@ -385,7 +481,7 @@ const CONTENT = [
   { id: "phrase_can_i_have_some_food", contentType: "sentence", en: "Can I have some food?", pt: "posso comer alguma coisa?", emoji: "🍱", category: "phrases", difficulty: 4, prerequisites: ["phrase_hungry"] },
   { id: "phrase_i_need_a_tissue", contentType: "sentence", en: "I need a tissue", pt: "eu preciso de um lenço", emoji: "🤧", category: "phrases", difficulty: 3, prerequisites: [] },
   { id: "phrase_im_cold", contentType: "sentence", en: "I'm cold", pt: "estou com frio", emoji: "🥶", category: "phrases", difficulty: 2, prerequisites: [] },
-  { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: ["beach_hot"] },
   { id: "phrase_im_tired", contentType: "sentence", en: "I'm tired", pt: "estou cansado", emoji: "😴", category: "phrases", difficulty: 2, prerequisites: [] },
   { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🧘", category: "phrases", difficulty: 3, prerequisites: [] },
 
@@ -450,4 +546,607 @@ const CONTENT = [
   { id: "school_ruler", contentType: "word", en: "ruler", pt: "régua", emoji: "📏", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_globe", contentType: "word", en: "globe", pt: "globo", emoji: "🌍", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_calendar", contentType: "word", en: "calendar", pt: "calendário", emoji: "📅", category: "school", difficulty: 1, prerequisites: [] },
+
+  // ---- dez/2026 (CONTENT_PLAN.md): praia — palavras só como degrau das frases (máx. 40% soltas) ----
+  { id: "beach_sand", contentType: "word", en: "sand", pt: "areia", emoji: "🏖️", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_sunscreen", contentType: "word", en: "sunscreen", pt: "protetor solar", emoji: "🧴", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_swim", contentType: "word", en: "swim", pt: "nadar", emoji: "🏊", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_shade", contentType: "word", en: "shade", pt: "sombra", emoji: "⛱️", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_hot", contentType: "word", en: "hot", pt: "calor / quente", emoji: "🥵", category: "beach", difficulty: 1, prerequisites: [] },
+  {
+    id: "beach_go_swimming", contentType: "sentence",
+    en: "Can I go swimming?", pt: "posso ir nadar?", emoji: "🏊❓",
+    category: "beach", difficulty: 3, prerequisites: ["beach_swim"],
+    acceptedAnswers: ["can i go swimming", "can i swim"],
+  },
+  {
+    id: "beach_go_swimming_dad", contentType: "sentence",
+    en: "Can I go swimming with Dad, please?", pt: "posso ir nadar com o papai, por favor?", emoji: "🏊👨🙏",
+    category: "beach", difficulty: 5, prerequisites: ["beach_go_swimming", "family_dad", "survival_please"],
+    acceptedAnswers: ["can i go swimming with dad please", "can i go swimming with dad"],
+  },
+  {
+    id: "beach_hot_water", contentType: "sentence",
+    en: "I'm hot, can I have some water?", pt: "estou com calor, posso tomar água?", emoji: "🥵💧",
+    category: "beach", difficulty: 5, prerequisites: ["phrase_im_hot", "phrase_water_please"],
+    acceptedAnswers: ["i'm hot can i have some water", "i am hot can i have some water", "i'm hot can i have water", "can i have some water"],
+  },
+  {
+    id: "beach_need_my_hat", contentType: "sentence",
+    en: "I need my hat.", pt: "preciso do meu chapéu.", emoji: "🧢☀️",
+    category: "beach", difficulty: 3, prerequisites: ["clothes_hat"],
+    acceptedAnswers: ["i need my hat"],
+  },
+  {
+    id: "beach_put_on_sunscreen", contentType: "sentence",
+    en: "Put on your sunscreen!", pt: "passe o protetor solar!", emoji: "🧴☀️",
+    category: "beach", difficulty: 3, prerequisites: ["beach_sunscreen"],
+    acceptedAnswers: ["put on your sunscreen", "put your sunscreen on"],
+  },
+  {
+    id: "beach_sit_in_shade", contentType: "sentence",
+    en: "Let's sit in the shade.", pt: "vamos sentar na sombra.", emoji: "⛱️🙂",
+    category: "beach", difficulty: 3, prerequisites: ["beach_shade"],
+    acceptedAnswers: ["let's sit in the shade", "let us sit in the shade"],
+  },
+  {
+    id: "beach_build_sandcastle", contentType: "sentence",
+    en: "Let's build a sandcastle!", pt: "vamos fazer um castelo de areia!", emoji: "🏰🏖️",
+    category: "beach", difficulty: 4, prerequisites: ["beach_sand", "phrase_lets_play"],
+    acceptedAnswers: ["let's build a sandcastle", "let us build a sandcastle", "let's build a sand castle"],
+  },
+
+  // ---- dez/2026: Natal com a família (cadeia "thank you" → "Thank you for the present!") ----
+  { id: "family_merry_christmas", contentType: "phrase", en: "Merry Christmas!", pt: "feliz Natal!", emoji: "🎄", category: "family", difficulty: 2, prerequisites: [] },
+  {
+    id: "family_merry_christmas_grandma", contentType: "sentence",
+    en: "Merry Christmas, Grandma!", pt: "feliz Natal, vovó!", emoji: "🎄👵",
+    category: "family", difficulty: 3, prerequisites: ["family_merry_christmas", "family_grandma"],
+    acceptedAnswers: ["merry christmas grandma", "merry christmas"],
+  },
+  {
+    id: "family_thank_you_present", contentType: "sentence",
+    en: "Thank you for the present!", pt: "obrigado pelo presente!", emoji: "🎁🙏",
+    category: "family", difficulty: 4, prerequisites: ["survival_thank_you"],
+    acceptedAnswers: ["thank you for the present", "thanks for the present"],
+  },
+
+  // ======================================================================================
+  // ---- TRILHA ADULTA (perfil Thales) ----
+  // `track: "adult"` tira esses itens da trilha das crianças (engine.js, profileContent). Mesma
+  // metodologia do resto: palavra (1) → chunk (2) → sentença curta (3) → sentença completa (4) →
+  // versão mais natural/complexa (5), ligadas por `prerequisites` (cadeias de evolução,
+  // CONTENT_GUIDE.md seção 8), e cada lugar do mapa abre com um cenário de problem-posing.
+  // acceptedAnswers sempre presentes nas sentenças (sem pontuação, com e sem contração).
+  // ======================================================================================
+
+  // ---- trabalho ----
+  { id: "adult_work_deadline", track: "adult", contentType: "word", en: "deadline", pt: "prazo", emoji: "⏰", category: "adult_work", difficulty: 1, prerequisites: [] },
+  { id: "adult_work_meet_the_deadline", track: "adult", contentType: "phrase", en: "meet the deadline", pt: "cumprir o prazo", emoji: "⏰✅", category: "adult_work", difficulty: 2, prerequisites: ["adult_work_deadline"] },
+  {
+    id: "adult_work_wont_meet_deadline", track: "adult", contentType: "sentence",
+    en: "I'm afraid we won't meet the deadline.", pt: "infelizmente não vamos conseguir cumprir o prazo.", emoji: "⚠️⏰",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_meet_the_deadline"],
+    acceptedAnswers: ["i'm afraid we won't meet the deadline", "i am afraid we will not meet the deadline", "i'm afraid we will not meet the deadline"],
+  },
+  {
+    id: "adult_work_extend_deadline", track: "adult", contentType: "sentence",
+    en: "Would it be possible to extend the deadline until Friday?", pt: "seria possível estender o prazo até sexta?", emoji: "📅🙏",
+    category: "adult_work", difficulty: 5, prerequisites: ["adult_work_wont_meet_deadline"],
+    acceptedAnswers: ["would it be possible to extend the deadline until friday", "would it be possible to extend the deadline to friday"],
+  },
+  { id: "adult_work_postpone", track: "adult", contentType: "word", en: "postpone", pt: "adiar", emoji: "⏸️", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_postpone_meeting", track: "adult", contentType: "sentence",
+    en: "Could we postpone the meeting to next week?", pt: "podemos adiar a reunião para a semana que vem?", emoji: "⏸️📆",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_postpone"],
+    acceptedAnswers: ["could we postpone the meeting to next week", "could we postpone the meeting until next week"],
+  },
+  { id: "adult_work_follow_up", track: "adult", contentType: "phrase", en: "follow up", pt: "dar um retorno", emoji: "🔁", category: "adult_work", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_work_ill_follow_up", track: "adult", contentType: "sentence",
+    en: "I'll follow up with an email this afternoon.", pt: "vou dar um retorno por e-mail hoje à tarde.", emoji: "📧🔁",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_follow_up"],
+    acceptedAnswers: ["i'll follow up with an email this afternoon", "i will follow up with an email this afternoon"],
+  },
+  { id: "adult_work_availability", track: "adult", contentType: "word", en: "availability", pt: "disponibilidade", emoji: "🗓️", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_whats_your_availability", track: "adult", contentType: "sentence",
+    en: "What's your availability later this week?", pt: "qual é a sua disponibilidade no fim desta semana?", emoji: "🗓️❓",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_availability"],
+    acceptedAnswers: ["what's your availability later this week", "what is your availability later this week"],
+  },
+  { id: "adult_work_workload", track: "adult", contentType: "word", en: "workload", pt: "carga de trabalho", emoji: "📚", category: "adult_work", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_work_overwhelmed", track: "adult", contentType: "sentence",
+    en: "I'm a bit overwhelmed with my workload at the moment.", pt: "estou um pouco sobrecarregado com o trabalho no momento.", emoji: "😵📚",
+    category: "adult_work", difficulty: 4, prerequisites: ["adult_work_workload"],
+    acceptedAnswers: ["i'm a bit overwhelmed with my workload at the moment", "i am a bit overwhelmed with my workload at the moment"],
+  },
+  {
+    id: "adult_work_clarify", track: "adult", contentType: "sentence",
+    en: "Could you clarify what you mean by that?", pt: "você pode esclarecer o que quer dizer com isso?", emoji: "🤔",
+    category: "adult_work", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["could you clarify what you mean by that", "could you clarify what you mean"],
+  },
+  {
+    id: "adult_work_same_page", track: "adult", contentType: "sentence",
+    en: "Let me make sure we're on the same page.", pt: "deixa eu garantir que estamos alinhados.", emoji: "🤝📄",
+    category: "adult_work", difficulty: 5, prerequisites: ["adult_work_clarify"],
+    acceptedAnswers: ["let me make sure we're on the same page", "let me make sure we are on the same page"],
+  },
+
+  // ---- saúde e médico ----
+  { id: "adult_health_appointment", track: "adult", contentType: "word", en: "appointment", pt: "consulta (horário marcado)", emoji: "📋", category: "adult_health", difficulty: 1, prerequisites: [] },
+  { id: "adult_health_book_appointment", track: "adult", contentType: "phrase", en: "book an appointment", pt: "marcar uma consulta", emoji: "📋✍️", category: "adult_health", difficulty: 2, prerequisites: ["adult_health_appointment"] },
+  {
+    id: "adult_health_id_like_to_book", track: "adult", contentType: "sentence",
+    en: "I'd like to book an appointment with a GP, please.", pt: "eu gostaria de marcar uma consulta com um clínico geral, por favor.", emoji: "☎️🩺",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_book_appointment"],
+    acceptedAnswers: ["i'd like to book an appointment with a gp please", "i would like to book an appointment with a gp please", "i'd like to book an appointment with a gp", "i would like to book an appointment with a gp"],
+  },
+  {
+    id: "adult_health_anything_earlier", track: "adult", contentType: "sentence",
+    en: "Is there anything available earlier this week?", pt: "tem algum horário disponível mais cedo nesta semana?", emoji: "⏪🗓️",
+    category: "adult_health", difficulty: 5, prerequisites: ["adult_health_id_like_to_book"],
+    acceptedAnswers: ["is there anything available earlier this week"],
+  },
+  { id: "adult_health_symptoms", track: "adult", contentType: "word", en: "symptoms", pt: "sintomas", emoji: "🤒", category: "adult_health", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_health_sore_throat", track: "adult", contentType: "sentence",
+    en: "I've had a sore throat for three days.", pt: "estou com dor de garganta há três dias.", emoji: "🤒🗣️",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_symptoms"],
+    acceptedAnswers: ["i've had a sore throat for three days", "i have had a sore throat for three days"],
+  },
+  { id: "adult_health_prescription", track: "adult", contentType: "word", en: "prescription", pt: "receita médica", emoji: "💊📝", category: "adult_health", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_health_repeat_prescription", track: "adult", contentType: "sentence",
+    en: "Could I get a repeat prescription, please?", pt: "posso pegar uma nova receita do mesmo remédio, por favor?", emoji: "💊🔁",
+    category: "adult_health", difficulty: 4, prerequisites: ["adult_health_prescription"],
+    acceptedAnswers: ["could i get a repeat prescription please", "could i get a repeat prescription"],
+  },
+  {
+    id: "adult_health_allergic", track: "adult", contentType: "sentence",
+    en: "I'm allergic to penicillin.", pt: "sou alérgico a penicilina.", emoji: "🚫💉",
+    category: "adult_health", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["i'm allergic to penicillin", "i am allergic to penicillin"],
+  },
+  {
+    id: "adult_health_side_effects", track: "adult", contentType: "sentence",
+    en: "Are there any side effects I should be aware of?", pt: "tem algum efeito colateral que eu deveria saber?", emoji: "💊❓",
+    category: "adult_health", difficulty: 5, prerequisites: ["adult_health_prescription"],
+    acceptedAnswers: ["are there any side effects i should be aware of", "are there any side effects"],
+  },
+
+  // ---- aluguel e consertos ----
+  { id: "adult_housing_landlord", track: "adult", contentType: "word", en: "landlord", pt: "proprietário do imóvel", emoji: "🏠🔑", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  { id: "adult_housing_lease", track: "adult", contentType: "word", en: "lease", pt: "contrato de aluguel", emoji: "📄", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  { id: "adult_housing_bond", track: "adult", contentType: "word", en: "bond", pt: "caução do aluguel", emoji: "💰", category: "adult_housing", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_housing_rent_due", track: "adult", contentType: "sentence",
+    en: "When is the rent due?", pt: "quando vence o aluguel?", emoji: "📅💵",
+    category: "adult_housing", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["when is the rent due"],
+  },
+  {
+    id: "adult_housing_stopped_working", track: "adult", contentType: "sentence",
+    en: "The hot water system has stopped working.", pt: "o aquecedor de água parou de funcionar.", emoji: "🚿❄️",
+    category: "adult_housing", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["the hot water system has stopped working", "the hot water system stopped working"],
+  },
+  {
+    id: "adult_housing_send_someone", track: "adult", contentType: "sentence",
+    en: "Could you send someone to take a look at it?", pt: "você pode mandar alguém para dar uma olhada?", emoji: "🔧👷",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_stopped_working"],
+    acceptedAnswers: ["could you send someone to take a look at it", "could you send someone to have a look at it"],
+  },
+  {
+    id: "adult_housing_leaking", track: "adult", contentType: "sentence",
+    en: "There's a leak under the kitchen sink.", pt: "tem um vazamento embaixo da pia da cozinha.", emoji: "💧🚰",
+    category: "adult_housing", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["there's a leak under the kitchen sink", "there is a leak under the kitchen sink"],
+  },
+  {
+    id: "adult_housing_get_bond_back", track: "adult", contentType: "sentence",
+    en: "When will we get our bond back?", pt: "quando vamos receber a caução de volta?", emoji: "💰🔙",
+    category: "adult_housing", difficulty: 4, prerequisites: ["adult_housing_bond"],
+    acceptedAnswers: ["when will we get our bond back"],
+  },
+  {
+    id: "adult_housing_renew_lease", track: "adult", contentType: "sentence",
+    en: "We'd like to renew the lease for another twelve months.", pt: "gostaríamos de renovar o contrato por mais doze meses.", emoji: "📄🔁",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_lease"],
+    acceptedAnswers: ["we'd like to renew the lease for another twelve months", "we would like to renew the lease for another twelve months", "we'd like to renew the lease for another 12 months", "we would like to renew the lease for another 12 months"],
+  },
+  {
+    id: "adult_housing_give_notice", track: "adult", contentType: "sentence",
+    en: "I'm calling to give notice that we're moving out.", pt: "estou ligando para avisar que vamos sair do imóvel.", emoji: "📦🚚",
+    category: "adult_housing", difficulty: 5, prerequisites: ["adult_housing_landlord"],
+    acceptedAnswers: ["i'm calling to give notice that we're moving out", "i am calling to give notice that we are moving out"],
+  },
+
+  // ---- escola dos filhos ----
+  {
+    id: "adult_parenting_settling_in", track: "adult", contentType: "sentence",
+    en: "How is he settling in?", pt: "como ele está se adaptando?", emoji: "🏫🙂",
+    category: "adult_parenting", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["how is he settling in", "how's he settling in"],
+  },
+  { id: "adult_parenting_permission_slip", track: "adult", contentType: "phrase", en: "permission slip", pt: "autorização (bilhete da escola)", emoji: "📝✍️", category: "adult_parenting", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_parenting_absent", track: "adult", contentType: "sentence",
+    en: "He'll be absent tomorrow because he's unwell.", pt: "ele vai faltar amanhã porque não está bem.", emoji: "🤒🏠",
+    category: "adult_parenting", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["he'll be absent tomorrow because he's unwell", "he will be absent tomorrow because he is unwell"],
+  },
+  {
+    id: "adult_parenting_struggling", track: "adult", contentType: "sentence",
+    en: "He's been struggling to follow the instructions in class.", pt: "ele tem tido dificuldade para acompanhar as instruções na sala.", emoji: "😕📋",
+    category: "adult_parenting", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["he's been struggling to follow the instructions in class", "he has been struggling to follow the instructions in class"],
+  },
+  {
+    id: "adult_parenting_support_at_home", track: "adult", contentType: "sentence",
+    en: "Is there anything we can do at home to support his learning?", pt: "tem algo que a gente possa fazer em casa para apoiar o aprendizado dele?", emoji: "🏠📚",
+    category: "adult_parenting", difficulty: 5, prerequisites: ["adult_parenting_struggling"],
+    acceptedAnswers: ["is there anything we can do at home to support his learning"],
+  },
+  {
+    id: "adult_parenting_pick_up_early", track: "adult", contentType: "sentence",
+    en: "I need to pick him up early today because of a medical appointment.", pt: "preciso buscá-lo mais cedo hoje por causa de uma consulta médica.", emoji: "🚗🩺",
+    category: "adult_parenting", difficulty: 5, prerequisites: ["adult_health_appointment"],
+    acceptedAnswers: ["i need to pick him up early today because of a medical appointment", "i need to pick him up early today"],
+  },
+  {
+    id: "adult_parenting_bilingual", track: "adult", contentType: "sentence",
+    en: "We speak Portuguese at home, so English is still new for him.", pt: "falamos português em casa, então o inglês ainda é novo para ele.", emoji: "🇧🇷🇦🇺",
+    category: "adult_parenting", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["we speak portuguese at home so english is still new for him", "we speak portuguese at home so english is still new to him"],
+  },
+
+  // ---- conversa e small talk ----
+  {
+    id: "adult_social_hows_your_week", track: "adult", contentType: "sentence",
+    en: "How's your week been so far?", pt: "como está sendo a sua semana?", emoji: "☕🙂",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["how's your week been so far", "how has your week been so far", "how's your week been"],
+  },
+  {
+    id: "adult_social_what_do_you_do", track: "adult", contentType: "sentence",
+    en: "What do you do for a living?", pt: "você trabalha com o quê?", emoji: "💼❓",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["what do you do for a living"],
+  },
+  {
+    id: "adult_social_originally_from", track: "adult", contentType: "sentence",
+    en: "I'm originally from Brazil.", pt: "eu sou do Brasil, originalmente.", emoji: "🇧🇷",
+    category: "adult_social", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["i'm originally from brazil", "i am originally from brazil"],
+  },
+  {
+    id: "adult_social_been_living_here", track: "adult", contentType: "sentence",
+    en: "We've been living here for about two years.", pt: "moramos aqui há mais ou menos dois anos.", emoji: "🏡⏳",
+    category: "adult_social", difficulty: 4, prerequisites: ["adult_social_originally_from"],
+    acceptedAnswers: ["we've been living here for about two years", "we have been living here for about two years", "we've been living here for about 2 years", "we have been living here for about 2 years"],
+  },
+  { id: "adult_social_catch_up", track: "adult", contentType: "phrase", en: "catch up", pt: "colocar o papo em dia", emoji: "🤝", category: "adult_social", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_social_we_should_catch_up", track: "adult", contentType: "sentence",
+    en: "We should catch up for a coffee sometime.", pt: "a gente devia marcar um café qualquer dia.", emoji: "☕🤝",
+    category: "adult_social", difficulty: 4, prerequisites: ["adult_social_catch_up"],
+    acceptedAnswers: ["we should catch up for a coffee sometime", "we should catch up for coffee sometime"],
+  },
+  {
+    id: "adult_social_long_time", track: "adult", contentType: "sentence",
+    en: "It's been ages since we last saw each other!", pt: "faz séculos que a gente não se vê!", emoji: "⌛😄",
+    category: "adult_social", difficulty: 5, prerequisites: ["adult_social_we_should_catch_up"],
+    acceptedAnswers: ["it's been ages since we last saw each other", "it has been ages since we last saw each other"],
+  },
+  {
+    id: "adult_social_looking_forward", track: "adult", contentType: "sentence",
+    en: "I'm really looking forward to the weekend.", pt: "estou muito animado para o fim de semana.", emoji: "🎉📅",
+    category: "adult_social", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["i'm really looking forward to the weekend", "i am really looking forward to the weekend"],
+  },
+
+  // ---- opinião e argumento ----
+  { id: "adult_opinion_in_my_opinion", track: "adult", contentType: "phrase", en: "in my opinion", pt: "na minha opinião", emoji: "💭", category: "adult_opinion", difficulty: 2, prerequisites: [] },
+  { id: "adult_opinion_to_be_honest", track: "adult", contentType: "phrase", en: "to be honest", pt: "pra ser sincero", emoji: "🙂", category: "adult_opinion", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_opinion_what_do_you_think", track: "adult", contentType: "sentence",
+    en: "What do you think about it?", pt: "o que você acha disso?", emoji: "🤔💬",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["what do you think about it", "what do you think"],
+  },
+  {
+    id: "adult_opinion_fair_point", track: "adult", contentType: "sentence",
+    en: "That's a fair point.", pt: "é um argumento válido.", emoji: "👍💬",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["that's a fair point", "that is a fair point"],
+  },
+  {
+    id: "adult_opinion_depends", track: "adult", contentType: "sentence",
+    en: "It depends on the circumstances.", pt: "depende das circunstâncias.", emoji: "⚖️",
+    category: "adult_opinion", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["it depends on the circumstances"],
+  },
+  {
+    id: "adult_opinion_see_your_point", track: "adult", contentType: "sentence",
+    en: "I see your point, but I'm not entirely convinced.", pt: "entendo o seu ponto, mas não estou totalmente convencido.", emoji: "🤨💬",
+    category: "adult_opinion", difficulty: 5, prerequisites: ["adult_opinion_fair_point"],
+    acceptedAnswers: ["i see your point but i'm not entirely convinced", "i see your point but i am not entirely convinced"],
+  },
+  {
+    id: "adult_opinion_agree_to_disagree", track: "adult", contentType: "sentence",
+    en: "Let's agree to disagree.", pt: "vamos concordar em discordar.", emoji: "🤝🙃",
+    category: "adult_opinion", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["let's agree to disagree", "let us agree to disagree"],
+  },
+  {
+    id: "adult_opinion_rather_not", track: "adult", contentType: "sentence",
+    en: "To be honest, I'd rather not commit to that yet.", pt: "pra ser sincero, prefiro não me comprometer com isso ainda.", emoji: "✋⏳",
+    category: "adult_opinion", difficulty: 5, prerequisites: ["adult_opinion_to_be_honest"],
+    acceptedAnswers: ["to be honest i'd rather not commit to that yet", "to be honest i would rather not commit to that yet", "i'd rather not commit to that yet"],
+  },
+
+  // ---- conectores (palavra isolada → a mesma palavra fazendo trabalho numa frase de verdade) ----
+  { id: "adult_conn_however", track: "adult", contentType: "word", en: "however", pt: "no entanto", emoji: "↔️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_although", track: "adult", contentType: "word", en: "although", pt: "embora", emoji: "🌦️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_therefore", track: "adult", contentType: "word", en: "therefore", pt: "portanto", emoji: "➡️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_unless", track: "adult", contentType: "word", en: "unless", pt: "a menos que", emoji: "🚧", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_meanwhile", track: "adult", contentType: "word", en: "meanwhile", pt: "enquanto isso", emoji: "⏱️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_nevertheless", track: "adult", contentType: "word", en: "nevertheless", pt: "mesmo assim", emoji: "💪", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_whereas", track: "adult", contentType: "word", en: "whereas", pt: "ao passo que", emoji: "⚖️", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  { id: "adult_conn_furthermore", track: "adult", contentType: "word", en: "furthermore", pt: "além disso", emoji: "➕", category: "adult_connectors", difficulty: 1, prerequisites: [] },
+  {
+    id: "adult_conn_although_sentence", track: "adult", contentType: "sentence",
+    en: "Although it was raining, we went to the beach.", pt: "embora estivesse chovendo, fomos à praia.", emoji: "🌧️🏖️",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_although"],
+    acceptedAnswers: ["although it was raining we went to the beach"],
+  },
+  {
+    id: "adult_conn_unless_sentence", track: "adult", contentType: "sentence",
+    en: "I'll be there on time unless the train is late.", pt: "vou chegar na hora, a menos que o trem atrase.", emoji: "🚆⏰",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_unless"],
+    acceptedAnswers: ["i'll be there on time unless the train is late", "i will be there on time unless the train is late"],
+  },
+  {
+    id: "adult_conn_however_sentence", track: "adult", contentType: "sentence",
+    en: "The plan is good; however, it's too expensive.", pt: "o plano é bom; no entanto, é caro demais.", emoji: "📝💸",
+    category: "adult_connectors", difficulty: 4, prerequisites: ["adult_conn_however"],
+    acceptedAnswers: ["the plan is good however it's too expensive", "the plan is good however it is too expensive"],
+  },
+  {
+    id: "adult_conn_therefore_sentence", track: "adult", contentType: "sentence",
+    en: "The flight was cancelled; therefore, we stayed another night.", pt: "o voo foi cancelado; portanto, ficamos mais uma noite.", emoji: "✈️🏨",
+    category: "adult_connectors", difficulty: 5, prerequisites: ["adult_conn_therefore"],
+    acceptedAnswers: ["the flight was cancelled therefore we stayed another night", "the flight was canceled therefore we stayed another night"],
+  },
+  {
+    id: "adult_conn_whereas_sentence", track: "adult", contentType: "sentence",
+    en: "I prefer working from home, whereas my colleague prefers the office.", pt: "eu prefiro trabalhar de casa, ao passo que meu colega prefere o escritório.", emoji: "🏠🏢",
+    category: "adult_connectors", difficulty: 5, prerequisites: ["adult_conn_whereas"],
+    acceptedAnswers: ["i prefer working from home whereas my colleague prefers the office"],
+  },
+
+  // ---- viagem (dez/2026, CONTENT_PLAN.md) ----
+  { id: "adult_travel_delay", track: "adult", contentType: "word", en: "delay", pt: "atraso", emoji: "⏳", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_luggage", track: "adult", contentType: "word", en: "luggage", pt: "bagagem", emoji: "🧳", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_itinerary_word", track: "adult", contentType: "word", en: "itinerary", pt: "roteiro de viagem", emoji: "🗺️", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_check_in", track: "adult", contentType: "phrase", en: "check in", pt: "fazer check-in", emoji: "🛎️", category: "adult_travel", difficulty: 2, prerequisites: [] },
+  { id: "adult_travel_boarding_pass", track: "adult", contentType: "phrase", en: "boarding pass", pt: "cartão de embarque", emoji: "🎫", category: "adult_travel", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_travel_flight_delayed", track: "adult", contentType: "sentence",
+    en: "Our flight has been delayed by two hours.", pt: "nosso voo atrasou duas horas.", emoji: "✈️⏳",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_delay"],
+    acceptedAnswers: ["our flight has been delayed by two hours", "our flight has been delayed by 2 hours", "our flight's been delayed by two hours"],
+  },
+  {
+    id: "adult_travel_connection", track: "adult", contentType: "sentence",
+    en: "Will I still make my connecting flight?", pt: "ainda vou conseguir pegar o voo de conexão?", emoji: "🔁✈️",
+    category: "adult_travel", difficulty: 5, prerequisites: ["adult_travel_flight_delayed"],
+    acceptedAnswers: ["will i still make my connecting flight", "will i still make my connection"],
+  },
+  {
+    id: "adult_travel_cant_find_luggage", track: "adult", contentType: "sentence",
+    en: "I can't find my luggage.", pt: "não estou encontrando a minha bagagem.", emoji: "🧳❓",
+    category: "adult_travel", difficulty: 3, prerequisites: ["adult_travel_luggage"],
+    acceptedAnswers: ["i can't find my luggage", "i cannot find my luggage"],
+  },
+  {
+    id: "adult_travel_luggage_who", track: "adult", contentType: "sentence",
+    en: "My luggage didn't arrive. Who should I speak to?", pt: "minha mala não chegou. com quem eu devo falar?", emoji: "🧳🙋",
+    category: "adult_travel", difficulty: 5, prerequisites: ["adult_travel_cant_find_luggage"],
+    acceptedAnswers: ["my luggage didn't arrive who should i speak to", "my luggage did not arrive who should i speak to", "my luggage didn't arrive who should i talk to"],
+  },
+  {
+    id: "adult_travel_check_in_early", track: "adult", contentType: "sentence",
+    en: "Is it possible to check in a bit earlier?", pt: "é possível fazer o check-in um pouco mais cedo?", emoji: "🛎️⏪",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_check_in"],
+    acceptedAnswers: ["is it possible to check in a bit earlier", "is it possible to check in earlier"],
+  },
+  {
+    id: "adult_travel_late_checkout", track: "adult", contentType: "sentence",
+    en: "Could we get a late check-out?", pt: "podemos fazer o check-out mais tarde?", emoji: "🛎️⏩",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_check_in"],
+    acceptedAnswers: ["could we get a late check-out", "could we get a late checkout", "could we get a late check out"],
+  },
+  {
+    id: "adult_travel_recommend", track: "adult", contentType: "sentence",
+    en: "Is there anywhere nearby you'd recommend?", pt: "tem algum lugar aqui perto que você recomendaria?", emoji: "🍽️📍",
+    category: "adult_travel", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["is there anywhere nearby you'd recommend", "is there anywhere nearby you would recommend"],
+  },
+  {
+    id: "adult_travel_heading_coast", track: "adult", contentType: "sentence",
+    en: "We're heading to the coast for the long weekend.", pt: "vamos para o litoral no feriadão.", emoji: "🚗🏖️",
+    category: "adult_travel", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["we're heading to the coast for the long weekend", "we are heading to the coast for the long weekend"],
+  },
+  {
+    id: "adult_travel_itinerary", track: "adult", contentType: "sentence",
+    en: "We haven't sorted out our itinerary yet.", pt: "ainda não fechamos o nosso roteiro.", emoji: "🗺️🤷",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_itinerary_word"],
+    acceptedAnswers: ["we haven't sorted out our itinerary yet", "we have not sorted out our itinerary yet"],
+  },
+
+  // ======================================================================================
+  // ---- TRILHA DE ORTOGRAFIA (André, 8 anos — já fala inglês, precisa ESCREVER certo) ----
+  // `track: "spelling"`: só o perfil do André vê (engine.js, PROFILES.tracks). Agrupada por padrão
+  // de som (phonics), que é como a alfabetização em inglês é ensinada: cada categoria é UMA regra
+  // de grafia ("oo" em school/moon/food), e as dicas de erro (PHONICS_PATTERNS, engine.js) usam
+  // essas palavras como exemplo. Mesma metodologia do resto: palavras (1-2) → frase que usa as
+  // palavras (4) → versão mais longa (5), ligadas por `prerequisites`; as frases têm cenário.
+  // `spellingTip` (tricky words): palavra que não segue regra — a dica é um macete pra decorar.
+  // ======================================================================================
+
+  // ---- oo ----
+  { id: "spell_school", track: "spelling", contentType: "word", en: "school", pt: "escola", emoji: "🏫", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_moon", track: "spelling", contentType: "word", en: "moon", pt: "lua", emoji: "🌙", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_food", track: "spelling", contentType: "word", en: "food", pt: "comida", emoji: "🍲", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_pool", track: "spelling", contentType: "word", en: "pool", pt: "piscina", emoji: "🏊", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_room", track: "spelling", contentType: "word", en: "room", pt: "quarto / sala", emoji: "🚪", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_zoo", track: "spelling", contentType: "word", en: "zoo", pt: "zoológico", emoji: "🦓", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_walk_to_school", track: "spelling", contentType: "sentence",
+    en: "I walk to school.", pt: "eu vou a pé para a escola.", emoji: "🚶🏫",
+    category: "spell_oo", difficulty: 4, prerequisites: ["spell_school"],
+    acceptedAnswers: ["i walk to school"],
+  },
+  {
+    id: "spell_walk_to_school_friends", track: "spelling", contentType: "sentence",
+    en: "I walk to school with my friends every morning.", pt: "eu vou a pé para a escola com meus amigos toda manhã.", emoji: "🚶🧑‍🤝‍🧑🏫",
+    category: "spell_oo", difficulty: 5, prerequisites: ["spell_walk_to_school", "spell_friend"],
+    acceptedAnswers: ["i walk to school with my friends every morning"],
+  },
+
+  // ---- sh / ch / th (duas letras, um som) ----
+  { id: "spell_shop", track: "spelling", contentType: "word", en: "shop", pt: "loja", emoji: "🏪", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_shell", track: "spelling", contentType: "word", en: "shell", pt: "concha", emoji: "🐚", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_lunch", track: "spelling", contentType: "word", en: "lunch", pt: "almoço / lanche", emoji: "🥪", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_chicken", track: "spelling", contentType: "word", en: "chicken", pt: "frango", emoji: "🍗", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_think", track: "spelling", contentType: "word", en: "think", pt: "pensar", emoji: "🤔", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_mother", track: "spelling", contentType: "word", en: "mother", pt: "mãe", emoji: "👩", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_chicken_lunch", track: "spelling", contentType: "sentence",
+    en: "We had chicken for lunch.", pt: "comemos frango no almoço.", emoji: "🍗🥪",
+    category: "spell_digraphs", difficulty: 4, prerequisites: ["spell_chicken", "spell_lunch"],
+    acceptedAnswers: ["we had chicken for lunch"],
+  },
+
+  // ---- ee / ea ----
+  { id: "spell_tree", track: "spelling", contentType: "word", en: "tree", pt: "árvore", emoji: "🌳", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_sleep", track: "spelling", contentType: "word", en: "sleep", pt: "dormir", emoji: "😴", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_feet", track: "spelling", contentType: "word", en: "feet", pt: "pés", emoji: "🦶", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_beach", track: "spelling", contentType: "word", en: "beach", pt: "praia", emoji: "🏖️", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_read", track: "spelling", contentType: "word", en: "read", pt: "ler", emoji: "📖", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_dream", track: "spelling", contentType: "word", en: "dream", pt: "sonho", emoji: "💭", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_read_tree", track: "spelling", contentType: "sentence",
+    en: "We read books under the tree.", pt: "a gente lê livros embaixo da árvore.", emoji: "📖🌳",
+    category: "spell_ee_ea", difficulty: 4, prerequisites: ["spell_read", "spell_tree"],
+    acceptedAnswers: ["we read books under the tree"],
+  },
+
+  // ---- ai / ay ----
+  { id: "spell_rain", track: "spelling", contentType: "word", en: "rain", pt: "chuva", emoji: "🌧️", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_paint", track: "spelling", contentType: "word", en: "paint", pt: "tinta / pintar", emoji: "🎨", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_snail", track: "spelling", contentType: "word", en: "snail", pt: "caracol", emoji: "🐌", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_day", track: "spelling", contentType: "word", en: "day", pt: "dia", emoji: "☀️", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_play", track: "spelling", contentType: "word", en: "play", pt: "brincar", emoji: "🤸", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_birthday", track: "spelling", contentType: "word", en: "birthday", pt: "aniversário", emoji: "🎂", category: "spell_ai_ay", difficulty: 2, prerequisites: [] },
+  {
+    id: "spell_rained_played", track: "spelling", contentType: "sentence",
+    en: "It rained all day, so we played inside.", pt: "choveu o dia todo, então brincamos dentro de casa.", emoji: "🌧️🏠",
+    category: "spell_ai_ay", difficulty: 5, prerequisites: ["spell_rain", "spell_day", "spell_play"],
+    acceptedAnswers: ["it rained all day so we played inside"],
+  },
+
+  // ---- magic e (a_e, i_e, o_e) ----
+  { id: "spell_cake", track: "spelling", contentType: "word", en: "cake", pt: "bolo", emoji: "🍰", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_game", track: "spelling", contentType: "word", en: "game", pt: "jogo", emoji: "🎲", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_bike", track: "spelling", contentType: "word", en: "bike", pt: "bicicleta", emoji: "🚲", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_time", track: "spelling", contentType: "word", en: "time", pt: "hora / tempo", emoji: "⏰", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_home", track: "spelling", contentType: "word", en: "home", pt: "casa (lar)", emoji: "🏠", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_bone", track: "spelling", contentType: "word", en: "bone", pt: "osso", emoji: "🦴", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_bike_home", track: "spelling", contentType: "sentence",
+    en: "I ride my bike home after school.", pt: "eu volto de bicicleta para casa depois da escola.", emoji: "🚲🏠",
+    category: "spell_magic_e", difficulty: 4, prerequisites: ["spell_bike", "spell_home"],
+    acceptedAnswers: ["i ride my bike home after school"],
+  },
+
+  // ---- igh / ow / ou ----
+  { id: "spell_night", track: "spelling", contentType: "word", en: "night", pt: "noite", emoji: "🌃", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_light", track: "spelling", contentType: "word", en: "light", pt: "luz", emoji: "💡", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_right", track: "spelling", contentType: "word", en: "right", pt: "certo / direita", emoji: "✅", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_house", track: "spelling", contentType: "word", en: "house", pt: "casa", emoji: "🏡", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_mouse", track: "spelling", contentType: "word", en: "mouse", pt: "rato", emoji: "🐭", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_snow", track: "spelling", contentType: "word", en: "snow", pt: "neve", emoji: "❄️", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_moon_bright", track: "spelling", contentType: "sentence",
+    en: "The moon is bright tonight.", pt: "a lua está brilhante hoje à noite.", emoji: "🌙✨",
+    category: "spell_igh_ow", difficulty: 4, prerequisites: ["spell_moon", "spell_night"],
+    acceptedAnswers: ["the moon is bright tonight"],
+  },
+
+  // ---- ar / or / ir / ur ----
+  { id: "spell_park", track: "spelling", contentType: "word", en: "park", pt: "parque", emoji: "🛝", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_shark", track: "spelling", contentType: "word", en: "shark", pt: "tubarão", emoji: "🦈", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_storm", track: "spelling", contentType: "word", en: "storm", pt: "tempestade", emoji: "⛈️", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_girl", track: "spelling", contentType: "word", en: "girl", pt: "menina", emoji: "👧", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_first", track: "spelling", contentType: "word", en: "first", pt: "primeiro", emoji: "🥇", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_nurse", track: "spelling", contentType: "word", en: "nurse", pt: "enfermeira", emoji: "🧑‍⚕️", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_park_storm", track: "spelling", contentType: "sentence",
+    en: "We left the park before the storm.", pt: "saímos do parque antes da tempestade.", emoji: "🛝⛈️",
+    category: "spell_r_vowels", difficulty: 4, prerequisites: ["spell_park", "spell_storm"],
+    acceptedAnswers: ["we left the park before the storm"],
+  },
+
+  // ---- tricky words (não seguem regra — macete pra decorar em `spellingTip`) ----
+  { id: "spell_because", track: "spelling", contentType: "word", en: "because", pt: "porque", emoji: "❓", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: be-CAU-se. The /z/ sound is spelled with an s" },
+  { id: "spell_friend", track: "spelling", contentType: "word", en: "friend", pt: "amigo", emoji: "🧑‍🤝‍🧑", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It has an i before the e: fr-I-E-nd. A friend is a friend to the END" },
+  { id: "spell_people", track: "spelling", contentType: "word", en: "people", pt: "pessoas", emoji: "👥", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: pe-O-ple" },
+  { id: "spell_said", track: "spelling", contentType: "word", en: "said", pt: "disse", emoji: "💬", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like sed, but it is spelled s-a-i-d" },
+  { id: "spell_was", track: "spelling", contentType: "word", en: "was", pt: "era / estava", emoji: "⏪", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like woz, but it is spelled w-a-s" },
+  { id: "spell_they", track: "spelling", contentType: "word", en: "they", pt: "eles / elas", emoji: "👉👉", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It ends in ey, like hey: th-EY" },
+  { id: "spell_could", track: "spelling", contentType: "word", en: "could", pt: "poderia / conseguia", emoji: "🤷", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! could, would and should all end in o-u-l-d, and the l is silent" },
+  { id: "spell_beautiful", track: "spelling", contentType: "word", en: "beautiful", pt: "bonito / lindo", emoji: "🌸", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: be-a-u-ti-ful" },
+  {
+    id: "spell_friend_said", track: "spelling", contentType: "sentence",
+    en: "My friend said it was beautiful.", pt: "meu amigo disse que estava lindo.", emoji: "💬🌸",
+    category: "spell_tricky", difficulty: 4, prerequisites: ["spell_friend", "spell_said", "spell_beautiful"],
+    acceptedAnswers: ["my friend said it was beautiful"],
+  },
+  {
+    id: "spell_friends_because", track: "spelling", contentType: "sentence",
+    en: "My friends are coming because it is my birthday.", pt: "meus amigos vão vir porque é meu aniversário.", emoji: "🧑‍🤝‍🧑🎂",
+    category: "spell_tricky", difficulty: 5, prerequisites: ["spell_because", "spell_friend", "spell_birthday"],
+    acceptedAnswers: ["my friends are coming because it is my birthday", "my friends are coming because it's my birthday"],
+  },
+
+  // ---- ck / ng / nk (dez/2026, CONTENT_PLAN.md) ----
+  { id: "spell_kick", track: "spelling", contentType: "word", en: "kick", pt: "chutar", emoji: "🦵⚽", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_rock", track: "spelling", contentType: "word", en: "rock", pt: "pedra", emoji: "🪨", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_truck", track: "spelling", contentType: "word", en: "truck", pt: "caminhão", emoji: "🚚", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_sing", track: "spelling", contentType: "word", en: "sing", pt: "cantar", emoji: "🎤", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_swing", track: "spelling", contentType: "word", en: "swing", pt: "balanço", emoji: "🌳🪢", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_drink", track: "spelling", contentType: "word", en: "drink", pt: "beber / bebida", emoji: "🥤", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_truck_sand", track: "spelling", contentType: "sentence",
+    en: "My truck got stuck in the sand.", pt: "meu caminhãozinho ficou preso na areia.", emoji: "🚚🏖️",
+    category: "spell_ck_ng_nk", difficulty: 4, prerequisites: ["spell_truck"],
+    acceptedAnswers: ["my truck got stuck in the sand"],
+  },
+  {
+    id: "spell_sing_swing", track: "spelling", contentType: "sentence",
+    en: "We sing songs on the swings.", pt: "a gente canta músicas nos balanços.", emoji: "🎤🌳",
+    category: "spell_ck_ng_nk", difficulty: 4, prerequisites: ["spell_sing", "spell_swing"],
+    acceptedAnswers: ["we sing songs on the swings"],
+  },
+  { id: "spell_christmas", track: "spelling", contentType: "word", en: "Christmas", pt: "Natal", emoji: "🎄", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It starts with Ch that says /k/, and the t is silent: CHRIS-mas" },
+  { id: "spell_holiday", track: "spelling", contentType: "word", en: "holiday", pt: "férias / feriado", emoji: "🌴", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It ends with the word day: holi-DAY" },
+  { id: "spell_family", track: "spelling", contentType: "word", en: "family", pt: "família", emoji: "👨‍👩‍👦", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say every part slowly: fam-I-ly" },
+  { id: "spell_laugh", track: "spelling", contentType: "word", en: "laugh", pt: "rir / risada", emoji: "😂", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! The gh at the end says /f/: l-a-u-g-h" },
 ];

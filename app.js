@@ -132,12 +132,18 @@ function renderAllAvatarMounts() {
   });
 }
 
+// Só os itens que o perfil ativo consegue desbloquear: um item ligado a uma categoria de outra
+// trilha (ex. "spell_oo", do André) ficaria trancado pra sempre na tela do João.
+function avatarItemVisible(item) {
+  return !item.unlockedBy || profileCategoryIds().includes(item.unlockedBy);
+}
+
 function renderAvatarScreen() {
   let totalUnlocked = 0, totalItems = 0;
   Object.keys(AVATAR_ITEMS).forEach((cat) => {
     const row = document.getElementById("row-" + cat);
     row.innerHTML = "";
-    AVATAR_ITEMS[cat].forEach((item) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
       totalItems++;
       const unlocked = isCategoryUnlockThresholdMet(item.unlockedBy);
       if (unlocked) totalUnlocked++;
@@ -150,7 +156,8 @@ function renderAvatarScreen() {
         const hintEl = document.getElementById("avatar-unlock-hint");
         if (!unlocked) {
           const catMeta = CATEGORY_META[item.unlockedBy];
-          hintEl.textContent = `🔒 Continue praticando "${catMeta ? catMeta.namePt : item.unlockedBy}" pra desbloquear!`;
+          const catName = catMeta ? displayName(catMeta) : item.unlockedBy;
+          hintEl.textContent = tr(`🔒 Keep practising "${catName}" to unlock it!`, `🔒 Continue praticando "${catName}" pra desbloquear!`);
           btn.style.animation = "none";
           void btn.offsetWidth;
           btn.style.animation = "shake 0.4s";
@@ -180,26 +187,30 @@ function renderWorldMap() {
   const pinsWrap = document.getElementById("world-pins");
   pinsWrap.innerHTML = "";
   renderCategoryGrid();
-  SITUATIONS.forEach((situation) => {
+  profileSituations().forEach((situation) => {
     const ratio = getSituationProgressRatio(situation);
     const pin = document.createElement("button");
     pin.className = "pin";
     pin.style.top = situation.mapPos.top;
     pin.style.left = situation.mapPos.left;
-    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${situation.namePt}</div>`;
+    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${displayName(situation)}</div>`;
     pin.addEventListener("click", () => goToSituation(situation));
     pinsWrap.appendChild(pin);
   });
   document.getElementById("world-avatar").innerHTML = avatarSVG(avatarState);
   const hintEl = document.querySelector("#world-map .world-hint");
   if (hintEl) {
-    const anyIntroduced = CONTENT.some((it) => getState(it.id).introduced);
-    hintEl.textContent = anyIntroduced ? "👉 Toque num lugar pra ir e jogar lá!" : "🌱 Sua aventura começa aqui — toque num lugar!";
+    const anyIntroduced = profileContent().some((it) => getState(it.id).introduced);
+    hintEl.textContent = anyIntroduced
+      ? tr("👉 Tap a place to go and play there!", "👉 Toque num lugar pra ir e jogar lá!")
+      : tr("🌱 Your adventure starts here — tap a place!", "🌱 Sua aventura começa aqui — toque num lugar!");
   }
 }
 
 function goToSituation(situation) {
-  speakPT(situation.namePt, situation.id);
+  // André (imersão) ouve o nome do lugar em inglês; os outros, em português.
+  if (isImmersion() && situation.nameEn) speak(situation.nameEn, `place_${situation.id}`);
+  else speakPT(situation.namePt, situation.id);
   const avatarEl = document.getElementById("world-avatar");
   avatarEl.style.top = situation.mapPos.top;
   avatarEl.style.left = situation.mapPos.left;
@@ -207,12 +218,17 @@ function goToSituation(situation) {
   setTimeout(() => {
     avatarEl.classList.remove("walking");
     const items = getSituationItems(situation);
-    const queue = shuffle(items).slice(0, 7).map((it) => ({ item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
+    // Adulto/André: usa o mesmo sorteio de atividade da sessão (pickRoundType, engine.js) — "choice"
+    // por imagem não carrega o sentido de uma frase longa, e "intro" seria condescendente pro André.
+    const queue = shuffle(items)
+      .slice(0, 7)
+      .map((it) => (getActiveProfile().mode !== "oral" ? makeRound(it) : { item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
     // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
     // do lugar vem depois, como prática complementar.
     const scenario = getScenarioForSituation(situation.id);
+    // André: o cenário de abertura vira escrita (o foco dele), não o round "situation" de ouvir.
     if (scenario) {
-      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: "situation", scenario });
+      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: isImmersion() ? "write" : "situation", scenario });
     }
     quizReturnScreen = "world";
     startQuiz(queue);
@@ -425,6 +441,8 @@ document.getElementById("btn-result-back").addEventListener("click", goToQuizRet
 
 // ===================== Home =====================
 function renderHome() {
+  // CSS por modo (ex. frase longa do adulto não pode vir em CAIXA ALTA gigante no card de intro).
+  document.body.dataset.mode = getActiveProfile().mode;
   document.getElementById("home-mascot").innerHTML = mascotSVG();
   renderAllAvatarMounts();
   renderAvatarScreen();
@@ -432,7 +450,9 @@ function renderHome() {
   // streak
   const streak = touchStreak();
   document.getElementById("streak-badge").innerHTML = streak.count > 0 ? `🔥 ${streak.count}` : "👋";
-  document.getElementById("home-greeting").textContent = streak.count > 1 ? `${streak.count} dias seguidos!` : "Olá! 👋";
+  document.getElementById("home-greeting").textContent =
+    streak.count > 1 ? tr(`${streak.count} days in a row!`, `${streak.count} dias seguidos!`) : tr("Hi! 👋", "Olá! 👋");
+  renderHomeStaticTexts();
 
   // missão do dia (sessão adaptativa, com carinha de missão)
   const session = buildSession();
@@ -441,13 +461,15 @@ function renderHome() {
   const topCatId = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a])[0];
   const topCat = topCatId ? CATEGORY_META[topCatId] : null;
   const estMinutes = Math.max(1, Math.round(session.length / 3));
-  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${topCat.namePt}` : "🎉 Tudo em dia!";
-  document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
+  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
+  document.getElementById("mission-meta").textContent = session.length
+    ? tr(`⏱ ~${estMinutes} min · ${session.length} activities`, `⏱ ~${estMinutes} min · ${session.length} atividades`)
+    : tr("Come back later to review!", "Volta mais tarde pra revisar!");
 
   // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
-  const nextSituations = [...SITUATIONS].sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
+  const nextSituations = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
   document.getElementById("world-banner-preview").innerHTML = nextSituations
-    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${s.namePt}</div>`)
+    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${displayName(s)}</div>`)
     .join("");
 }
 
@@ -456,14 +478,14 @@ function renderCategoryGrid() {
   const grid = document.getElementById("category-grid");
   if (!grid) return;
   grid.innerHTML = "";
-  Object.keys(CATEGORY_META).forEach((catId) => {
+  profileCategoryIds().forEach((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     const masteredCount = items.filter((it) => getLearningStage(it.id) === "mastered").length;
     const btn = document.createElement("button");
     btn.className = "cat-card";
     btn.style.background = meta.color;
-    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${meta.namePt}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
+    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${displayName(meta)}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
     btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
@@ -474,7 +496,7 @@ let currentCategoryId = null;
 function openCategory(catId) {
   currentCategoryId = catId;
   const meta = CATEGORY_META[catId];
-  document.getElementById("category-title").textContent = meta.namePt;
+  document.getElementById("category-title").textContent = displayName(meta);
   const wordGrid = document.getElementById("word-grid");
   wordGrid.innerHTML = "";
   CONTENT.filter((it) => it.category === catId).forEach((item) => {
@@ -494,7 +516,7 @@ function openCategory(catId) {
 document.getElementById("btn-play-quiz").addEventListener("click", () => {
   const items = CONTENT.filter((it) => it.category === currentCategoryId);
   quizReturnScreen = "category";
-  startQuiz(shuffle(items).slice(0, 10).map((it) => ({ item: it, roundType: "choice" })));
+  startQuiz(shuffle(items).slice(0, 10).map((it) => (getActiveProfile().mode !== "oral" ? makeRound(it) : { item: it, roundType: "choice" })));
 });
 
 document.getElementById("btn-session").addEventListener("click", () => {
@@ -513,7 +535,7 @@ let wrongAttemptsThisRound = 0;
 function getUnlockedAvatarItemIds() {
   const ids = [];
   Object.keys(AVATAR_ITEMS).forEach((cat) => {
-    AVATAR_ITEMS[cat].forEach((item) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
       if (isCategoryUnlockThresholdMet(item.unlockedBy)) ids.push(cat + ":" + item.id);
     });
   });
@@ -579,7 +601,11 @@ function renderRound() {
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
         <button class="mic-btn" id="mic-btn" aria-label="Falar">${icon("mic")}</button>
         <span class="speak-status" id="speak-status">Toque no microfone e fale: "${round.item.en}"</span>
-        <span class="speak-note">É só uma brincadeira de praticar a fala — não avalia a pronúncia dele.</span>
+        <span class="speak-note">${
+          getActiveProfile().mode === "adult"
+            ? "Prática de fala — conta se a frase inteira for reconhecida; não avalia sotaque."
+            : "É só uma brincadeira de praticar a fala — não avalia a pronúncia dele."
+        }</span>
       </div>`;
     speak(round.item.en, round.item.id);
     document.getElementById("mic-btn").addEventListener("click", () => startSpeakAttempt(round.item));
@@ -594,13 +620,13 @@ function renderRound() {
       <div class="situation-card">
         <div class="scenario-emoji">${round.item.emoji}</div>
         <div class="scenario-bubble">
-          <span class="avatar">👩‍🏫</span>
-          <span class="txt">"${scenario.promptPt}"</span>
+          <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
+          <span class="txt">"${scenarioPrompt(scenario)}"</span>
           <button class="speaker" id="scenario-replay" aria-label="Ouvir de novo">${icon("sound")}</button>
         </div>
       </div>
-      <div class="prompt-line">O que você fala? 🇬🇧</div>
-      <div class="situation-status" id="situation-status">🔊 ouvindo as opções... toque numa carta pra ouvir de novo</div>
+      <div class="prompt-line">${tr("What do you say?", "O que você fala?")} 🇬🇧</div>
+      <div class="situation-status" id="situation-status">${tr("🔊 listening to the options... tap a card to hear it again", "🔊 ouvindo as opções... toque numa carta pra ouvir de novo")}</div>
       <div class="situation-options" id="situation-options"></div>`;
     const optionsWrap = document.getElementById("situation-options");
     const statusEl = document.getElementById("situation-status");
@@ -623,8 +649,10 @@ function renderRound() {
       });
       optionsWrap.appendChild(btn);
     });
-    document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt, scenario.id));
-    speakPT(scenario.promptPt, scenario.id);
+    const playPrompt = () =>
+      isImmersion() && scenario.promptEn ? speak(scenario.promptEn, scenario.id) : speakPT(scenario.promptPt, scenario.id);
+    document.getElementById("scenario-replay").addEventListener("click", playPrompt);
+    playPrompt();
     options.forEach((opt, i) => {
       setTimeout(() => {
         const btn = optionsWrap.children[[...optionsWrap.children].findIndex((b) => b.dataset.itemId === opt.id)];
@@ -636,7 +664,7 @@ function renderRound() {
     setTimeout(() => {
       optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading", "locked"));
       choiceLocked = false;
-      statusEl.textContent = "👉 toque na certa!";
+      statusEl.textContent = tr("👉 tap the right one!", "👉 toque na certa!");
     }, 2200 + options.length * 2000);
     return;
   }
@@ -646,17 +674,17 @@ function renderRound() {
     wrongAttemptsThisRound = 0;
     const scenario = SCENARIO_BY_CORRECT_ID[round.item.id];
     if (scenario) {
-      // Com cenário: lê o promptPt (texto, não narrado) e escolhe a FRASE certa entre 3 — mesmo
+      // Com cenário: lê a situação (texto, não narrado) e escolhe a FRASE certa entre 3 — mesmo
       // problem-posing do round "situation" do João, só que lendo em vez de ouvir.
       container.innerHTML = `
         <div class="situation-card">
           <div class="scenario-emoji">${round.item.emoji}</div>
           <div class="scenario-bubble">
-            <span class="avatar">👩‍🏫</span>
-            <span class="txt">"${scenario.promptPt}"</span>
+            <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
+            <span class="txt">"${scenarioPrompt(scenario)}"</span>
           </div>
         </div>
-        <div class="prompt-line">Leia e escolha o que você fala 🇬🇧</div>
+        <div class="prompt-line">${tr("Read and choose what you say", "Leia e escolha o que você fala")} 🇬🇧</div>
         <div class="situation-options" id="situation-options"></div>`;
       const optionsWrap = document.getElementById("situation-options");
       const options = shuffle([round.item, ...scenario.distractorIds.map((id) => CONTENT_BY_ID[id])]);
@@ -670,16 +698,16 @@ function renderRound() {
       });
       return;
     }
-    // Sem cenário: mostra a palavra escrita (áudio só sob demanda — o desafio é ler, não ouvir) e
-    // escolhe a imagem certa entre 3.
+    // Sem cenário: mostra a palavra escrita e escolhe a imagem certa entre 3. Imersão: a ajuda é
+    // OUVIR a palavra em inglês (sob demanda — o desafio é ler), não a tradução em português.
     container.innerHTML = `
       <div class="read-card">
         <span class="read-word">${round.item.en}</span>
-        <button class="word-pt-btn" id="read-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>
-        <span class="intro-hint">toque na tradução se precisar de ajuda · escolha a imagem certa</span>
+        <button class="word-pt-btn" id="read-help">${icon("sound")}<span class="word-pt">${tr("hear it", "ouvir")}</span></button>
+        <span class="intro-hint">${tr("Read the word and tap the right picture", "Leia e escolha a imagem certa")}</span>
       </div>
       <div class="read-image-options" id="read-image-options"></div>`;
-    document.getElementById("read-pt").addEventListener("click", () => speakPT(round.item.pt));
+    document.getElementById("read-help").addEventListener("click", () => speak(round.item.en, round.item.id));
     const optionsWrap = document.getElementById("read-image-options");
     const distractors = getDistractors(round.item, 2);
     const options = shuffle([round.item, ...distractors]);
@@ -694,71 +722,80 @@ function renderRound() {
     return;
   }
 
-  if (round.roundType === "write") {
+  if (round.roundType === "write" || round.roundType === "dictation") {
+    // write: escreve a partir da situação (com cenário) ou da tradução (adulto, sem cenário).
+    // dictation (André): ouve a palavra/frase — que ele já conhece de ouvido — e escreve. É o
+    // treino de ortografia propriamente dito: som → grafia.
     repeatBtn.style.display = "none";
     wrongAttemptsThisRound = 0;
-    const scenario = SCENARIO_BY_CORRECT_ID[round.item.id];
+    const isDictation = round.roundType === "dictation";
+    const scenario = isDictation ? null : SCENARIO_BY_CORRECT_ID[round.item.id];
+    let head;
+    if (isDictation) {
+      head = `<span class="word-emoji-big dictation-media">${renderMedia(round.item)}</span>
+              <button class="big-btn listen-btn" id="write-listen">${icon("sound")} ${tr("Listen", "Ouvir")}</button>
+              <span class="intro-hint">${tr("Listen and write what you hear", "Ouça e escreva o que ouviu")}</span>`;
+    } else if (scenario) {
+      head = `<div class="scenario-emoji">${round.item.emoji}</div>
+              <div class="scenario-bubble"><span class="avatar">${scenario.speaker || "👩‍🏫"}</span><span class="txt">"${scenarioPrompt(scenario)}"</span>
+                ${isImmersion() ? `<button class="speaker" id="write-listen" aria-label="Listen">${icon("sound")}</button>` : ""}</div>
+              ${isImmersion() ? `<span class="intro-hint">What do you say? Write it.</span>` : ""}`;
+    } else {
+      head = `<span class="word-emoji-big">${renderMedia(round.item)}</span>
+              <button class="word-pt-btn" id="write-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>`;
+    }
     container.innerHTML = `
       <div class="write-card">
-        ${
-          scenario
-            ? `<div class="scenario-emoji">${round.item.emoji}</div>
-               <div class="scenario-bubble"><span class="avatar">👩‍🏫</span><span class="txt">"${scenario.promptPt}"</span></div>`
-            : `<span class="word-emoji-big">${renderMedia(round.item)}</span>
-               <button class="word-pt-btn" id="write-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>`
-        }
+        ${head}
         <input type="text" id="write-input" class="write-input" inputmode="text" autocapitalize="off"
-               autocomplete="off" autocorrect="off" spellcheck="false" placeholder="escreva em inglês..." />
-        <button class="big-btn" id="write-submit">Confirmar</button>
+               autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${tr("write it in English...", "escreva em inglês...")}" />
+        <button class="big-btn" id="write-submit">${tr("Check", "Confirmar")}</button>
         <div class="write-feedback" id="write-feedback"></div>
       </div>`;
-    if (!scenario) document.getElementById("write-pt").addEventListener("click", () => speakPT(round.item.pt));
-    const input = document.getElementById("write-input");
-    const feedback = document.getElementById("write-feedback");
-    // acceptedAnswers (data.js) são escritas sem nenhuma pontuação interna (ex. "can i have some
-    // water please", sem vírgula antes de "please") -- tira TODA pontuação, não só a do final, ou
-    // uma resposta certa com vírgula/interrogação naturais seria marcada como errada.
-    const normalize = (s) => s.toLowerCase().trim().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ").trim();
-    const target = round.item.acceptedAnswers && round.item.acceptedAnswers.length ? round.item.acceptedAnswers : [round.item.en];
-    const acceptedNormalized = target.map(normalize);
-    const checkWrite = () => {
-      if (choiceLocked) return;
-      const typed = normalize(input.value);
-      if (!typed) return;
-      if (acceptedNormalized.includes(typed)) {
-        choiceLocked = true;
-        feedback.textContent = "🌟 Isso aí!";
-        playCheer();
-        recordResult(round.item.id, wrongAttemptsThisRound === 0);
-        quizScore.correct++;
-        quizScore.total++;
-        setTimeout(() => {
-          quizIndex++;
-          renderRound();
-        }, 900);
-      } else {
-        wrongAttemptsThisRound++;
-        quizScore.total++;
-        playGentle();
-        if (wrongAttemptsThisRound >= 2) {
-          choiceLocked = true;
-          recordResult(round.item.id, false);
-          feedback.textContent = `A resposta certa era: "${round.item.en}"`;
-          speak(round.item.en, round.item.id);
-          setTimeout(() => {
-            quizIndex++;
-            renderRound();
-          }, 1800);
-        } else {
-          feedback.textContent = "Quase! Tenta de novo.";
-          input.value = "";
-        }
-      }
-    };
-    document.getElementById("write-submit").addEventListener("click", checkWrite);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") checkWrite();
+    const listenBtn = document.getElementById("write-listen");
+    if (listenBtn) {
+      listenBtn.addEventListener("click", () =>
+        isDictation ? speak(round.item.en, round.item.id) : speak(scenario.promptEn, scenario.id)
+      );
+    }
+    const ptBtn = document.getElementById("write-pt");
+    if (ptBtn) ptBtn.addEventListener("click", () => speakPT(round.item.pt));
+    if (isDictation) speak(round.item.en, round.item.id);
+    // Imersão: a situação em inglês toca sozinha (é contexto, não a resposta — ele ainda precisa
+    // saber O QUE dizer e COMO se escreve).
+    else if (scenario && isImmersion() && scenario.promptEn) speak(scenario.promptEn, scenario.id);
+    setupTypingCheck(round, isDictation);
+    return;
+  }
+
+  if (round.roundType === "meaning") {
+    // Trilha adulta: mostra (e toca) a frase em inglês e pede o SENTIDO — escolher a tradução
+    // certa entre 3 da mesma categoria. É o "understand" antes do "produce" (write/speak):
+    // pra "It depends on the circumstances" o que importa é entender, não reconhecer um emoji.
+    repeatBtn.style.display = "";
+    wrongAttemptsThisRound = 0;
+    container.innerHTML = `
+      <div class="read-card">
+        <span class="read-word">${round.item.en}</span>
+        <span class="intro-hint">o que isso quer dizer?</span>
+      </div>
+      <div class="situation-options" id="meaning-options"></div>`;
+    const optionsWrap = document.getElementById("meaning-options");
+    // Distratores do mesmo tipo (sentença contra sentença): frase longa contra "disponibilidade"
+    // entrega a resposta pelo tamanho, sem precisar entender nada.
+    const sameType = profileContent().filter((it) => it.id !== round.item.id && it.contentType === round.item.contentType);
+    const sameTypeAndCategory = sameType.filter((it) => it.category === round.item.category);
+    const distractors = shuffle(sameTypeAndCategory.length >= 2 ? sameTypeAndCategory : sameType).slice(0, 2);
+    const options = shuffle([round.item, ...distractors]);
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.className = "quiz-option situation-option";
+      btn.innerHTML = `<span class="opt-text">${opt.pt}</span>`;
+      btn.dataset.itemId = opt.id;
+      btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
+      optionsWrap.appendChild(btn);
     });
+    speak(round.item.en, round.item.id);
     return;
   }
 
@@ -776,6 +813,144 @@ function renderRound() {
     container.appendChild(btn);
   });
   speak(round.item.en, round.item.id);
+}
+
+// ---- Imersão (André, modo "literacy"): tudo do quiz em inglês ----
+function isImmersion() {
+  return getActiveProfile().mode === "literacy";
+}
+// Texto de interface: inglês no perfil em imersão, português nos outros.
+function tr(en, pt) {
+  return isImmersion() ? en : pt;
+}
+// Nome de lugar/categoria: `nameEn` no perfil em imersão (quando existe), senão `namePt`.
+function displayName(obj) {
+  return isImmersion() && obj.nameEn ? obj.nameEn : obj.namePt;
+}
+// Textos fixos da Home e do mapa (index.html) — trocados aqui pra seguir o idioma do perfil.
+function renderHomeStaticTexts() {
+  const set = (sel, text) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = text;
+  };
+  set("#btn-session .eyebrow", tr("Your mission", "Sua Missão"));
+  set("#btn-world-banner .txt small", tr("Explore places and practise there", "Explore lugares e pratique lá"));
+  set("#screen-world .section-title", tr("Explore by category", "Explorar por categoria"));
+  const pill = document.querySelector("#btn-session .play-pill");
+  if (pill) pill.innerHTML = icon("play") + " " + tr("PLAY", "JOGAR");
+  const playQuizBtn = document.getElementById("btn-play-quiz");
+  if (playQuizBtn) playQuizBtn.innerHTML = icon("play") + " " + tr("Play", "Jogar");
+}
+function scenarioPrompt(scenario) {
+  return isImmersion() && scenario.promptEn ? scenario.promptEn : scenario.promptPt;
+}
+
+// ---- Escrita: corrige mostrando ONDE errou e QUAL regra de grafia (engine.js, analyzeSpelling) ----
+// 1º erro: as letras dele em verde/vermelho (faltou = "_", sobrou = riscado) + a dica do padrão de
+//   som daquele pedaço — sem entregar a palavra (scaffolding: o menor passo pra ele acertar sozinho).
+// 2º erro: conta como erro no SRS, mostra a grafia certa com o padrão destacado, e pede pra ele
+//   digitar certo uma vez antes de seguir (copiar já é praticar a grafia; não pontua de novo).
+// Erro nunca é punição (LEARNING_PHILOSOPHY.md seção 35): texto gentil, som gentil, sempre dá pra seguir.
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+}
+function renderAttemptHtml(analysis) {
+  return analysis.ops
+    .map((o) => {
+      if (o.op === "ok") return `<span class="sp-ok">${o.y === " " ? "&nbsp;" : escapeHtml(o.y)}</span>`;
+      if (o.op === "sub") return `<span class="sp-bad">${o.y === " " ? "&nbsp;" : escapeHtml(o.y)}</span>`;
+      if (o.op === "ins") return `<span class="sp-extra">${o.y === " " ? "&nbsp;" : escapeHtml(o.y)}</span>`;
+      return `<span class="sp-missing">_</span>`;
+    })
+    .join("");
+}
+function renderTargetHtml(analysis) {
+  const inPattern = new Set();
+  analysis.tips.forEach((t) => {
+    for (let k = t.range[0]; k < t.range[1]; k++) inPattern.add(k);
+  });
+  return [...analysis.target]
+    .map((ch, k) => {
+      const txt = ch === " " ? "&nbsp;" : escapeHtml(ch);
+      if (inPattern.has(k)) return `<span class="sp-pattern">${txt}</span>`;
+      if (analysis.wrongIdx.has(k)) return `<span class="sp-fix">${txt}</span>`;
+      return txt;
+    })
+    .join("");
+}
+function renderTipsHtml(analysis, item) {
+  const lines = [];
+  if (item.spellingTip) lines.push(item.spellingTip);
+  analysis.tips.forEach((t) => {
+    lines.push(t.pattern.tip + (t.examples.length ? ` — like ${t.examples.join(", ")}` : ""));
+  });
+  if (!isImmersion()) return ""; // dicas de phonics são em inglês e pensadas pra alfabetização (André)
+  return lines.slice(0, 2).map((l) => `<div class="sp-tip">💡 ${escapeHtml(l)}</div>`).join("");
+}
+
+function setupTypingCheck(round, isDictation) {
+  const item = round.item;
+  const input = document.getElementById("write-input");
+  const feedback = document.getElementById("write-feedback");
+  const submitBtn = document.getElementById("write-submit");
+  const accepted = (item.acceptedAnswers && item.acceptedAnswers.length ? item.acceptedAnswers : [item.en]).map(normalizeAnswer);
+  let copyMode = false; // depois de revelar: ele digita a grafia certa uma vez, sem valer ponto
+  const goNext = (delay) => {
+    choiceLocked = true;
+    setTimeout(() => {
+      quizIndex++;
+      renderRound();
+    }, delay);
+  };
+  const check = () => {
+    if (choiceLocked) return;
+    const typed = normalizeAnswer(input.value);
+    if (!typed) return;
+    if (accepted.includes(typed)) {
+      feedback.innerHTML = copyMode ? tr("👍 Now you've got it!", "👍 Agora sim!") : tr("🌟 Great job!", "🌟 Isso aí!");
+      playCheer();
+      if (!copyMode) {
+        recordResult(item.id, wrongAttemptsThisRound === 0);
+        quizScore.correct++;
+        quizScore.total++;
+      }
+      goNext(900);
+      return;
+    }
+    const analysis = analyzeSpelling(item, input.value);
+    playGentle();
+    if (copyMode) {
+      feedback.innerHTML = `<div class="sp-line">${renderAttemptHtml(analysis)}</div><div>${tr("Look again and copy it:", "Olhe de novo e copie:")} <span class="sp-target">${renderTargetHtml(analysis)}</span></div>`;
+      return;
+    }
+    wrongAttemptsThisRound++;
+    quizScore.total++;
+    if (isImmersion()) logSpellingMistake(analysis, item);
+    if (wrongAttemptsThisRound >= 2) {
+      recordResult(item.id, false);
+      copyMode = true;
+      feedback.innerHTML = `
+        <div>${tr("This is how you spell it:", "O jeito certo é:")}</div>
+        <div class="sp-target sp-big">${renderTargetHtml(analysis)}</div>
+        ${renderTipsHtml(analysis, item)}
+        <div>${tr("Now type it the right way 👇", "Agora digite do jeito certo 👇")}</div>
+        <button class="skip-btn" id="write-skip">${tr("Next →", "Próxima →")}</button>`;
+      document.getElementById("write-skip").addEventListener("click", () => goNext(0));
+      input.value = "";
+      input.focus();
+      speak(item.en, item.id);
+    } else {
+      feedback.innerHTML = `
+        <div>${tr("Almost! Look at the red letters:", "Quase! Olha as letras em vermelho:")}</div>
+        <div class="sp-line">${renderAttemptHtml(analysis)}</div>
+        ${renderTipsHtml(analysis, item)}`;
+      if (isDictation) speak(item.en, item.id);
+    }
+  };
+  submitBtn.addEventListener("click", check);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") check();
+  });
 }
 
 function handleChoice(btn, opt, target, container) {
@@ -876,7 +1051,7 @@ function showResultScreen() {
   const pct = quizScore.total ? quizScore.correct / quizScore.total : 1;
   const starCount = pct >= 0.85 ? 3 : pct >= 0.5 ? 2 : 1;
   document.getElementById("result-stars").textContent = "⭐".repeat(starCount) + "☆".repeat(3 - starCount);
-  document.getElementById("result-text").textContent = `Você brincou com ${quizQueue.length} palavras!`;
+  document.getElementById("result-text").textContent = tr(`You practised ${quizQueue.length} words!`, `Você brincou com ${quizQueue.length} palavras!`);
   renderHome();
 }
 
@@ -950,22 +1125,40 @@ function formatLastActive(dateStr) {
   return `${d}/${m}/${y} (${days} dias atrás)`;
 }
 
+// Padrões de grafia em que mais errou (engine.js, logSpellingMistake) — é o dado mais útil pros
+// pais de uma criança em alfabetização: não "errou 12 palavras", mas "confunde 'oo' (school → scull)".
+const SPELLING_PATTERN_LABELS = { tricky: "tricky words (decorar)", other: "outras letras" };
+function topSpellingPatterns() {
+  const log = loadSpellingLog();
+  return Object.keys(log)
+    .map((id) => {
+      const p = PHONICS_PATTERNS.find((x) => x.id === id);
+      return { id, label: SPELLING_PATTERN_LABELS[id] || (p ? p.labelPt : id), count: log[id].count, examples: log[id].examples };
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+}
+
 function buildProgressSummary() {
   const lastActiveLine = `📅 Última vez que abriu: ${formatLastActive(streakAtLoad.lastActiveDate)}`;
-  const lines = Object.keys(CATEGORY_META).map((catId) => {
+  const lines = profileCategoryIds().map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     const introduced = items.filter((it) => getState(it.id).introduced).length;
     const mastered = items.filter((it) => getLearningStage(it.id) === "mastered").length;
     return `${meta.icon} ${meta.namePt}: ${mastered}/${items.length} dominadas (${introduced} vistas)`;
   });
-  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
+  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
     .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
     .map((x) => x.it.en);
   let text = lastActiveLine + "\n\n" + lines.join("\n");
   if (struggling.length) text += `\n\nCom mais dificuldade: ${struggling.join(", ")}`;
+  const spelling = topSpellingPatterns();
+  if (spelling.length) {
+    text += "\n\n✏️ Padrões de grafia pra praticar:\n" + spelling.map((p) => `• ${p.label} (${p.count}x) — ex.: ${p.examples.join("; ")}`).join("\n");
+  }
   return text;
 }
 
@@ -975,7 +1168,7 @@ function buildProgressSummary() {
 // servidor: tudo já mora no localStorage do aparelho, isso só empacota pra exportar.
 function buildStructuredReportData() {
   const streak = streakAtLoad;
-  const byCategory = Object.keys(CATEGORY_META).map((catId) => {
+  const byCategory = profileCategoryIds().map((catId) => {
     const meta = CATEGORY_META[catId];
     const items = CONTENT.filter((it) => it.category === catId);
     return {
@@ -987,20 +1180,22 @@ function buildStructuredReportData() {
     };
   });
   const totals = { new: 0, learning: 0, consolidating: 0, mastered: 0 };
-  CONTENT.forEach((it) => { totals[getLearningStage(it.id)]++; });
-  const struggling = CONTENT.map((it) => ({ it, st: getState(it.id) }))
+  profileContent().forEach((it) => { totals[getLearningStage(it.id)]++; });
+  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
     .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
     .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
     .slice(0, 8)
     .map((x) => ({ id: x.it.id, en: x.it.en, wrongCount: x.st.wrongCount }));
   return {
     exportedAt: todayStr(),
-    totalContentItems: CONTENT.length,
+    profile: getActiveProfile().id,
+    totalContentItems: profileContent().length,
     stageTotals: totals,
     streak: { current: streak.count, lastActiveDate: streak.lastActiveDate },
     byCategory,
     dailyActivity: loadActivityLog(), // { "YYYY-MM-DD": { seen, correct, wrong, speech } } — até 60 dias
     strugglingTop: struggling,
+    spellingPatterns: topSpellingPatterns(), // só tem dado no perfil do André (escrita em imersão)
   };
 }
 
@@ -1009,8 +1204,11 @@ document.getElementById("btn-check-update").addEventListener("click", checkForUp
 document.getElementById("btn-share-report").addEventListener("click", () => {
   const today = new Date().toLocaleDateString("pt-BR");
   const dataBlock = JSON.stringify(buildStructuredReportData());
+  const theme = getCurrentFamilyTheme();
+  const themeBlock = theme ? `${theme.icon} Tema do mês: ${theme.namePt}\n🏠 Pra fazer em casa:\n${theme.homeTipsPt.map((t) => `• ${t}`).join("\n")}\n\n` : "";
   const text =
-    `📚 Relatório do Meu Inglês — ${today}\n\n${buildProgressSummary()}\n\n` +
+    `📚 Relatório do Meu Inglês — ${today} (${getActiveProfile().name})\n\n${buildProgressSummary()}\n\n` +
+    themeBlock +
     `— \n📊 Cole este bloco numa conversa com o Claude pra ele gerar gráficos de evolução:\n` +
     "```json\n" + dataBlock + "\n```";
   if (navigator.share) {
@@ -1098,8 +1296,30 @@ function renderProfileSwitcher() {
   });
 }
 
+// ---- Tema da família do mês (FAMILY_THEMES, data.js; CONTENT_PLAN.md seção 2) ----
+// O do mês atual, ou o último que já começou (se o plano atrasar, a dica antiga continua valendo).
+function getCurrentFamilyTheme() {
+  const month = todayStr().slice(0, 7);
+  const started = (typeof FAMILY_THEMES !== "undefined" ? FAMILY_THEMES : []).filter((t) => t.id <= month);
+  return started.length ? started[started.length - 1] : null;
+}
+function renderFamilyTheme() {
+  const el = document.getElementById("family-theme");
+  if (!el) return;
+  const theme = getCurrentFamilyTheme();
+  if (!theme) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = `
+    <p class="family-theme-title">${theme.icon} Tema do mês: ${theme.namePt}</p>
+    <p class="family-theme-sub">🏠 Pra fazer em casa:</p>
+    <ul class="family-theme-tips">${theme.homeTipsPt.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>`;
+}
+
 function renderSettings() {
   renderProfileSwitcher();
+  renderFamilyTheme();
   populateVoiceSelect();
   document.getElementById("rate-slider").value = speechRate;
   document.getElementById("progress-summary").textContent = buildProgressSummary();
