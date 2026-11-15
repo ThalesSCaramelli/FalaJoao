@@ -264,6 +264,10 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
 
 ### NEXT
 
+- **Plano de conteúdo dez/2026 → mai/2027** em `CONTENT_PLAN.md`: um tema da família por mês
+  (as três trilhas no mesmo assunto), regras de qualidade para item novo e revisão mensal guiada
+  pelo relatório. As pendências de conteúdo abaixo (cadeias de evolução, cenário do lugar
+  "Família") estão encaixadas nele.
 - Mais cadeias de "evolução natural" além de água/saudação (padrão documentado em
   `CONTENT_GUIDE.md` seção 8, pronto pra reaproveitar).
 - 4 `SITUATIONS` ainda sem `SCENARIO` de problem-posing: `cafeteria`, `classroom`, `family`,

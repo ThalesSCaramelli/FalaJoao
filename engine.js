@@ -300,8 +300,14 @@ function speechRecognitionAvailable() {
 // Cenário associado a um item, quando ele é a resposta "certa" de algum problem-posing
 // (SCENARIOS em data.js). Um item pode ter no máximo um cenário como alvo principal.
 const SCENARIO_BY_CORRECT_ID = Object.fromEntries((typeof SCENARIOS !== "undefined" ? SCENARIOS : []).map((s) => [s.correctId, s]));
+// Só cenários cuja resposta é da trilha do perfil ativo: um lugar das crianças pode ter cenário da
+// trilha de ortografia (ex. "Lanche" → "We had chicken for lunch", do André) e o João não pode
+// abrir a visita com um item que nem está na trilha dele.
 function getScenarioForSituation(situationId) {
-  return (typeof SCENARIOS !== "undefined" ? SCENARIOS : []).find((s) => s.situationId === situationId);
+  const tracks = getActiveProfile().tracks;
+  return (typeof SCENARIOS !== "undefined" ? SCENARIOS : []).find(
+    (s) => s.situationId === situationId && CONTENT_BY_ID[s.correctId] && tracks.includes(itemTrack(CONTENT_BY_ID[s.correctId]))
+  );
 }
 
 function pickRoundType(item) {
