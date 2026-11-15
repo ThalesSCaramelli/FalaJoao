@@ -44,6 +44,14 @@ SIZE = 160
 # codepoints (sem FE0F, ver cp_key) -> nome da pasta no Fluent, pros que nao resolvem sozinhos.
 OVERRIDES = {"1f53a": "Red triangle"}
 
+# codepoints -> caminho exato (relativo a BASE) quando a variante padrao nao serve. O 🙏 amarelo do
+# Fluent 3D, pequeno, vira um formato amarelo+roxo ilegivel (maos + mangas roxas); a variante de tom
+# "Medium-Light" fica com cara de maos juntas (e tem contraste com o fundo creme, ao contrario da "Light").
+# Pra voltar ao amarelo, remova a entrada e rode com --force.
+URL_OVERRIDES = {
+    "1f64f": "assets/Folded%20hands/Medium-Light/3D/folded_hands_3d_medium-light.png",
+}
+
 # O Fluent 3D nao tem familia, "pessoas de maos dadas" nem casal de maos dadas. Pra esses, o script
 # monta o PNG juntando emoji individuais lado a lado: codepoints -> lista de emoji componentes.
 # Crianca (CHILDREN) fica menor, na frente e no centro de baixo.
@@ -163,6 +171,8 @@ def candidate_urls(seq):
         folders += [v[0].upper() + v[1:] for v in variants(n)]
     folders = list(dict.fromkeys(folders))
     urls = []
+    if cp_key(seq) in URL_OVERRIDES:
+        urls.append(BASE + URL_OVERRIDES[cp_key(seq)])
     for f in folders:
         fn = f.lower().replace(" ", "_")
         q = urllib.parse.quote(f)
