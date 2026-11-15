@@ -132,12 +132,18 @@ function renderAllAvatarMounts() {
   });
 }
 
+// Só os itens que o perfil ativo consegue desbloquear: um item ligado a uma categoria de outra
+// trilha (ex. "spell_oo", do André) ficaria trancado pra sempre na tela do João.
+function avatarItemVisible(item) {
+  return !item.unlockedBy || profileCategoryIds().includes(item.unlockedBy);
+}
+
 function renderAvatarScreen() {
   let totalUnlocked = 0, totalItems = 0;
   Object.keys(AVATAR_ITEMS).forEach((cat) => {
     const row = document.getElementById("row-" + cat);
     row.innerHTML = "";
-    AVATAR_ITEMS[cat].forEach((item) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
       totalItems++;
       const unlocked = isCategoryUnlockThresholdMet(item.unlockedBy);
       if (unlocked) totalUnlocked++;
@@ -519,7 +525,7 @@ let wrongAttemptsThisRound = 0;
 function getUnlockedAvatarItemIds() {
   const ids = [];
   Object.keys(AVATAR_ITEMS).forEach((cat) => {
-    AVATAR_ITEMS[cat].forEach((item) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
       if (isCategoryUnlockThresholdMet(item.unlockedBy)) ids.push(cat + ":" + item.id);
     });
   });
@@ -1165,8 +1171,11 @@ document.getElementById("btn-check-update").addEventListener("click", checkForUp
 document.getElementById("btn-share-report").addEventListener("click", () => {
   const today = new Date().toLocaleDateString("pt-BR");
   const dataBlock = JSON.stringify(buildStructuredReportData());
+  const theme = getCurrentFamilyTheme();
+  const themeBlock = theme ? `${theme.icon} Tema do mês: ${theme.namePt}\n🏠 Pra fazer em casa:\n${theme.homeTipsPt.map((t) => `• ${t}`).join("\n")}\n\n` : "";
   const text =
-    `📚 Relatório do Meu Inglês — ${today}\n\n${buildProgressSummary()}\n\n` +
+    `📚 Relatório do Meu Inglês — ${today} (${getActiveProfile().name})\n\n${buildProgressSummary()}\n\n` +
+    themeBlock +
     `— \n📊 Cole este bloco numa conversa com o Claude pra ele gerar gráficos de evolução:\n` +
     "```json\n" + dataBlock + "\n```";
   if (navigator.share) {
@@ -1254,8 +1263,30 @@ function renderProfileSwitcher() {
   });
 }
 
+// ---- Tema da família do mês (FAMILY_THEMES, data.js; CONTENT_PLAN.md seção 2) ----
+// O do mês atual, ou o último que já começou (se o plano atrasar, a dica antiga continua valendo).
+function getCurrentFamilyTheme() {
+  const month = todayStr().slice(0, 7);
+  const started = (typeof FAMILY_THEMES !== "undefined" ? FAMILY_THEMES : []).filter((t) => t.id <= month);
+  return started.length ? started[started.length - 1] : null;
+}
+function renderFamilyTheme() {
+  const el = document.getElementById("family-theme");
+  if (!el) return;
+  const theme = getCurrentFamilyTheme();
+  if (!theme) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = `
+    <p class="family-theme-title">${theme.icon} Tema do mês: ${theme.namePt}</p>
+    <p class="family-theme-sub">🏠 Pra fazer em casa:</p>
+    <ul class="family-theme-tips">${theme.homeTipsPt.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>`;
+}
+
 function renderSettings() {
   renderProfileSwitcher();
+  renderFamilyTheme();
   populateVoiceSelect();
   document.getElementById("rate-slider").value = speechRate;
   document.getElementById("progress-summary").textContent = buildProgressSummary();

@@ -190,6 +190,22 @@ Palavras pro André treinar ESCRITA, agrupadas por padrão de som (phonics) — 
 - **Cenário infantil novo**: sempre com `promptEn` também (o André vê a situação em inglês).
   `python scripts/generate_audio.py` gera o áudio do `promptEn` em `assets/audio/en/<scn_id>.mp3`.
 
+## 8d. Tema da família do mês (`FAMILY_THEMES`)
+
+Cada mês do `CONTENT_PLAN.md` ganha uma entrada em `FAMILY_THEMES` (data.js), com o tema e as
+dicas "pra fazer em casa" para os pais:
+
+```js
+{ id: "2027-01", namePt: "Pronto para a escola", icon: "🎒", homeTipsPt: ["Ensaiem o primeiro dia: ..."] },
+```
+
+- `id` é o mês (`AAAA-MM`). O app mostra o do mês atual, ou o último que já começou, em
+  Configurações e no relatório compartilhado. Em ordem cronológica.
+- 3 a 4 dicas curtas, em português, cada uma com a frase em inglês que a criança usa, e pelo menos
+  uma para cada criança.
+- Categoria nova pede item de avatar novo em `AVATAR_ITEMS` com `unlockedBy` nela (recompensa ao
+  abrir conteúdo novo). Cada perfil só vê os itens que consegue desbloquear (`avatarItemVisible`).
+
 ## 9. Checklist antes de publicar conteúdo novo
 
 - [ ] Item(ns) adicionados em `CONTENT` com id estável e único

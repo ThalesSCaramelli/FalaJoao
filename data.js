@@ -20,6 +20,7 @@ const CATEGORY_META = {
   seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
   home: { namePt: "Casa", icon: "🏠", color: "#FFCF9C" },
   toys: { namePt: "Brinquedos", icon: "🧸", color: "#B5EAD7" },
+  beach: { namePt: "Praia", icon: "🏖️", color: "#FFE3A3" }, // CONTENT_PLAN.md, dez/2026
   // ---- trilha adulta (perfil Thales) — só aparecem pra perfis com track "adult" (engine.js) ----
   adult_work: { namePt: "Trabalho", icon: "💼", color: "#9FB7E8" },
   adult_health: { namePt: "Saúde e Médico", icon: "🩺", color: "#F2A7A7" },
@@ -28,6 +29,7 @@ const CATEGORY_META = {
   adult_social: { namePt: "Conversa e Small Talk", icon: "☕", color: "#D9B99B" },
   adult_opinion: { namePt: "Opinião e Argumento", icon: "🗣️", color: "#C3B1E1" },
   adult_connectors: { namePt: "Conectores", icon: "🔗", color: "#A7D8DE" },
+  adult_travel: { namePt: "Viagem", icon: "✈️", color: "#B4D8F0" }, // CONTENT_PLAN.md, dez/2026
   // ---- trilha de ortografia (André) — agrupada por padrão de som (phonics), não por tema ----
   spell_oo: { namePt: "Spelling · oo", icon: "🌙", color: "#B9C6F2" },
   spell_digraphs: { namePt: "Spelling · sh ch th", icon: "🐚", color: "#F5C2C7" },
@@ -37,6 +39,7 @@ const CATEGORY_META = {
   spell_igh_ow: { namePt: "Spelling · igh ow ou", icon: "💡", color: "#E5D4F5" },
   spell_r_vowels: { namePt: "Spelling · ar or ir ur", icon: "🦈", color: "#A8DDE0" },
   spell_tricky: { namePt: "Spelling · tricky words", icon: "🧠", color: "#F7C6A3" },
+  spell_ck_ng_nk: { namePt: "Spelling · ck ng nk", icon: "🚚", color: "#D6E8B5" }, // CONTENT_PLAN.md, dez/2026
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -48,6 +51,7 @@ const AVATAR_ITEMS = {
     { id: "yellow", color: "#FFB648", unlockedBy: "colors" },
     { id: "green", color: "#5FC98D", unlockedBy: "animals" },
     { id: "purple", color: "#B18CD9", unlockedBy: "school" },
+    { id: "sand", color: "#E8C98A", unlockedBy: "beach" },
   ],
   hat: [
     { id: "none", type: null, unlockedBy: null },
@@ -57,8 +61,25 @@ const AVATAR_ITEMS = {
   backpack: [
     { id: "none", color: null, unlockedBy: null },
     { id: "red", color: "#FF6B5B", unlockedBy: "food" },
+    { id: "blue", color: "#5B8DEF", unlockedBy: "spell_oo" },
+    { id: "lime", color: "#9BCB4B", unlockedBy: "spell_ck_ng_nk" },
   ],
 };
+
+// Tema da família do mês (CONTENT_PLAN.md seção 2): as três trilhas no mesmo assunto, e dicas pros
+// pais levarem o tema pra vida real (LEARNING_PHILOSOPHY.md §32-34). `id` = "AAAA-MM"; o app mostra o
+// tema do mês atual (ou o último que já começou) em Configurações e no relatório compartilhado.
+const FAMILY_THEMES = [
+  {
+    id: "2026-12", namePt: "Praia, verão e Natal", icon: "☀️",
+    homeTipsPt: [
+      "No fim do dia, cada um conta em inglês uma coisa que gostou: \"I liked the beach!\"",
+      "Na praia, antes de entrar no mar, espere o João pedir: \"Can I go swimming?\"",
+      "Peça pro André escrever a lista de presentes de Natal em inglês e conferir a grafia no app.",
+      "Quando alguém der um presente, todo mundo agradece em inglês: \"Thank you for the present!\"",
+    ],
+  },
+];
 
 // Situações — "My English World". Cada uma reaproveita conteúdo que já existe (categoria inteira ou
 // uma lista de ids específica pra grupos temáticos que cruzam categorias, tipo "banheiro" que usa
@@ -78,12 +99,14 @@ const SITUATIONS = [
   { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
   { id: "home", namePt: "Casa", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
   { id: "toys", namePt: "Brinquedos", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
+  { id: "beach", namePt: "Praia", icon: "🏖️", mapPos: { top: "31%", left: "70%" }, categoryId: "beach" },
   // ---- trilha adulta: mesmo mapa, outros lugares (profileSituations em engine.js filtra por track) ----
   { id: "work", track: "adult", namePt: "Trabalho", icon: "💼", mapPos: { top: "18%", left: "22%" }, categoryId: "adult_work" },
   { id: "doctor", track: "adult", namePt: "Médico", icon: "🩺", mapPos: { top: "18%", left: "72%" }, categoryId: "adult_health" },
   { id: "rental", track: "adult", namePt: "Imobiliária", icon: "🔑", mapPos: { top: "45%", left: "15%" }, categoryId: "adult_housing" },
   { id: "parent_teacher", track: "adult", namePt: "Reunião na Escola", icon: "🏫", mapPos: { top: "45%", left: "58%" }, categoryId: "adult_parenting" },
   { id: "small_talk", track: "adult", namePt: "Papo com Vizinhos", icon: "☕", mapPos: { top: "72%", left: "28%" }, categoryId: "adult_social" },
+  { id: "travel", track: "adult", namePt: "Viagem", icon: "✈️", mapPos: { top: "88%", left: "50%" }, categoryId: "adult_travel" },
   { id: "discussion", track: "adult", namePt: "Discussão e Opinião", icon: "🗣️", mapPos: { top: "75%", left: "75%" }, categoryId: "adult_opinion" },
 ];
 
@@ -107,6 +130,13 @@ const SCENARIOS = [
   { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", promptEn: "You finished your homework and want to relax. What do you ask your parents?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
   { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", promptEn: "Your friend has a cool toy and you want to play with it.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
   { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", promptEn: "The teacher talked too fast and you didn't understand.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
+
+  // ---- dez/2026 (CONTENT_PLAN.md): praia e Natal. "Família" ganha o primeiro cenário. ----
+  { id: "scn_beach_hat", situationId: "beach", promptPt: "O sol está muito forte e você está sem chapéu.", promptEn: "The sun is really strong and you don't have your hat on.", correctId: "beach_need_my_hat", distractorIds: ["beach_go_swimming", "beach_build_sandcastle"] },
+  { id: "scn_beach_swim", situationId: "beach", promptPt: "Você quer entrar no mar.", promptEn: "You want to go in the water.", correctId: "beach_go_swimming", distractorIds: ["beach_need_my_hat", "beach_sit_in_shade"] },
+  { id: "scn_beach_hot", situationId: "beach", promptPt: "Você brincou muito no sol e agora está com calor e com sede.", promptEn: "You played in the sun for a long time. Now you're hot and thirsty.", correctId: "beach_hot_water", distractorIds: ["beach_go_swimming", "beach_build_sandcastle"] },
+  { id: "scn_family_christmas", situationId: "family", promptPt: "É Natal e a vovó acabou de chegar.", promptEn: "It's Christmas and Grandma just arrived.", correctId: "family_merry_christmas_grandma", distractorIds: ["family_thank_you_present", "phrase_see_you_later"] },
+  { id: "scn_family_present", situationId: "family", promptPt: "A vovó te deu um presente de Natal.", promptEn: "Grandma gave you a Christmas present.", correctId: "family_thank_you_present", distractorIds: ["family_merry_christmas_grandma", "phrase_can_i_have_this"] },
 
   // ---- trilha adulta: vários cenários por lugar (o primeiro de cada situationId abre a visita no
   // mapa; os outros entram nas rodadas situation/read/write via SCENARIO_BY_CORRECT_ID). `speaker`
@@ -139,6 +169,12 @@ const SCENARIOS = [
   { id: "scn_spell_lunch", situationId: "cafeteria", promptPt: "Sua mãe pergunta o que você comeu na escola hoje.", promptEn: "Mum asks what you ate at school today.", correctId: "spell_chicken_lunch", distractorIds: ["spell_read_tree", "spell_walk_to_school"] },
   { id: "scn_spell_rain", situationId: "home", promptPt: "Seu pai pergunta o que vocês fizeram no dia de chuva.", promptEn: "Dad asks what you did on the rainy day.", correctId: "spell_rained_played", distractorIds: ["spell_park_storm", "spell_bike_home"] },
   { id: "scn_spell_birthday", situationId: "friends", promptPt: "A professora pergunta por que seus amigos vão na sua casa.", promptEn: "Your teacher asks why your friends are coming to your house.", correctId: "spell_friends_because", distractorIds: ["spell_friend_said", "spell_walk_to_school"] },
+  { id: "scn_spell_beach", situationId: "beach", promptPt: "Seu primo pergunta o que aconteceu na praia.", promptEn: "Your cousin asks what happened at the beach.", correctId: "spell_truck_sand", distractorIds: ["spell_sing_swing", "spell_read_tree"] },
+  { id: "scn_travel_delay", situationId: "travel", speaker: "🧑‍✈️", promptPt: "No aeroporto, você precisa avisar a família que o voo vai sair duas horas depois.", correctId: "adult_travel_flight_delayed", distractorIds: ["adult_travel_late_checkout", "adult_travel_recommend"] },
+  { id: "scn_travel_connection", situationId: "travel", speaker: "🧑‍✈️", promptPt: "Seu voo atrasou e você tem medo de perder a conexão.", correctId: "adult_travel_connection", distractorIds: ["adult_travel_check_in_early", "adult_travel_luggage_who"] },
+  { id: "scn_travel_luggage", situationId: "travel", speaker: "🧑‍✈️", promptPt: "A esteira parou e a sua mala não apareceu.", correctId: "adult_travel_luggage_who", distractorIds: ["adult_travel_connection", "adult_travel_late_checkout"] },
+  { id: "scn_travel_checkout", situationId: "travel", speaker: "🛎️", promptPt: "O voo de volta é só à noite e vocês queriam ficar mais tempo no quarto do hotel.", correctId: "adult_travel_late_checkout", distractorIds: ["adult_travel_check_in_early", "adult_travel_recommend"] },
+  { id: "scn_travel_recommend", situationId: "travel", speaker: "🛎️", promptPt: "Você quer pedir ao recepcionista uma dica de restaurante por perto.", correctId: "adult_travel_recommend", distractorIds: ["adult_travel_late_checkout", "adult_travel_itinerary"] },
   { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
@@ -444,7 +480,7 @@ const CONTENT = [
   { id: "phrase_can_i_have_some_food", contentType: "sentence", en: "Can I have some food?", pt: "posso comer alguma coisa?", emoji: "🍱", category: "phrases", difficulty: 4, prerequisites: ["phrase_hungry"] },
   { id: "phrase_i_need_a_tissue", contentType: "sentence", en: "I need a tissue", pt: "eu preciso de um lenço", emoji: "🤧", category: "phrases", difficulty: 3, prerequisites: [] },
   { id: "phrase_im_cold", contentType: "sentence", en: "I'm cold", pt: "estou com frio", emoji: "🥶", category: "phrases", difficulty: 2, prerequisites: [] },
-  { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: [] },
+  { id: "phrase_im_hot", contentType: "sentence", en: "I'm hot", pt: "estou com calor", emoji: "🥵", category: "phrases", difficulty: 2, prerequisites: ["beach_hot"] },
   { id: "phrase_im_tired", contentType: "sentence", en: "I'm tired", pt: "estou cansado", emoji: "😴", category: "phrases", difficulty: 2, prerequisites: [] },
   { id: "phrase_i_need_a_break", contentType: "sentence", en: "I need a break", pt: "eu preciso de uma pausa", emoji: "🧘", category: "phrases", difficulty: 3, prerequisites: [] },
 
@@ -509,6 +545,70 @@ const CONTENT = [
   { id: "school_ruler", contentType: "word", en: "ruler", pt: "régua", emoji: "📏", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_globe", contentType: "word", en: "globe", pt: "globo", emoji: "🌍", category: "school", difficulty: 1, prerequisites: [] },
   { id: "school_calendar", contentType: "word", en: "calendar", pt: "calendário", emoji: "📅", category: "school", difficulty: 1, prerequisites: [] },
+
+  // ---- dez/2026 (CONTENT_PLAN.md): praia — palavras só como degrau das frases (máx. 40% soltas) ----
+  { id: "beach_sand", contentType: "word", en: "sand", pt: "areia", emoji: "🏖️", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_sunscreen", contentType: "word", en: "sunscreen", pt: "protetor solar", emoji: "🧴", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_swim", contentType: "word", en: "swim", pt: "nadar", emoji: "🏊", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_shade", contentType: "word", en: "shade", pt: "sombra", emoji: "⛱️", category: "beach", difficulty: 1, prerequisites: [] },
+  { id: "beach_hot", contentType: "word", en: "hot", pt: "calor / quente", emoji: "🥵", category: "beach", difficulty: 1, prerequisites: [] },
+  {
+    id: "beach_go_swimming", contentType: "sentence",
+    en: "Can I go swimming?", pt: "posso ir nadar?", emoji: "🏊❓",
+    category: "beach", difficulty: 3, prerequisites: ["beach_swim"],
+    acceptedAnswers: ["can i go swimming", "can i swim"],
+  },
+  {
+    id: "beach_go_swimming_dad", contentType: "sentence",
+    en: "Can I go swimming with Dad, please?", pt: "posso ir nadar com o papai, por favor?", emoji: "🏊👨🙏",
+    category: "beach", difficulty: 5, prerequisites: ["beach_go_swimming", "family_dad", "survival_please"],
+    acceptedAnswers: ["can i go swimming with dad please", "can i go swimming with dad"],
+  },
+  {
+    id: "beach_hot_water", contentType: "sentence",
+    en: "I'm hot, can I have some water?", pt: "estou com calor, posso tomar água?", emoji: "🥵💧",
+    category: "beach", difficulty: 5, prerequisites: ["phrase_im_hot", "phrase_water_please"],
+    acceptedAnswers: ["i'm hot can i have some water", "i am hot can i have some water", "i'm hot can i have water", "can i have some water"],
+  },
+  {
+    id: "beach_need_my_hat", contentType: "sentence",
+    en: "I need my hat.", pt: "preciso do meu chapéu.", emoji: "🧢☀️",
+    category: "beach", difficulty: 3, prerequisites: ["clothes_hat"],
+    acceptedAnswers: ["i need my hat"],
+  },
+  {
+    id: "beach_put_on_sunscreen", contentType: "sentence",
+    en: "Put on your sunscreen!", pt: "passe o protetor solar!", emoji: "🧴☀️",
+    category: "beach", difficulty: 3, prerequisites: ["beach_sunscreen"],
+    acceptedAnswers: ["put on your sunscreen", "put your sunscreen on"],
+  },
+  {
+    id: "beach_sit_in_shade", contentType: "sentence",
+    en: "Let's sit in the shade.", pt: "vamos sentar na sombra.", emoji: "⛱️🙂",
+    category: "beach", difficulty: 3, prerequisites: ["beach_shade"],
+    acceptedAnswers: ["let's sit in the shade", "let us sit in the shade"],
+  },
+  {
+    id: "beach_build_sandcastle", contentType: "sentence",
+    en: "Let's build a sandcastle!", pt: "vamos fazer um castelo de areia!", emoji: "🏰🏖️",
+    category: "beach", difficulty: 4, prerequisites: ["beach_sand", "phrase_lets_play"],
+    acceptedAnswers: ["let's build a sandcastle", "let us build a sandcastle", "let's build a sand castle"],
+  },
+
+  // ---- dez/2026: Natal com a família (cadeia "thank you" → "Thank you for the present!") ----
+  { id: "family_merry_christmas", contentType: "phrase", en: "Merry Christmas!", pt: "feliz Natal!", emoji: "🎄", category: "family", difficulty: 2, prerequisites: [] },
+  {
+    id: "family_merry_christmas_grandma", contentType: "sentence",
+    en: "Merry Christmas, Grandma!", pt: "feliz Natal, vovó!", emoji: "🎄👵",
+    category: "family", difficulty: 3, prerequisites: ["family_merry_christmas", "family_grandma"],
+    acceptedAnswers: ["merry christmas grandma", "merry christmas"],
+  },
+  {
+    id: "family_thank_you_present", contentType: "sentence",
+    en: "Thank you for the present!", pt: "obrigado pelo presente!", emoji: "🎁🙏",
+    category: "family", difficulty: 4, prerequisites: ["survival_thank_you"],
+    acceptedAnswers: ["thank you for the present", "thanks for the present"],
+  },
 
   // ======================================================================================
   // ---- TRILHA ADULTA (perfil Thales) ----
@@ -828,6 +928,67 @@ const CONTENT = [
     acceptedAnswers: ["i prefer working from home whereas my colleague prefers the office"],
   },
 
+  // ---- viagem (dez/2026, CONTENT_PLAN.md) ----
+  { id: "adult_travel_delay", track: "adult", contentType: "word", en: "delay", pt: "atraso", emoji: "⏳", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_luggage", track: "adult", contentType: "word", en: "luggage", pt: "bagagem", emoji: "🧳", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_itinerary_word", track: "adult", contentType: "word", en: "itinerary", pt: "roteiro de viagem", emoji: "🗺️", category: "adult_travel", difficulty: 1, prerequisites: [] },
+  { id: "adult_travel_check_in", track: "adult", contentType: "phrase", en: "check in", pt: "fazer check-in", emoji: "🛎️", category: "adult_travel", difficulty: 2, prerequisites: [] },
+  { id: "adult_travel_boarding_pass", track: "adult", contentType: "phrase", en: "boarding pass", pt: "cartão de embarque", emoji: "🎫", category: "adult_travel", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_travel_flight_delayed", track: "adult", contentType: "sentence",
+    en: "Our flight has been delayed by two hours.", pt: "nosso voo atrasou duas horas.", emoji: "✈️⏳",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_delay"],
+    acceptedAnswers: ["our flight has been delayed by two hours", "our flight has been delayed by 2 hours", "our flight's been delayed by two hours"],
+  },
+  {
+    id: "adult_travel_connection", track: "adult", contentType: "sentence",
+    en: "Will I still make my connecting flight?", pt: "ainda vou conseguir pegar o voo de conexão?", emoji: "🔁✈️",
+    category: "adult_travel", difficulty: 5, prerequisites: ["adult_travel_flight_delayed"],
+    acceptedAnswers: ["will i still make my connecting flight", "will i still make my connection"],
+  },
+  {
+    id: "adult_travel_cant_find_luggage", track: "adult", contentType: "sentence",
+    en: "I can't find my luggage.", pt: "não estou encontrando a minha bagagem.", emoji: "🧳❓",
+    category: "adult_travel", difficulty: 3, prerequisites: ["adult_travel_luggage"],
+    acceptedAnswers: ["i can't find my luggage", "i cannot find my luggage"],
+  },
+  {
+    id: "adult_travel_luggage_who", track: "adult", contentType: "sentence",
+    en: "My luggage didn't arrive. Who should I speak to?", pt: "minha mala não chegou. com quem eu devo falar?", emoji: "🧳🙋",
+    category: "adult_travel", difficulty: 5, prerequisites: ["adult_travel_cant_find_luggage"],
+    acceptedAnswers: ["my luggage didn't arrive who should i speak to", "my luggage did not arrive who should i speak to", "my luggage didn't arrive who should i talk to"],
+  },
+  {
+    id: "adult_travel_check_in_early", track: "adult", contentType: "sentence",
+    en: "Is it possible to check in a bit earlier?", pt: "é possível fazer o check-in um pouco mais cedo?", emoji: "🛎️⏪",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_check_in"],
+    acceptedAnswers: ["is it possible to check in a bit earlier", "is it possible to check in earlier"],
+  },
+  {
+    id: "adult_travel_late_checkout", track: "adult", contentType: "sentence",
+    en: "Could we get a late check-out?", pt: "podemos fazer o check-out mais tarde?", emoji: "🛎️⏩",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_check_in"],
+    acceptedAnswers: ["could we get a late check-out", "could we get a late checkout", "could we get a late check out"],
+  },
+  {
+    id: "adult_travel_recommend", track: "adult", contentType: "sentence",
+    en: "Is there anywhere nearby you'd recommend?", pt: "tem algum lugar aqui perto que você recomendaria?", emoji: "🍽️📍",
+    category: "adult_travel", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["is there anywhere nearby you'd recommend", "is there anywhere nearby you would recommend"],
+  },
+  {
+    id: "adult_travel_heading_coast", track: "adult", contentType: "sentence",
+    en: "We're heading to the coast for the long weekend.", pt: "vamos para o litoral no feriadão.", emoji: "🚗🏖️",
+    category: "adult_travel", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["we're heading to the coast for the long weekend", "we are heading to the coast for the long weekend"],
+  },
+  {
+    id: "adult_travel_itinerary", track: "adult", contentType: "sentence",
+    en: "We haven't sorted out our itinerary yet.", pt: "ainda não fechamos o nosso roteiro.", emoji: "🗺️🤷",
+    category: "adult_travel", difficulty: 4, prerequisites: ["adult_travel_itinerary_word"],
+    acceptedAnswers: ["we haven't sorted out our itinerary yet", "we have not sorted out our itinerary yet"],
+  },
+
   // ======================================================================================
   // ---- TRILHA DE ORTOGRAFIA (André, 8 anos — já fala inglês, precisa ESCREVER certo) ----
   // `track: "spelling"`: só o perfil do André vê (engine.js, PROFILES.tracks). Agrupada por padrão
@@ -963,4 +1124,28 @@ const CONTENT = [
     category: "spell_tricky", difficulty: 5, prerequisites: ["spell_because", "spell_friend", "spell_birthday"],
     acceptedAnswers: ["my friends are coming because it is my birthday", "my friends are coming because it's my birthday"],
   },
+
+  // ---- ck / ng / nk (dez/2026, CONTENT_PLAN.md) ----
+  { id: "spell_kick", track: "spelling", contentType: "word", en: "kick", pt: "chutar", emoji: "🦵⚽", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_rock", track: "spelling", contentType: "word", en: "rock", pt: "pedra", emoji: "🪨", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_truck", track: "spelling", contentType: "word", en: "truck", pt: "caminhão", emoji: "🚚", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_sing", track: "spelling", contentType: "word", en: "sing", pt: "cantar", emoji: "🎤", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_swing", track: "spelling", contentType: "word", en: "swing", pt: "balanço", emoji: "🌳🪢", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  { id: "spell_drink", track: "spelling", contentType: "word", en: "drink", pt: "beber / bebida", emoji: "🥤", category: "spell_ck_ng_nk", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_truck_sand", track: "spelling", contentType: "sentence",
+    en: "My truck got stuck in the sand.", pt: "meu caminhãozinho ficou preso na areia.", emoji: "🚚🏖️",
+    category: "spell_ck_ng_nk", difficulty: 4, prerequisites: ["spell_truck"],
+    acceptedAnswers: ["my truck got stuck in the sand"],
+  },
+  {
+    id: "spell_sing_swing", track: "spelling", contentType: "sentence",
+    en: "We sing songs on the swings.", pt: "a gente canta músicas nos balanços.", emoji: "🎤🌳",
+    category: "spell_ck_ng_nk", difficulty: 4, prerequisites: ["spell_sing", "spell_swing"],
+    acceptedAnswers: ["we sing songs on the swings"],
+  },
+  { id: "spell_christmas", track: "spelling", contentType: "word", en: "Christmas", pt: "Natal", emoji: "🎄", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It starts with Ch that says /k/, and the t is silent: CHRIS-mas" },
+  { id: "spell_holiday", track: "spelling", contentType: "word", en: "holiday", pt: "férias / feriado", emoji: "🌴", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It ends with the word day: holi-DAY" },
+  { id: "spell_family", track: "spelling", contentType: "word", en: "family", pt: "família", emoji: "👨‍👩‍👦", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say every part slowly: fam-I-ly" },
+  { id: "spell_laugh", track: "spelling", contentType: "word", en: "laugh", pt: "rir / risada", emoji: "😂", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! The gh at the end says /f/: l-a-u-g-h" },
 ];

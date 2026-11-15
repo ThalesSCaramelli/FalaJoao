@@ -514,6 +514,8 @@ const PHONICS_PATTERNS = [
   { id: "wh", labelPt: "'wh'", re: /wh/g, tip: "'wh' says /w/" },
   { id: "ck", labelPt: "'ck'", re: /ck/g, tip: "'ck' says /k/ — it comes right after a short vowel" },
   { id: "silent", labelPt: "letra muda (kn, wr, mb)", re: /kn|wr|mb(?= |$)/g, tip: "There's a silent letter here — you write it but don't say it" },
+  { id: "nk", labelPt: "'nk' (drink, think)", re: /nk/g, tip: "'nk' says /ngk/ at the end of a word" },
+  { id: "ng", labelPt: "'ng' (sing)", re: /ng/g, tip: "'ng' is one sound, made in your nose" },
   { id: "oo", labelPt: "'oo' (moon, school)", re: /oo/g, tip: "'oo' says /oo/" },
   { id: "ee", labelPt: "'ee' (tree)", re: /ee/g, tip: "'ee' says /ee/" },
   { id: "ea", labelPt: "'ea' (beach)", re: /ea/g, tip: "'ea' often says /ee/" },

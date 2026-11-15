@@ -80,6 +80,16 @@ Tamanho de cada mês (para caber na rotina e manter qualidade):
 
 ### Dezembro — ☀️ Praia, verão e Natal
 Férias de verão; Natal e Ano-Novo.
+
+> ✅ **Feito em 15/11/2026.** João: categoria e lugar "Praia" (5 palavras + 7 frases, 3 cenários),
+> Natal na família (3 itens, 2 cenários; o lugar "Família" ganhou seu primeiro cenário). O "I'm
+> hot" que já existia (`phrase_im_hot`) foi reaproveitado como degrau, em vez de duplicado.
+> André: `spell_ck_ng_nk` (6 palavras + 2 frases, 1 cenário) + 4 tricky words (Christmas,
+> holiday, family, laugh, no lugar de friend/people, que já existiam); dicas de phonics novas para
+> 'ng' e 'nk'. Thales: `adult_travel` (14 itens, lugar "Viagem", 5 cenários). Dica "em casa":
+> `FAMILY_THEMES` (aparece em Configurações e no relatório a partir de 1/12). Avatar: camiseta
+> "sand" (Praia) e mochilas "blue"/"lime" (ortografia), e cada perfil só vê os itens da sua trilha.
+
 - **João**: categoria nova `beach` (o lugar "Praia" vai para o mapa): sand, sunscreen, hat, swim,
   shade. Cadeias: `swim` → "Can I go swimming?" → "Can I go swimming with Dad, please?";
   `hot` → "I'm hot" → "I'm hot, can I have some water?". Cenários: "O sol está muito forte e você
@@ -163,7 +173,7 @@ calendário precisa:
 
 | Quando | O quê | Por quê |
 |---|---|---|
-| Dez | **"Em casa"**: dica para os pais por tema (`homeTipPt`), mostrada em Configurações e no relatório | Ponte com o mundo real (§33, §34); é texto, mas precisa de lugar na tela |
+| Dez ✅ | **"Em casa"**: dicas para os pais por tema (`FAMILY_THEMES` em data.js), mostradas em Configurações e no relatório | Ponte com o mundo real (§33, §34); é texto, mas precisa de lugar na tela |
 | Jan | **Montar a frase** com blocos de palavras + **completar a frase** (`I want ___`) | Apoio quando a frase longa trava (§17); já estava na lista de pendências do André |
 | Fev | **Modo história**: uma sequência de frases + pergunta de compreensão, reaproveitando os rounds que já existem | Historinhas são o próximo passo de leitura do André (§24, §25) e servem para o João ouvir |
 

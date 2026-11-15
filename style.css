@@ -1096,3 +1096,9 @@ body[data-mode="adult"] .situation-option .opt-text {
 .dictation-media { font-size: 3.5rem; }
 .listen-btn { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
 .listen-btn .icon { width: 1.3em; height: 1.3em; }
+
+/* Tema da família do mês (Configurações) — dicas "pra fazer em casa" pros pais. */
+.family-theme-title { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin: 0 0 4px; }
+.family-theme-sub { font-weight: 700; margin: 0 0 4px; color: var(--color-text-secondary); }
+.family-theme-tips { margin: 0; padding-left: 20px; line-height: 1.45; }
+.family-theme-tips li + li { margin-top: 4px; }
