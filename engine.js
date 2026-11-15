@@ -334,8 +334,23 @@ function pickRoundType(item) {
 // escrever); sem cenário, imagem sozinha é ambígua demais pra pedir escrita ("sunny" ou "summer"?)
 // e a tradução em português saiu de propósito (imersão). Palavras da trilha de ortografia pesam
 // mais pro ditado; "read" continua pra leitura (ler a palavra/frase e escolher a imagem/frase).
+// Frase "de verdade" pra montar/completar: 3+ palavras (não "I'm hot").
+function isMultiWordSentence(item) {
+  return item.contentType === "sentence" && item.en.trim().split(/\s+/).length >= 3;
+}
+// Frase travada (errou repetidamente sem sair da caixa 0) e sem pré-requisito pra decompor: em vez
+// de insistir em escrever tudo de novo, o menor passo é MONTAR com as palavras prontas
+// (LEARNING_PHILOSOPHY.md §16-19: regra determinística, observável).
+function isStuckSentence(item) {
+  const st = getState(item.id);
+  return isMultiWordSentence(item) && st.introduced && st.box === 0 && (st.wrongCount || 0) >= FAILURE_THRESHOLD;
+}
+
 function pickLiteracyRoundType(item) {
+  if (isStuckSentence(item)) return "sentence_build";
   const options = itemTrack(item) === "spelling" ? ["dictation", "dictation", "read"] : ["dictation", "read"];
+  // jan/2027: montar a frase com blocos de palavras e completar a palavra que falta (escrevendo).
+  if (isMultiWordSentence(item) && getState(item.id).introduced) options.push("sentence_build", "cloze");
   if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("write");
   // Minigames também aparecem na sessão normal (repetition without monotony), pra palavras de
   // ortografia que ele já viu ao menos uma vez — palavra nova entra por ditado/leitura.
@@ -354,7 +369,10 @@ function pickLiteracyRoundType(item) {
 // carrega o significado — o round de sentido ("meaning") faz esse papel.
 function pickAdultRoundType(item, st) {
   if (!st.introduced) return "intro";
+  if (isStuckSentence(item)) return "sentence_build";
   const options = ["meaning", "write"];
+  // jan/2027: ordem das palavras (montar) e vocabulário no contexto (completar, escolhendo).
+  if (isMultiWordSentence(item)) options.push("sentence_build", "cloze");
   if (SCENARIO_BY_CORRECT_ID[item.id]) options.push("situation", "read");
   if (st.box >= 2 && speechRecognitionAvailable() && navigator.onLine) options.push("speak");
   // Na caixa 0/1 (acabou de conhecer), reconhecer vem antes de produzir: tira a escrita.
@@ -509,6 +527,10 @@ function closestAccepted(item, typedNorm) {
 // `re` roda sobre a resposta normalizada; `tip` é em inglês (o André usa o app em imersão);
 // `labelPt` é o nome do padrão no relatório dos pais (Configurações / compartilhar relatório).
 const PHONICS_PATTERNS = [
+  { id: "double_suffix", labelPt: "dobrar a consoante antes de -ing/-ed (swimming, stopped)", re: /([bdglmnprt])\1(?=ing|ed)/g, tip: "Short vowel sound? Double the last letter before -ing or -ed: swim → swimming, stop → stopped" },
+  // -ed/-ing só como SUFIXO (3+ letras antes): "red", "bed", "sing", "bring" não contam.
+  { id: "ed_end", labelPt: "final -ed (played, jumped)", re: /(?<=[a-z]{3})ed(?= |$)/g, tip: "The end can sound like /t/ or /d/, but it is always spelled -ed" },
+  { id: "ing_end", labelPt: "final -ing (running)", re: /(?<=[a-z]{3})ing(?= |$)/g, tip: "'-ing' at the end is always spelled i-n-g" },
   { id: "igh", labelPt: "'igh' (night)", re: /igh/g, tip: "'igh' says /eye/" },
   { id: "tion", labelPt: "'tion'", re: /tion/g, tip: "'tion' says /shun/" },
   { id: "magic_e", labelPt: "magic e (bike, cake)", re: /(?<![aeiou])[aeiou][^aeiou\s]e(?= |$)/g, except: ["one", "some", "come", "done", "have", "give", "love", "gone", "were", "there", "where"], tip: "Magic e: the 'e' at the end is silent and makes the vowel say its name" },
@@ -658,9 +680,14 @@ function dictionaryExample(entry, excludeId) {
 // que soa igual ("oo" → "u", "ch" → "k"). Os distratores são justamente essas trocas.
 
 // Grafemas de mais de uma letra, do mais longo pro mais curto (busca gulosa).
-const GRAPHEMES = ["igh", "tch", "dge", "ck", "ng", "nk", "sh", "ch", "th", "ph", "wh", "qu", "kn", "wr", "oo", "ee", "ea", "ai", "ay", "oa", "ow", "ou", "oi", "oy", "ar", "or", "er", "ir", "ur", "aw", "au", "ew", "ll", "ss", "ff", "zz"];
+const GRAPHEMES = ["igh", "tch", "dge", "ck", "ng", "nk", "sh", "ch", "th", "ph", "wh", "qu", "kn", "wr", "oo", "ee", "ea", "ai", "ay", "oa", "ow", "ou", "oi", "oy", "ar", "or", "er", "ir", "ur", "aw", "au", "ew", "ll", "ss", "ff", "zz", "mm", "pp", "nn", "tt", "gg", "dd", "rr", "bb"];
+// Sufixos -ing / -ed viram um bloco só no fim da palavra (played → p·l·ay·ed; swimming →
+// s·w·i·mm·ing): é assim que a regra é ensinada, e a troca típica é "playd"/"jumpt".
+const SUFFIXES = ["ing", "ed"];
 function segmentGraphemes(word) {
-  const w = word.toLowerCase();
+  let w = word.toLowerCase();
+  const suffix = SUFFIXES.find((x) => w.length > x.length + 2 && w.endsWith(x));
+  if (suffix) w = w.slice(0, -suffix.length);
   const out = [];
   let i = 0;
   while (i < w.length) {
@@ -673,6 +700,7 @@ function segmentGraphemes(word) {
       i++;
     }
   }
+  if (suffix) out.push(suffix);
   return out;
 }
 // Grafias que soam igual (ou quase) — o que ele confunde. Fonte dos distratores dos três jogos.
@@ -683,6 +711,8 @@ const GRAPHEME_ALTERNATES = {
   sh: ["s", "ch"], th: ["f", "t"], ng: ["n", "nk"], nk: ["ng", "n"], ph: ["f"], wh: ["w"], kn: ["n"], wr: ["r"],
   ll: ["l"], ss: ["s"], ff: ["f"], k: ["c", "ck"], c: ["k", "s"], s: ["z", "c"], f: ["ph"], e: ["ee", "a"], i: ["e", "y"],
   a: ["u", "e"], u: ["oo", "o"], o: ["oa", "u"], y: ["i", "ee"], w: ["wh"], n: ["kn"], r: ["wr"], j: ["g"], g: ["j"],
+  mm: ["m"], pp: ["p"], nn: ["n"], tt: ["t"], gg: ["g"], dd: ["d"], rr: ["r"], bb: ["b"],
+  ing: ["in", "eng"], ed: ["t", "d"],
 };
 function alternatesFor(g) {
   return (GRAPHEME_ALTERNATES[g] || []).filter((x) => x !== g);
@@ -789,4 +819,75 @@ function missingSoundPuzzle(item) {
   const gapIndex = pool[Math.floor(Math.random() * pool.length)];
   const options = shuffle([gs[gapIndex], ...shuffle(alternatesFor(gs[gapIndex])).slice(0, 2)]);
   return { graphemes: gs, gapIndex, options };
+}
+
+// ===================== Montar a frase / completar a frase (jan/2027) =====================
+// Palavras da frase como blocos (pontuação final sai; vírgula fica grudada na palavra, que é
+// como ela aparece escrita). Distratores: 2 palavras de outras frases da mesma categoria/trilha
+// que não estão nesta (ex. "my" vs "your"), pra ter que LER e não só ordenar.
+function sentenceTokens(text) {
+  return text.trim().replace(/[.!?]+$/, "").split(/\s+/);
+}
+function sentenceBuildPuzzle(item) {
+  const tokens = sentenceTokens(item.en);
+  const lower = new Set(tokens.map((t) => normalizeAnswer(t)));
+  const pool = profileContent()
+    .filter((it) => it.id !== item.id && it.contentType === "sentence" && itemTrack(it) === itemTrack(item))
+    .sort((a, b) => (b.category === item.category) - (a.category === item.category));
+  const extra = [];
+  for (const it of pool) {
+    for (const t of shuffle(sentenceTokens(it.en))) {
+      const n = normalizeAnswer(t);
+      if (n && !lower.has(n) && !extra.some((e) => normalizeAnswer(e) === n)) {
+        extra.push(t.replace(/,$/, ""));
+        break;
+      }
+    }
+    if (extra.length >= 2) break;
+  }
+  return { tokens, distractors: extra, ending: (item.en.trim().match(/[.!?]+$/) || [""])[0] };
+}
+// Palavra escondida no "cloze": a mais "de conteúdo" da frase — a mais longa que não é palavra
+// gramatical. No adulto, de preferência um termo do dicionário (vocabulário no contexto).
+const CLOZE_SKIP = new Set(["the", "a", "an", "i", "you", "he", "she", "we", "they", "it", "my", "your", "his", "her", "our", "to", "of", "in", "on", "at", "for", "with", "and", "but", "so", "is", "are", "was", "be", "do", "can", "i'm", "it's", "that's", "what", "where", "how"]);
+function clozePuzzle(item) {
+  const tokens = sentenceTokens(item.en);
+  const clean = (t) => t.replace(/[,;:]+$/, "");
+  let candidates = tokens.map((t, i) => ({ i, w: clean(t) })).filter((x) => !CLOZE_SKIP.has(x.w.toLowerCase()) && /^[a-z'-]+$/i.test(x.w));
+  if (!candidates.length) candidates = tokens.map((t, i) => ({ i, w: clean(t) }));
+  // André: de preferência uma palavra da trilha de ortografia ("played", "because") — completar a
+  // frase é treino de grafia no contexto.
+  if (getActiveProfile().mode === "literacy") {
+    const spellingWords = new Set(profileContent().filter((it) => itemTrack(it) === "spelling" && it.contentType === "word").map((it) => normalizeAnswer(it.en)));
+    const inSpelling = candidates.filter((c) => spellingWords.has(normalizeAnswer(c.w)));
+    if (inSpelling.length) candidates = inSpelling;
+  }
+  if (itemTrack(item) === "adult" && typeof findDictionaryTerms === "function") {
+    const dictWords = new Set(findDictionaryTerms(item.en).flatMap((h) => item.en.slice(h.start, h.end).toLowerCase().split(/\s+/)));
+    const inDict = candidates.filter((c) => dictWords.has(c.w.toLowerCase()));
+    if (inDict.length) candidates = inDict;
+  }
+  candidates.sort((a, b) => b.w.length - a.w.length);
+  const top = candidates.slice(0, Math.min(2, candidates.length));
+  const pick = top[Math.floor(Math.random() * top.length)];
+  // Opções (adulto escolhe): a palavra + 2 de outras frases da trilha, de tamanho parecido.
+  const others = shuffle(
+    profileContent()
+      .filter((it) => it.id !== item.id && itemTrack(it) === itemTrack(item))
+      .flatMap((it) => sentenceTokens(it.en).map(clean))
+      // só minúsculas: "Could" (início de frase) entregaria que não é a palavra do meio
+      .filter((w) => /^[a-z'-]+$/.test(w) && !CLOZE_SKIP.has(w) && w !== pick.w.toLowerCase() && Math.abs(w.length - pick.w.length) <= 3)
+  );
+  // Adulto: alternativas do próprio dicionário (palavras de peso parecido — "landlord" contra
+  // "contact"), senão "please"/"water" seriam fáceis demais de descartar.
+  const dictPool =
+    itemTrack(item) === "adult" && typeof ADULT_DICTIONARY !== "undefined"
+      ? shuffle(ADULT_DICTIONARY.map((e) => e.term).filter((t) => /^[a-z-]+$/.test(t) && t !== pick.w.toLowerCase() && Math.abs(t.length - pick.w.length) <= 4))
+      : [];
+  const options = [pick.w];
+  for (const w of [...dictPool, ...others]) {
+    if (!options.some((o) => o.toLowerCase() === w.toLowerCase())) options.push(w);
+    if (options.length >= 3) break;
+  }
+  return { tokens, gapIndex: pick.i, answer: pick.w, options: shuffle(options) };
 }

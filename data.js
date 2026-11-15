@@ -21,6 +21,8 @@ const CATEGORY_META = {
   home: { namePt: "Casa", nameEn: "Home", icon: "🏠", color: "#FFCF9C" },
   toys: { namePt: "Brinquedos", nameEn: "Toys", icon: "🧸", color: "#B5EAD7" },
   beach: { namePt: "Praia", nameEn: "Beach", icon: "🏖️", color: "#FFE3A3" }, // CONTENT_PLAN.md, dez/2026
+  school_day: { namePt: "Dia na Escola", nameEn: "School day", icon: "🏫", color: "#C5E1A5" }, // jan/2027
+  feelings: { namePt: "Sentimentos", nameEn: "Feelings", icon: "😊", color: "#FFD1DC" }, // jan/2027
   // ---- trilha adulta (perfil Thales) — só aparecem pra perfis com track "adult" (engine.js) ----
   adult_work: { namePt: "Trabalho", icon: "💼", color: "#9FB7E8" },
   adult_health: { namePt: "Saúde e Médico", icon: "🩺", color: "#F2A7A7" },
@@ -30,6 +32,7 @@ const CATEGORY_META = {
   adult_opinion: { namePt: "Opinião e Argumento", icon: "🗣️", color: "#C3B1E1" },
   adult_connectors: { namePt: "Conectores", icon: "🔗", color: "#A7D8DE" },
   adult_travel: { namePt: "Viagem", icon: "✈️", color: "#B4D8F0" }, // CONTENT_PLAN.md, dez/2026
+  adult_school_admin: { namePt: "Burocracia da Escola", icon: "🗂️", color: "#D7CCE8" }, // jan/2027
   // ---- trilha de ortografia (André) — agrupada por padrão de som (phonics), não por tema ----
   spell_oo: { namePt: "Spelling · oo", icon: "🌙", color: "#B9C6F2" },
   spell_digraphs: { namePt: "Spelling · sh ch th", icon: "🐚", color: "#F5C2C7" },
@@ -40,6 +43,7 @@ const CATEGORY_META = {
   spell_r_vowels: { namePt: "Spelling · ar or ir ur", icon: "🦈", color: "#A8DDE0" },
   spell_tricky: { namePt: "Spelling · tricky words", icon: "🧠", color: "#F7C6A3" },
   spell_ck_ng_nk: { namePt: "Spelling · ck ng nk", icon: "🚚", color: "#D6E8B5" }, // CONTENT_PLAN.md, dez/2026
+  spell_ed_ing: { namePt: "Spelling · -ed -ing", icon: "🏃", color: "#F9D5A7" }, // jan/2027
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -52,6 +56,7 @@ const AVATAR_ITEMS = {
     { id: "green", color: "#5FC98D", unlockedBy: "animals" },
     { id: "purple", color: "#B18CD9", unlockedBy: "school" },
     { id: "sand", color: "#E8C98A", unlockedBy: "beach" },
+    { id: "sky", color: "#7EC8E3", unlockedBy: "feelings" },
   ],
   hat: [
     { id: "none", type: null, unlockedBy: null },
@@ -63,6 +68,8 @@ const AVATAR_ITEMS = {
     { id: "red", color: "#FF6B5B", unlockedBy: "food" },
     { id: "blue", color: "#5B8DEF", unlockedBy: "spell_oo" },
     { id: "lime", color: "#9BCB4B", unlockedBy: "spell_ck_ng_nk" },
+    { id: "orange", color: "#FF9F43", unlockedBy: "school_day" },
+    { id: "pink", color: "#F78FB3", unlockedBy: "spell_ed_ing" },
   ],
 };
 
@@ -77,6 +84,15 @@ const FAMILY_THEMES = [
       "Na praia, antes de entrar no mar, espere o João pedir: \"Can I go swimming?\"",
       "Peça pro André escrever a lista de presentes de Natal em inglês e conferir a grafia no app.",
       "Quando alguém der um presente, todo mundo agradece em inglês: \"Thank you for the present!\"",
+    ],
+  },
+  {
+    id: "2027-01", namePt: "Pronto para a escola", icon: "🎒",
+    homeTipsPt: [
+      "Ensaiem o primeiro dia: alguém faz a professora e o João pede \"I need to wash my hands.\" ou \"Where do I put my bag?\"",
+      "No caminho da escola, pergunte \"How do you feel today?\" — e aceite \"happy\", \"sad\" ou \"scared\" como resposta.",
+      "À noite, o André conta o dia no passado (\"Yesterday I played...\") e escreve uma frase dessas no app.",
+      "Leiam juntos o informativo da escola (newsletter) e procurem as palavras novas no dicionário do app.",
     ],
   },
 ];
@@ -172,6 +188,16 @@ const ADULT_DICTIONARY = [
   { term: "coast", pos: "noun", def: "the land next to the sea", pt: "litoral" },
   { term: "long weekend", pos: "noun", def: "a weekend with an extra day off, like a public holiday", pt: "feriadão" },
   { term: "sort out", pos: "phrasal verb", def: "to organise something or fix a problem", pt: "resolver, organizar", forms: ["sorted out", "sorting out"] },
+  { term: "enrolment", pos: "noun", def: "the process of officially joining a school or course", pt: "matrícula", forms: ["enrollment"] },
+  { term: "uniform", pos: "noun", def: "the special clothes that all students of a school wear", pt: "uniforme" },
+  { term: "lunch order", pos: "noun", def: "food you order from the school canteen for your child's lunch", pt: "pedido de lanche na cantina" },
+  { term: "pupil-free day", pos: "noun", def: "a school day with no classes for students, when teachers plan and train", pt: "dia sem aula (planejamento)", forms: ["pupil free day"] },
+  { term: "newsletter", pos: "noun", def: "a short report with news, sent regularly by a school or group", pt: "informativo", forms: ["school newsletter"] },
+  { term: "emergency contact", pos: "noun", def: "a person the school calls if something serious happens", pt: "contato de emergência" },
+  { term: "details", pos: "noun", def: "small pieces of information, like a phone number or address", pt: "dados, informações" },
+  { term: "documents", pos: "noun", def: "official papers, like a passport or a birth certificate", pt: "documentos" },
+  { term: "running late", pos: "phrase", def: "going to arrive later than planned", pt: "atrasado", forms: ["we're running late"] },
+  { term: "bring", pos: "verb", def: "to take something or someone with you to a place", pt: "levar, trazer" },
   { term: "itinerary", pos: "noun", def: "a plan of the places you will visit on a trip", pt: "roteiro de viagem" },
 ];
 
@@ -201,6 +227,7 @@ const SITUATIONS = [
   { id: "rental", track: "adult", namePt: "Imobiliária", icon: "🔑", mapPos: { top: "45%", left: "15%" }, categoryId: "adult_housing" },
   { id: "parent_teacher", track: "adult", namePt: "Reunião na Escola", icon: "🏫", mapPos: { top: "45%", left: "58%" }, categoryId: "adult_parenting" },
   { id: "small_talk", track: "adult", namePt: "Papo com Vizinhos", icon: "☕", mapPos: { top: "72%", left: "28%" }, categoryId: "adult_social" },
+  { id: "school_office", track: "adult", namePt: "Secretaria da Escola", icon: "🗂️", mapPos: { top: "30%", left: "45%" }, categoryId: "adult_school_admin" },
   { id: "travel", track: "adult", namePt: "Viagem", icon: "✈️", mapPos: { top: "88%", left: "50%" }, categoryId: "adult_travel" },
   { id: "discussion", track: "adult", namePt: "Discussão e Opinião", icon: "🗣️", mapPos: { top: "75%", left: "75%" }, categoryId: "adult_opinion" },
 ];
@@ -232,6 +259,14 @@ const SCENARIOS = [
   { id: "scn_beach_hot", situationId: "beach", promptPt: "Você brincou muito no sol e agora está com calor e com sede.", promptEn: "You played in the sun for a long time. Now you're hot and thirsty.", correctId: "beach_hot_water", distractorIds: ["beach_go_swimming", "beach_build_sandcastle"] },
   { id: "scn_family_christmas", situationId: "family", promptPt: "É Natal e a vovó acabou de chegar.", promptEn: "It's Christmas and Grandma just arrived.", correctId: "family_merry_christmas_grandma", distractorIds: ["family_thank_you_present", "phrase_see_you_later"] },
   { id: "scn_family_present", situationId: "family", promptPt: "A vovó te deu um presente de Natal.", promptEn: "Grandma gave you a Christmas present.", correctId: "family_thank_you_present", distractorIds: ["family_merry_christmas_grandma", "phrase_can_i_have_this"] },
+
+  // ---- jan/2027 (CONTENT_PLAN.md): pronto para a escola — rotina e sentimentos ----
+  { id: "scn_school_finished", situationId: "classroom", promptPt: "Você terminou a atividade antes dos outros.", promptEn: "You finished your work before everyone else.", correctId: "schoolday_finished_next", distractorIds: ["schoolday_where_bag", "schoolday_wash_hands"] },
+  { id: "scn_school_bag", situationId: "classroom", promptPt: "É o primeiro dia e você não sabe onde guardar a mochila.", promptEn: "It's your first day and you don't know where your bag goes.", correctId: "schoolday_where_bag", distractorIds: ["schoolday_can_i_sit_here", "schoolday_im_finished"] },
+  { id: "scn_school_hands", situationId: "cafeteria", promptPt: "Está na hora do lanche e suas mãos estão sujas.", promptEn: "It's lunch time and your hands are dirty.", correctId: "schoolday_wash_hands", distractorIds: ["schoolday_where_bag", "phrase_im_tired"] },
+  { id: "scn_school_sit", situationId: "friends", promptPt: "Na hora do lanche, você quer sentar do lado de outra criança.", promptEn: "At lunch time, you want to sit next to another kid.", correctId: "schoolday_sit_next_to_you", distractorIds: ["schoolday_where_bag", "phrase_play_with_you"] },
+  { id: "scn_feelings_miss_mum", situationId: "teacher_tell", promptPt: "Você está com saudade da mamãe e a professora pergunta o que aconteceu.", promptEn: "You miss your mum and the teacher asks what's wrong.", correctId: "feelings_miss_mum", distractorIds: ["feelings_im_happy", "phrase_im_tired"] },
+  { id: "scn_feelings_scared", situationId: "teacher_tell", promptPt: "Um cachorro grande entrou no pátio e você ficou com medo.", promptEn: "A big dog came into the playground and you feel scared.", correctId: "feelings_scared_help", distractorIds: ["feelings_im_happy", "schoolday_im_finished"] },
 
   // ---- trilha adulta: vários cenários por lugar (o primeiro de cada situationId abre a visita no
   // mapa; os outros entram nas rodadas situation/read/write via SCENARIO_BY_CORRECT_ID). `speaker`
@@ -270,6 +305,11 @@ const SCENARIOS = [
   { id: "scn_travel_luggage", situationId: "travel", speaker: "🧑‍✈️", promptPt: "A esteira parou e a sua mala não apareceu.", correctId: "adult_travel_luggage_who", distractorIds: ["adult_travel_connection", "adult_travel_late_checkout"] },
   { id: "scn_travel_checkout", situationId: "travel", speaker: "🛎️", promptPt: "O voo de volta é só à noite e vocês queriam ficar mais tempo no quarto do hotel.", correctId: "adult_travel_late_checkout", distractorIds: ["adult_travel_check_in_early", "adult_travel_recommend"] },
   { id: "scn_travel_recommend", situationId: "travel", speaker: "🛎️", promptPt: "Você quer pedir ao recepcionista uma dica de restaurante por perto.", correctId: "adult_travel_recommend", distractorIds: ["adult_travel_late_checkout", "adult_travel_itinerary"] },
+  { id: "scn_spell_yesterday", situationId: "friends", promptPt: "A professora pergunta o que você fez ontem.", promptEn: "Your teacher asks what you did yesterday.", correctId: "spell_yesterday_played", distractorIds: ["spell_stopped_tired", "spell_read_tree"] },
+  { id: "scn_admin_first_day", situationId: "school_office", speaker: "🧑‍💼", promptPt: "Seu filho começa na escola segunda-feira e você quer saber o que ele precisa levar.", correctId: "adult_admin_first_day", distractorIds: ["adult_admin_uniform_shop", "adult_admin_lunch_order"] },
+  { id: "scn_admin_contact", situationId: "school_office", speaker: "🧑‍💼", promptPt: "Você trocou de número de celular e precisa avisar a escola.", correctId: "adult_admin_emergency_contact", distractorIds: ["adult_admin_newsletter", "adult_admin_enrolment_docs"] },
+  { id: "scn_admin_pupil_free", situationId: "school_office", speaker: "🧑‍💼", promptPt: "Você ouviu dizer que não vai ter aula na sexta, mas não tem certeza.", correctId: "adult_admin_pupil_free", distractorIds: ["adult_admin_first_day", "adult_admin_late"] },
+  { id: "scn_admin_late", situationId: "school_office", speaker: "🧑‍💼", promptPt: "Vocês ficaram presos no trânsito e vão chegar atrasados na escola.", correctId: "adult_admin_late", distractorIds: ["adult_admin_pupil_free", "adult_admin_uniform_shop"] },
   { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
@@ -705,6 +745,79 @@ const CONTENT = [
     acceptedAnswers: ["thank you for the present", "thanks for the present"],
   },
 
+  // ---- jan/2027 (CONTENT_PLAN.md): pronto para a escola. Quase tudo é frase — as palavras novas
+  // são só os sentimentos (degrau de "I'm sad" → "I'm sad, I miss Mum."). ----
+  { id: "feelings_sad", contentType: "word", en: "sad", pt: "triste", emoji: "😢", category: "feelings", difficulty: 1, prerequisites: [] },
+  { id: "feelings_happy", contentType: "word", en: "happy", pt: "feliz", emoji: "😊", category: "feelings", difficulty: 1, prerequisites: [] },
+  { id: "feelings_scared", contentType: "word", en: "scared", pt: "com medo", emoji: "😨", category: "feelings", difficulty: 1, prerequisites: [] },
+  { id: "feelings_angry", contentType: "word", en: "angry", pt: "bravo", emoji: "😠", category: "feelings", difficulty: 1, prerequisites: [] },
+  {
+    id: "feelings_im_sad", contentType: "sentence",
+    en: "I'm sad", pt: "estou triste", emoji: "😢",
+    category: "feelings", difficulty: 2, prerequisites: ["feelings_sad"],
+    acceptedAnswers: ["i'm sad", "i am sad"],
+  },
+  {
+    id: "feelings_miss_mum", contentType: "sentence",
+    en: "I'm sad, I miss Mum.", pt: "estou triste, estou com saudade da mamãe.", emoji: "😢👩",
+    category: "feelings", difficulty: 4, prerequisites: ["feelings_im_sad", "family_mom"],
+    acceptedAnswers: ["i'm sad i miss mum", "i am sad i miss mum", "i'm sad i miss mom", "i miss mum", "i miss mom"],
+  },
+  {
+    id: "feelings_im_happy", contentType: "sentence",
+    en: "I'm happy!", pt: "estou feliz!", emoji: "😊",
+    category: "feelings", difficulty: 2, prerequisites: ["feelings_happy"],
+    acceptedAnswers: ["i'm happy", "i am happy"],
+  },
+  {
+    id: "feelings_im_scared", contentType: "sentence",
+    en: "I'm scared.", pt: "estou com medo.", emoji: "😨",
+    category: "feelings", difficulty: 2, prerequisites: ["feelings_scared"],
+    acceptedAnswers: ["i'm scared", "i am scared"],
+  },
+  {
+    id: "feelings_scared_help", contentType: "sentence",
+    en: "I'm scared, can you help me?", pt: "estou com medo, você pode me ajudar?", emoji: "😨🙋",
+    category: "feelings", difficulty: 5, prerequisites: ["feelings_im_scared", "phrase_help_please"],
+    acceptedAnswers: ["i'm scared can you help me", "i am scared can you help me", "can you help me"],
+  },
+  {
+    id: "schoolday_where_bag", contentType: "sentence",
+    en: "Where do I put my bag?", pt: "onde eu coloco a minha mochila?", emoji: "🎒❓",
+    category: "school_day", difficulty: 4, prerequisites: ["school_backpack"],
+    acceptedAnswers: ["where do i put my bag", "where do i put my backpack"],
+  },
+  {
+    id: "schoolday_wash_hands", contentType: "sentence",
+    en: "I need to wash my hands.", pt: "preciso lavar as mãos.", emoji: "🧼🙌",
+    category: "school_day", difficulty: 4, prerequisites: ["body_hand"],
+    acceptedAnswers: ["i need to wash my hands"],
+  },
+  {
+    id: "schoolday_im_finished", contentType: "sentence",
+    en: "I'm finished!", pt: "terminei!", emoji: "✅",
+    category: "school_day", difficulty: 3, prerequisites: [],
+    acceptedAnswers: ["i'm finished", "i am finished", "i'm done", "i am done"],
+  },
+  {
+    id: "schoolday_finished_next", contentType: "sentence",
+    en: "I'm finished! What do I do now?", pt: "terminei! o que eu faço agora?", emoji: "✅❓",
+    category: "school_day", difficulty: 5, prerequisites: ["schoolday_im_finished"],
+    acceptedAnswers: ["i'm finished what do i do now", "i am finished what do i do now", "what do i do now"],
+  },
+  {
+    id: "schoolday_can_i_sit_here", contentType: "sentence",
+    en: "Can I sit here?", pt: "posso sentar aqui?", emoji: "🪑❓",
+    category: "school_day", difficulty: 3, prerequisites: ["school_sit_down"],
+    acceptedAnswers: ["can i sit here"],
+  },
+  {
+    id: "schoolday_sit_next_to_you", contentType: "sentence",
+    en: "Can I sit next to you?", pt: "posso sentar do seu lado?", emoji: "🪑🧒",
+    category: "school_day", difficulty: 4, prerequisites: ["schoolday_can_i_sit_here"],
+    acceptedAnswers: ["can i sit next to you"],
+  },
+
   // ======================================================================================
   // ---- TRILHA ADULTA (perfil Thales) ----
   // `track: "adult"` tira esses itens da trilha das crianças (engine.js, profileContent). Mesma
@@ -1084,6 +1197,61 @@ const CONTENT = [
     acceptedAnswers: ["we haven't sorted out our itinerary yet", "we have not sorted out our itinerary yet"],
   },
 
+  // ---- burocracia da escola (jan/2027, CONTENT_PLAN.md) ----
+  { id: "adult_admin_enrolment", track: "adult", contentType: "word", en: "enrolment", pt: "matrícula", emoji: "📝", category: "adult_school_admin", difficulty: 1, prerequisites: [] },
+  { id: "adult_admin_uniform", track: "adult", contentType: "word", en: "uniform", pt: "uniforme", emoji: "👕🏫", category: "adult_school_admin", difficulty: 1, prerequisites: [] },
+  { id: "adult_admin_lunch_order_word", track: "adult", contentType: "phrase", en: "lunch order", pt: "pedido de lanche na cantina", emoji: "🥪📋", category: "adult_school_admin", difficulty: 2, prerequisites: [] },
+  { id: "adult_admin_pupil_free_word", track: "adult", contentType: "phrase", en: "pupil-free day", pt: "dia sem aula (planejamento)", emoji: "🚫🏫", category: "adult_school_admin", difficulty: 2, prerequisites: [] },
+  { id: "adult_admin_newsletter_word", track: "adult", contentType: "phrase", en: "school newsletter", pt: "informativo da escola", emoji: "📰", category: "adult_school_admin", difficulty: 2, prerequisites: [] },
+  {
+    id: "adult_admin_first_day", track: "adult", contentType: "sentence",
+    en: "Does he need to bring anything on the first day?", pt: "ele precisa levar alguma coisa no primeiro dia?", emoji: "🎒❓",
+    category: "adult_school_admin", difficulty: 4, prerequisites: [],
+    acceptedAnswers: ["does he need to bring anything on the first day"],
+  },
+  {
+    id: "adult_admin_emergency_contact", track: "adult", contentType: "sentence",
+    en: "I'd like to update our emergency contact details.", pt: "gostaria de atualizar nossos contatos de emergência.", emoji: "📞🆘",
+    category: "adult_school_admin", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["i'd like to update our emergency contact details", "i would like to update our emergency contact details"],
+  },
+  {
+    id: "adult_admin_enrolment_docs", track: "adult", contentType: "sentence",
+    en: "What documents do I need for the enrolment?", pt: "quais documentos eu preciso para a matrícula?", emoji: "📄📝",
+    category: "adult_school_admin", difficulty: 4, prerequisites: ["adult_admin_enrolment"],
+    acceptedAnswers: ["what documents do i need for the enrolment", "what documents do i need for enrolment"],
+  },
+  {
+    id: "adult_admin_uniform_shop", track: "adult", contentType: "sentence",
+    en: "Where can we buy the school uniform?", pt: "onde podemos comprar o uniforme da escola?", emoji: "🛍️👕",
+    category: "adult_school_admin", difficulty: 3, prerequisites: ["adult_admin_uniform"],
+    acceptedAnswers: ["where can we buy the school uniform", "where can we buy the uniform"],
+  },
+  {
+    id: "adult_admin_lunch_order", track: "adult", contentType: "sentence",
+    en: "How do I place a lunch order?", pt: "como faço o pedido de lanche na cantina?", emoji: "🥪❓",
+    category: "adult_school_admin", difficulty: 4, prerequisites: ["adult_admin_lunch_order_word"],
+    acceptedAnswers: ["how do i place a lunch order"],
+  },
+  {
+    id: "adult_admin_pupil_free", track: "adult", contentType: "sentence",
+    en: "Is Friday a pupil-free day?", pt: "sexta-feira é dia sem aula?", emoji: "📅🚫",
+    category: "adult_school_admin", difficulty: 4, prerequisites: ["adult_admin_pupil_free_word"],
+    acceptedAnswers: ["is friday a pupil-free day", "is friday a pupil free day"],
+  },
+  {
+    id: "adult_admin_newsletter", track: "adult", contentType: "sentence",
+    en: "I didn't get the school newsletter this week. Could you send it again?", pt: "não recebi o informativo da escola esta semana. vocês podem mandar de novo?", emoji: "📰📧",
+    category: "adult_school_admin", difficulty: 5, prerequisites: ["adult_admin_newsletter_word"],
+    acceptedAnswers: ["i didn't get the school newsletter this week could you send it again", "i did not get the school newsletter this week could you send it again"],
+  },
+  {
+    id: "adult_admin_late", track: "adult", contentType: "sentence",
+    en: "Sorry, we're running late. He'll be there in ten minutes.", pt: "desculpe, estamos atrasados. ele chega em dez minutos.", emoji: "🚗⏰",
+    category: "adult_school_admin", difficulty: 5, prerequisites: [],
+    acceptedAnswers: ["sorry we're running late he'll be there in ten minutes", "sorry we are running late he will be there in ten minutes", "sorry we're running late he'll be there in 10 minutes"],
+  },
+
   // ======================================================================================
   // ---- TRILHA DE ORTOGRAFIA (André, 8 anos — já fala inglês, precisa ESCREVER certo) ----
   // `track: "spelling"`: só o perfil do André vê (engine.js, PROFILES.tracks). Agrupada por padrão
@@ -1243,4 +1411,29 @@ const CONTENT = [
   { id: "spell_holiday", track: "spelling", contentType: "word", en: "holiday", pt: "férias / feriado", emoji: "🌴", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It ends with the word day: holi-DAY" },
   { id: "spell_family", track: "spelling", contentType: "word", en: "family", pt: "família", emoji: "👨‍👩‍👦", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say every part slowly: fam-I-ly" },
   { id: "spell_laugh", track: "spelling", contentType: "word", en: "laugh", pt: "rir / risada", emoji: "😂", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! The gh at the end says /f/: l-a-u-g-h" },
+
+  // ---- -ed / -ing (jan/2027, CONTENT_PLAN.md): som de /t/ ou /d/ no fim, mas sempre "-ed"; e a
+  // regra de dobrar a consoante depois de vogal curta (swim → swimming, stop → stopped) ----
+  { id: "spell_played", track: "spelling", contentType: "word", en: "played", pt: "brincou / jogou", emoji: "🤸⏪", category: "spell_ed_ing", difficulty: 1, prerequisites: [] },
+  { id: "spell_jumped", track: "spelling", contentType: "word", en: "jumped", pt: "pulou", emoji: "🦘⏪", category: "spell_ed_ing", difficulty: 1, prerequisites: [] },
+  { id: "spell_stopped", track: "spelling", contentType: "word", en: "stopped", pt: "parou", emoji: "🛑⏪", category: "spell_ed_ing", difficulty: 2, prerequisites: [] },
+  { id: "spell_swimming", track: "spelling", contentType: "word", en: "swimming", pt: "nadando", emoji: "🏊", category: "spell_ed_ing", difficulty: 2, prerequisites: [] },
+  { id: "spell_running", track: "spelling", contentType: "word", en: "running", pt: "correndo", emoji: "🏃", category: "spell_ed_ing", difficulty: 2, prerequisites: [] },
+  { id: "spell_hopping", track: "spelling", contentType: "word", en: "hopping", pt: "pulando num pé só", emoji: "🐇", category: "spell_ed_ing", difficulty: 2, prerequisites: [] },
+  {
+    id: "spell_yesterday_played", track: "spelling", contentType: "sentence",
+    en: "Yesterday I played with my friends.", pt: "ontem eu brinquei com meus amigos.", emoji: "⏪🧑‍🤝‍🧑",
+    category: "spell_ed_ing", difficulty: 4, prerequisites: ["spell_played", "spell_friend"],
+    acceptedAnswers: ["yesterday i played with my friends"],
+  },
+  {
+    id: "spell_stopped_tired", track: "spelling", contentType: "sentence",
+    en: "I stopped running because I was tired.", pt: "parei de correr porque estava cansado.", emoji: "🏃🛑😴",
+    category: "spell_ed_ing", difficulty: 5, prerequisites: ["spell_stopped", "spell_running", "spell_because"],
+    acceptedAnswers: ["i stopped running because i was tired"],
+  },
+  { id: "spell_were", track: "spelling", contentType: "word", en: "were", pt: "eram / estavam", emoji: "⏪👥", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! were is w-e-r-e — don't mix it up with where (a place)" },
+  { id: "spell_where", track: "spelling", contentType: "word", en: "where", pt: "onde", emoji: "📍❓", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Question words start with wh: what, when, WHere" },
+  { id: "spell_there", track: "spelling", contentType: "word", en: "there", pt: "lá / ali", emoji: "👉📍", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! there has the word here inside it: t-HERE" },
+  { id: "spell_does", track: "spelling", contentType: "word", en: "does", pt: "faz (ele/ela)", emoji: "🛠️", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like duz, but it is spelled d-o-e-s" },
 ];

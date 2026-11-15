@@ -1204,3 +1204,16 @@ body[data-mode="adult"] .situation-option .opt-text {
   border-bottom: 4px dashed var(--color-primary); color: var(--color-primary);
 }
 .gap-word .gap.filled { border-bottom-style: solid; border-bottom-color: #2E9E5B; color: #2E9E5B; }
+
+/* ===== Montar a frase / completar a frase ===== */
+.sentence-pt { font-weight: 700; color: var(--color-text-secondary); text-align: center; max-width: 340px; }
+.sentence-line {
+  display: flex; flex-wrap: wrap; gap: 6px 8px; justify-content: center; align-items: flex-end;
+  min-height: 44px; max-width: 360px; font-family: var(--font-display); font-size: 1.35rem;
+}
+.sentence-line .sl-word { color: var(--color-primary-dark); }
+.sentence-line .sl-blank { display: inline-block; width: 42px; border-bottom: 3px solid var(--color-border, #ccc); height: 1.2em; }
+.build-tile.word-tile { min-width: 0; height: 48px; font-size: 1.15rem; padding: 0 14px; }
+.cloze-sentence { font-family: var(--font-display); font-size: 1.35rem; text-align: center; max-width: 360px; line-height: 1.5; }
+.cloze-sentence .gap { display: inline-block; min-width: 3em; border-bottom: 3px dashed var(--color-primary); color: var(--color-primary); }
+.cloze-sentence .gap.filled { border-bottom-style: solid; border-bottom-color: #2E9E5B; color: #2E9E5B; }
