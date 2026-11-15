@@ -22,6 +22,15 @@ const ICONS = {
   lock: '<rect x="5" y="11" width="14" height="9" rx="2.5" fill="currentColor"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
   star: '<path d="M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1L6.6 19.3l1.3-6-4.6-4.1 6.1-.6L12 3z" fill="currentColor"/>',
   home: '<path d="M4 11l8-7 8 7v8a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-8z" fill="currentColor"/>',
+  // Fase 1 (acabamento): ícones que ainda eram emoji de cromo (cronômetro, ›, →, controle, livro...)
+  clock: '<circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 8.5V13l3 2M9.5 3h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  chevron: '<path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  gamepad: '<path d="M7.5 6.5h9a5 5 0 014.9 4l.8 4.2a3 3 0 01-5.2 2.4L15 15.5H9l-2 1.6a3 3 0 01-5.2-2.4l.8-4.2a5 5 0 014.9-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7.5 10v3M6 11.5h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="10.5" r="1.2" fill="currentColor"/><circle cx="18.5" cy="12.8" r="1.2" fill="currentColor"/>',
+  book: '<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>',
+  blocks: '<rect x="3" y="13" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="13" y="13" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="8" y="4" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L21 21" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
+  gap: '<path d="M8 8a4 4 0 118 0c0 2.6-4 3-4 6M12 17.4v.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M4 21h4M10 21h4M16 21h4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
 };
 function icon(name, extraClass) {
   return `<span class="icon${extraClass ? " " + extraClass : ""}"><svg viewBox="0 0 24 24">${ICONS[name] || ""}</svg></span>`;
@@ -36,6 +45,13 @@ function renderDots(current, total, cls, maxDots) {
   let html = `<div class="progress-dots${cls ? " " + cls : ""}">`;
   for (let i = 0; i < shown; i++) html += `<span class="dot${i < filled ? " filled" : ""}"></span>`;
   return html + "</div>";
+}
+
+// Barra de progresso do quiz com "3 / 8" (a rodada em andamento conta como atual).
+function renderQuizProgress(index, total) {
+  const current = Math.min(index + 1, total);
+  const pct = total > 0 ? Math.round((index / total) * 100) : 0;
+  return `<div class="quiz-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${current}"><span class="quiz-bar-fill" style="width:${pct}%"></span></div><span class="quiz-count">${current} / ${total}</span>`;
 }
 
 // Troca o cromo de interface estático (voltar, engrenagem, som, play) pelos ícones SVG.
@@ -59,6 +75,18 @@ function initIcons() {
   if (playQuizBtn) playQuizBtn.innerHTML = icon("play") + " Jogar";
   const playPill = document.querySelector(".play-pill");
   if (playPill) playPill.innerHTML = icon("play") + " JOGAR";
+  // Banners da Home e cabeçalhos de Word Games / Dictionary: o "›" e os emoji de cromo viram SVG.
+  document.querySelectorAll(".world-banner-head > span:last-child").forEach((el) => {
+    el.innerHTML = icon("chevron", "banner-chevron");
+  });
+  const gamesIc = document.querySelector("#btn-games .ic");
+  if (gamesIc) gamesIc.innerHTML = icon("gamepad");
+  const dictIc = document.querySelector("#btn-dictionary .ic");
+  if (dictIc) dictIc.innerHTML = icon("book");
+  const gamesTitle = document.querySelector("#screen-games h2");
+  if (gamesTitle) gamesTitle.innerHTML = icon("gamepad") + " Word Games";
+  const dictTitle = document.querySelector("#screen-dictionary h2");
+  if (dictTitle) dictTitle.innerHTML = icon("book") + " Dictionary";
 }
 initIcons();
 
@@ -367,12 +395,21 @@ function playTone(freq, duration, delay) {
   osc.start(ctx.currentTime + delay);
   osc.stop(ctx.currentTime + delay + duration);
 }
+// Vibração leve junto com o som (só onde existe navigator.vibrate): acerto = toque curto,
+// erro = toque curtíssimo e suave (sem punição — "errar faz parte do jogo").
+function haptic(kind) {
+  try {
+    if (navigator.vibrate) navigator.vibrate(kind === "ok" ? [18, 40, 18] : 25);
+  } catch (e) {}
+}
 function playCheer() {
+  haptic("ok");
   playTone(523.25, 0.15, 0);
   playTone(659.25, 0.15, 0.12);
   playTone(783.99, 0.25, 0.24);
 }
 function playGentle() {
+  haptic("err");
   playTone(392, 0.2, 0);
 }
 function playUnlock() {
@@ -411,7 +448,11 @@ function playFanfare() {
 // ===================== Navegação de telas =====================
 const screens = document.querySelectorAll(".screen");
 function showScreen(id) {
+  // A entrada suave (fade + slide curto) é uma animação CSS em .screen.active: ao trocar o display
+  // de none para flex ela reinicia sozinha; prefers-reduced-motion desliga no CSS.
   screens.forEach((s) => s.classList.toggle("active", s.id === "screen-" + id));
+  const target = document.getElementById("screen-" + id);
+  if (target) target.scrollTop = 0;
 }
 document.querySelectorAll("[data-back]").forEach((btn) => {
   btn.addEventListener("click", () => showScreen(btn.dataset.back));
@@ -467,8 +508,8 @@ function renderHome() {
   const topCat = topCatId ? CATEGORY_META[topCatId] : null;
   const estMinutes = Math.max(1, Math.round(session.length / 3));
   document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
-  document.getElementById("mission-meta").textContent = session.length
-    ? tr(`⏱ ~${estMinutes} min · ${session.length} activities`, `⏱ ~${estMinutes} min · ${session.length} atividades`)
+  document.getElementById("mission-meta").innerHTML = session.length
+    ? icon("clock") + " " + tr(`~${estMinutes} min · ${session.length} activities`, `~${estMinutes} min · ${session.length} atividades`)
     : tr("Come back later to review!", "Volta mais tarde pra revisar!");
 
   // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
@@ -574,9 +615,10 @@ function renderRound() {
     return;
   }
   const round = quizQueue[quizIndex];
-  document.getElementById("quiz-progress").innerHTML = renderDots(quizIndex, quizQueue.length, "", quizQueue.length);
+  document.getElementById("quiz-progress").innerHTML = renderQuizProgress(quizIndex, quizQueue.length);
   const container = document.getElementById("quiz-options");
   const repeatBtn = document.getElementById("btn-repeat-word");
+  repeatBtn.innerHTML = icon("sound") + " " + tr("Listen again", "Ouvir de novo");
   container.innerHTML = "";
   container.classList.remove("enter");
   void container.offsetWidth;
@@ -591,7 +633,7 @@ function renderRound() {
         <span class="word-en">${dictLinkedHtml(round.item.en)}</span>
         <button class="word-pt-btn" id="intro-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>
         <span class="intro-hint">toque na imagem pra ouvir em inglês · toque na tradução pra ouvir em português</span>
-        <button class="big-btn" id="intro-next">Já sei! →</button>
+        <button class="big-btn" id="intro-next">${tr("Got it!", "Já sei!")} ${icon("arrow")}</button>
       </div>`;
     speak(round.item.en, round.item.id);
     container.querySelector(".word-emoji-big").addEventListener("click", () => speak(round.item.en, round.item.id));
@@ -636,7 +678,7 @@ function renderRound() {
         </div>
       </div>
       <div class="prompt-line">${tr("What do you say?", "O que você fala?")} 🇬🇧</div>
-      <div class="situation-status" id="situation-status">${tr("🔊 listening to the options... tap a card to hear it again", "🔊 ouvindo as opções... toque numa carta pra ouvir de novo")}</div>
+      <div class="situation-status" id="situation-status">${icon("sound")} ${tr("listening to the options... tap a card to hear it again", "ouvindo as opções... toque numa carta pra ouvir de novo")}</div>
       <div class="situation-options" id="situation-options"></div>`;
     const optionsWrap = document.getElementById("situation-options");
     const statusEl = document.getElementById("situation-status");
@@ -954,7 +996,7 @@ function setupTypingCheck(round, isDictation) {
         <div class="sp-target sp-big">${renderTargetHtml(analysis)}</div>
         ${renderTipsHtml(analysis, item)}
         <div>${tr("Now type it the right way 👇", "Agora digite do jeito certo 👇")}</div>
-        <button class="skip-btn" id="write-skip">${tr("Next →", "Próxima →")}</button>`;
+        <button class="skip-btn" id="write-skip">${tr("Next", "Próxima")} ${icon("arrow")}</button>`;
       document.getElementById("write-skip").addEventListener("click", () => goNext(0));
       input.value = "";
       input.focus();
@@ -1366,7 +1408,7 @@ function renderSentenceRound(round, container, repeatBtn) {
     container.innerHTML = `
       <div class="write-card">
         ${isImmersion() ? listenHead : ptHead}
-        <span class="intro-hint">${tr("🧱 Build the sentence", "🧱 Monte a frase em inglês")}</span>
+        <span class="intro-hint">${tr("Build the sentence", "Monte a frase em inglês")}</span>
         <div class="sentence-line" id="sentence-line"></div>
         <div class="build-tiles" id="build-tiles"></div>
         <div class="write-feedback" id="game-feedback"></div>
@@ -1521,7 +1563,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
     container.innerHTML = `
       <div class="write-card">
         ${gameHead(item)}
-        <span class="intro-hint">🧱 Build the word with sound blocks</span>
+        <span class="intro-hint">Build the word with sound blocks</span>
         <div class="build-slots" id="build-slots">${gs.map(() => `<span class="build-slot"></span>`).join("")}</div>
         <div class="build-tiles" id="build-tiles"></div>
         <div class="write-feedback" id="game-feedback"></div>
@@ -1573,7 +1615,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
     container.innerHTML = `
       <div class="write-card">
         ${gameHead(item)}
-        <span class="intro-hint">🔍 Which one is spelled right?</span>
+        <span class="intro-hint">Which one is spelled right?</span>
         <div class="situation-options" id="pick-options"></div>
         <div class="write-feedback" id="game-feedback"></div>
       </div>`;
@@ -1609,7 +1651,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
     container.innerHTML = `
       <div class="write-card">
         ${gameHead(item)}
-        <span class="intro-hint">🕳️ Which sound is missing?</span>
+        <span class="intro-hint">Which sound is missing?</span>
         <div class="gap-word" id="gap-word">${renderWord("")}</div>
         <div class="build-tiles" id="gap-options"></div>
         <div class="write-feedback" id="game-feedback"></div>
@@ -1649,15 +1691,15 @@ function renderSpellingGameRound(round, container, repeatBtn) {
 // Tela "Word Games" (Home do André): cada jogo é uma rodada curta de 8 palavras, escolhidas pelo
 // motor (as que ele mais erra / estão vencidas / têm os padrões em que mais erra).
 const SPELLING_GAMES = [
-  { type: "build", icon: "🧱", name: "Build it", desc: "Listen and build the word with sound blocks" },
-  { type: "pick_spelling", icon: "🔍", name: "Which one is right?", desc: "Find the word that is spelled right" },
-  { type: "missing_sound", icon: "🕳️", name: "Missing sound", desc: "Choose the sound that is missing" },
+  { type: "build", icon: "blocks", name: "Build it", desc: "Listen and build the word with sound blocks" },
+  { type: "pick_spelling", icon: "search", name: "Which one is right?", desc: "Find the word that is spelled right" },
+  { type: "missing_sound", icon: "gap", name: "Missing sound", desc: "Choose the sound that is missing" },
 ];
 function renderGamesScreen() {
   const el = document.getElementById("games-list");
   el.innerHTML = SPELLING_GAMES.map(
     (g) => `<button class="game-card" data-game="${g.type}">
-      <span class="game-icon">${g.icon}</span>
+      <span class="game-icon">${icon(g.icon)}</span>
       <span class="game-txt"><b>${g.name}</b><small>${g.desc}</small></span>
       ${icon("play")}
     </button>`

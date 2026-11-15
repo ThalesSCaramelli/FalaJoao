@@ -395,43 +395,96 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 /* QUIZ */
+/* Padding próprio (a base usa env(safe-area-inset-*, 12px), que vira 0 em navegador comum e deixava
+   os cards colados na borda). Vale também pras telas de categoria, jogos e dicionário. */
+#screen-quiz,
+#screen-category,
+#screen-games,
+#screen-dictionary {
+  padding:
+    max(env(safe-area-inset-top, 0px), var(--space-4))
+    max(env(safe-area-inset-right, 0px), var(--space-4))
+    max(env(safe-area-inset-bottom, 0px), var(--space-5))
+    max(env(safe-area-inset-left, 0px), var(--space-4));
+}
+
+.quiz-header { padding: 0 0 var(--space-3); }
 .quiz-progress {
   flex: 1;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
 }
-.quiz-progress .progress-dots { flex-wrap: wrap; justify-content: center; }
-
-.quiz-body {
+.quiz-bar {
   flex: 1;
+  height: 14px;
+  background: var(--locked);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.quiz-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-success);
+  border-radius: var(--radius-pill);
+  transition: width 0.35s ease;
+}
+.quiz-count {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  min-width: 3.4em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Corpo do quiz: o conteúdo fica centrado verticalmente (com leve viés pra cima, onde o olho
+   procura o desafio). ::before/::after absorvem a sobra; se o conteúdo for maior que a tela eles
+   encolhem a zero e a tela rola normalmente, sem cortar o topo. */
+.quiz-body {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 28px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  /* em telas altas o respiro entre o botão de áudio e as opções cresce junto */
+  gap: clamp(var(--space-5), 4vh, 44px);
+  padding-bottom: var(--space-4);
 }
+.quiz-body::before,
+.quiz-body::after { content: ""; flex: 1 1 0; min-height: 0; }
+.quiz-body::before { flex-grow: 0.9; }
+.quiz-body::after { flex-grow: 1.1; }
 
 .repeat-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 64px;
   background: var(--color-secondary);
   color: #fff;
   border: none;
-  border-radius: 20px;
-  font-size: 1.3rem;
+  border-radius: var(--radius-lg);
+  font-size: 1.25rem;
   font-weight: 700;
-  padding: 18px 28px;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  padding: var(--space-3) var(--space-6);
+  box-shadow: var(--shadow-physical-sm);
   cursor: pointer;
 }
-
 .repeat-btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(58,46,42,0.13);
 }
 
 .quiz-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
   width: 100%;
   max-width: 520px;
 }
@@ -449,13 +502,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .quiz-option {
-  background: #fff;
+  background: var(--color-surface);
   border: 4px solid transparent;
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   font-size: 3.2rem;
-  padding: 20px 6px;
+  padding: var(--space-5) var(--space-2);
   cursor: pointer;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-physical-sm);
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -468,11 +521,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .quiz-option:active {
   transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(58,46,42,0.1);
 }
 
 .quiz-option.correct {
   border-color: var(--color-success);
-  background: #EAFBEA;
+  background: var(--cap-communicate-soft);
   animation: pop 0.4s ease;
 }
 
@@ -1061,17 +1115,17 @@ body[data-mode="adult"] .situation-option .opt-text {
   color: var(--color-text);
 }
 .write-feedback .sp-big { font-size: 2rem; }
-.sp-ok { color: #2E9E5B; }
-.sp-bad { color: #D64545; text-decoration: underline wavy #D64545; }
-.sp-extra { color: #D64545; text-decoration: line-through; opacity: 0.7; }
-.sp-missing { color: #D64545; font-weight: 800; }
+.sp-ok { color: var(--color-success); }
+.sp-bad { color: var(--color-error); text-decoration: underline wavy var(--color-error); }
+.sp-extra { color: var(--color-error); text-decoration: line-through; opacity: 0.7; }
+.sp-missing { color: var(--color-error); font-weight: 800; }
 .sp-pattern {
   background: var(--cap-help-soft);
   color: var(--color-primary-dark);
   border-radius: 6px;
   padding: 0 2px;
 }
-.sp-fix { text-decoration: underline; text-decoration-color: #D64545; text-decoration-thickness: 3px; }
+.sp-fix { text-decoration: underline; text-decoration-color: var(--color-error); text-decoration-thickness: 3px; }
 .sp-tip {
   margin-top: 8px;
   padding: 8px 12px;
@@ -1187,7 +1241,7 @@ body[data-mode="adult"] .situation-option .opt-text {
   display: inline-flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-size: 1.7rem; color: var(--color-primary-dark);
 }
-.build-slot.filled { border-bottom-color: #2E9E5B; }
+.build-slot.filled { border-bottom-color: var(--color-success); }
 .build-tiles { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 360px; }
 .build-tile {
   min-width: 58px; height: 58px; padding: 0 12px; border: none; border-radius: 16px;
@@ -1195,7 +1249,7 @@ body[data-mode="adult"] .situation-option .opt-text {
   font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--color-text); cursor: pointer;
 }
 .build-tile:disabled { opacity: 0.25; box-shadow: none; }
-.build-tile.hint { outline: 3px solid #2E9E5B; animation: pulse-hint 1s ease-in-out infinite; }
+.build-tile.hint { outline: 3px solid var(--color-success); animation: pulse-hint 1s ease-in-out infinite; }
 @keyframes pulse-hint { 50% { transform: scale(1.08); } }
 .spelling-option { justify-content: center; font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.06em; }
 .gap-word { font-family: var(--font-display); font-size: 2.4rem; letter-spacing: 0.06em; color: var(--color-text); }
@@ -1203,7 +1257,7 @@ body[data-mode="adult"] .situation-option .opt-text {
   display: inline-block; min-width: 1.6em; margin: 0 2px; text-align: center;
   border-bottom: 4px dashed var(--color-primary); color: var(--color-primary);
 }
-.gap-word .gap.filled { border-bottom-style: solid; border-bottom-color: #2E9E5B; color: #2E9E5B; }
+.gap-word .gap.filled { border-bottom-style: solid; border-bottom-color: var(--color-success); color: var(--color-success); }
 
 /* ===== Montar a frase / completar a frase ===== */
 .sentence-pt { font-weight: 700; color: var(--color-text-secondary); text-align: center; max-width: 340px; }
@@ -1216,4 +1270,138 @@ body[data-mode="adult"] .situation-option .opt-text {
 .build-tile.word-tile { min-width: 0; height: 48px; font-size: 1.15rem; padding: 0 14px; }
 .cloze-sentence { font-family: var(--font-display); font-size: 1.35rem; text-align: center; max-width: 360px; line-height: 1.5; }
 .cloze-sentence .gap { display: inline-block; min-width: 3em; border-bottom: 3px dashed var(--color-primary); color: var(--color-primary); }
-.cloze-sentence .gap.filled { border-bottom-style: solid; border-bottom-color: #2E9E5B; color: #2E9E5B; }
+.cloze-sentence .gap.filled { border-bottom-style: solid; border-bottom-color: var(--color-success); color: var(--color-success); }
+
+/* ===================== Fase 1: acabamento — cabeçalhos, categoria, Dictionary, Word Games ===================== */
+/* Botão de voltar com área de toque confortável (52px) em todas as telas que usam .back-btn. */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  box-shadow: var(--shadow-physical-sm);
+}
+.back-btn .icon { width: 1.3em; height: 1.3em; }
+
+/* Cabeçalho das telas de categoria / Word Games / Dictionary: mesmo ritmo do quiz */
+#screen-category .sub-header,
+#screen-games .sub-header,
+#screen-dictionary .sub-header { padding: 0 0 var(--space-4); gap: var(--space-3); }
+#screen-category .sub-header h2,
+#screen-games .sub-header h2,
+#screen-dictionary .sub-header h2 {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  font-size: 1.35rem; color: var(--color-text);
+}
+#screen-games .sub-header h2 .icon,
+#screen-dictionary .sub-header h2 .icon { width: 1.3em; height: 1.3em; color: var(--color-primary); }
+/* h2 centrado de verdade: compensa o botão de voltar (52px) à esquerda */
+#screen-games .sub-header::after,
+#screen-dictionary .sub-header::after { content: ""; flex: 0 0 52px; }
+
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-physical-sm);
+}
+.play-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(58,46,42,0.13); }
+.play-btn .icon { width: 1.1em; height: 1.1em; }
+
+#screen-category .grid { padding: 0 0 var(--space-5); gap: var(--space-4); }
+.word-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-2);
+  min-height: 132px;
+  justify-content: center;
+  box-shadow: var(--shadow-physical-sm);
+}
+.word-card .word-emoji { display: flex; align-items: center; justify-content: center; min-height: 4rem; line-height: 1; }
+.word-card .word-en { color: var(--color-text); }
+.word-card .word-pt { color: var(--color-text-secondary); font-size: 0.8rem; }
+
+.games-list { padding: 0 0 var(--space-5); gap: var(--space-4); }
+.game-card {
+  min-height: 88px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-physical-sm);
+}
+.game-card .game-icon {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 56px; height: 56px; border-radius: var(--radius-md);
+  background: var(--cap-say-soft); color: var(--color-primary-dark);
+}
+.game-card .game-icon .icon { width: 1.8rem; height: 1.8rem; color: inherit; }
+.game-card > .icon { color: var(--color-primary); }
+
+.dict-search {
+  width: 100%; margin: 0 0 var(--space-3); min-height: 52px;
+  background: var(--color-surface); color: var(--color-text);
+  border: 3px solid var(--color-border); font-family: var(--font-body);
+}
+.dict-search:focus { outline: none; border-color: var(--color-secondary); }
+.dict-list { padding: 0 0 var(--space-5); gap: var(--space-3); }
+.dict-row { min-height: 56px; align-items: center; box-shadow: var(--shadow-physical-sm); }
+
+/* chevron dos banners da Home (substitui o "›") */
+.world-banner-head .banner-chevron { width: 1.4em; height: 1.4em; color: var(--color-text-secondary); }
+.world-banner-head .ic .icon { width: 1.8rem; height: 1.8rem; color: var(--color-primary-dark); }
+.mission-card .meta .icon { width: 1.1em; height: 1.1em; margin-right: 2px; }
+
+/* Cartões de rodada: áreas de toque e ritmo consistentes */
+.intro-card { gap: var(--space-4); width: 100%; }
+.intro-card .big-btn,
+.speak-round .big-btn,
+.write-card .big-btn { min-height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); }
+.big-btn .icon { width: 1.2em; height: 1.2em; }
+.intro-hint, .speak-note { color: var(--color-text-secondary); text-align: center; }
+.situation-status { text-align: center; }
+.situation-status .icon { width: 1.1em; height: 1.1em; color: var(--color-secondary); margin-right: var(--space-1); }
+.situation-option { min-height: 64px; }
+.build-tile { min-height: 52px; }
+.skip-btn { min-height: 44px; padding: var(--space-2) var(--space-4); display: inline-flex; align-items: center; gap: var(--space-1); }
+.skip-btn .icon { width: 1.1em; height: 1.1em; }
+.write-input { min-height: 56px; background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+.read-card, .write-card, .speak-round { width: 100%; max-width: 420px; }
+
+/* ===================== Sistema global de interação (botões) ===================== */
+/* :where() zera a especificidade: qualquer regra própria de componente (.cat-card:active etc.)
+   continua mandando; isto só cobre os botões que ainda não tinham estado. */
+:where(button) { transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s ease, filter 0.15s ease; }
+:where(button:not(:disabled):active) { transform: translateY(2px) scale(0.98); }
+:where(button:disabled) { opacity: 0.45; cursor: not-allowed; filter: saturate(0.5); }
+
+/* Foco visível (teclado): anel colorido + halo claro, legível sobre qualquer cor de botão */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [role="button"]:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--color-surface);
+}
+.write-input:focus-visible, .dict-search:focus-visible { box-shadow: none; }
+
+/* Transição entre telas: fade + slide curto (≤200ms). Reinicia a cada showScreen porque a tela
+   passa de display:none para flex. */
+.screen.active { animation: screen-in 0.18s ease-out; }
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen.active { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
