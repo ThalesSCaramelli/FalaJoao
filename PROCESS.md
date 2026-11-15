@@ -231,6 +231,24 @@ sobre algo já decidido sem motivo novo.
 - **Regra daqui pra frente**: frase adulta nova com palavra difícil pede verbete novo no
   `ADULT_DICTIONARY` (ver CONTENT_GUIDE.md).
 
+### Cache offline: código e mídia separados (cada atualização só baixa o que falta)
+
+- **Contexto**: com ~600 áudios (~9 MB) na lista do `sw.js`, cada atualização (bump do
+  `CACHE_NAME`) baixava TUDO de novo num cache novo, via `cache.addAll` — e se um único arquivo
+  falhasse (sinal fraco), a instalação inteira falhava e o aparelho ficava na versão antiga. E
+  todo toque de áudio disparava um download em segundo plano, mesmo já estando guardado. Só no
+  dia 15/11/2026 foram 10 atualizações.
+- **Escolha**: dois caches. `CACHE_NAME` (código: html/css/js/ícones/fontes, pequeno, versionado,
+  `addAll`) e `MEDIA_CACHE` (áudio/imagem, estável entre versões). Na instalação, a mídia vem
+  arquivo por arquivo com `allSettled`, só o que falta — e o que já está em qualquer cache antigo
+  é copiado, não baixado. Mídia é servida do cache sem revalidar.
+- **Testado** (Playwright, migrando da versão anterior): 0 áudios baixados de novo na troca de
+  versão; 0 downloads ao tocar áudio guardado; com um arquivo inexistente na lista, a atualização
+  instala normalmente.
+- **Consequência**: o processo de sempre continua (áudio novo na lista + bump do `CACHE_NAME`). Se
+  um áudio EXISTENTE for regravado com o mesmo nome, é preciso trocar o `MEDIA_CACHE` também,
+  senão o aparelho continua com o antigo. Resolve a pendência de NOW sobre o offline.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
@@ -283,7 +301,8 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
 
 ### NOW
 
-- Pendência técnica pequena: nunca confirmei com 100% de certeza que o Service Worker está
+- ~~Pendência técnica pequena~~ (resolvida em 15/11/2026 — ver decisão "Cache offline: código e
+  mídia separados"): nunca confirmei com 100% de certeza que o Service Worker está
   guardando os áudios/assets mais recentes offline (v14+) — o navegador de teste deu sinais
   inconsistentes depois de muitos ciclos de registro/cancelamento na mesma sessão. Reproduzi a
   lista exata de arquivos manualmente e funcionou, então é bem provável que seja só o ambiente de
