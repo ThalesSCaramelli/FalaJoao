@@ -1143,7 +1143,7 @@ function renderRound() {
     setTimeout(() => {
       optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading", "locked"));
       choiceLocked = false;
-      statusEl.textContent = tr("👉 tap the right one!", "👉 toque na certa!");
+      statusEl.textContent = tr("tap the right one!", "toque na certa!");
     }, 2200 + options.length * 2000);
     return;
   }
@@ -1427,7 +1427,7 @@ function renderTipsHtml(analysis, item) {
     lines.push(t.pattern.tip + (t.examples.length ? ` — like ${t.examples.join(", ")}` : ""));
   });
   if (!isImmersion()) return ""; // dicas de phonics são em inglês e pensadas pra alfabetização (André)
-  return lines.slice(0, 2).map((l) => `<div class="sp-tip">💡 ${escapeHtml(l)}</div>`).join("");
+  return lines.slice(0, 2).map((l) => `<div class="sp-tip">${escapeHtml(l)}</div>`).join("");
 }
 
 function setupTypingCheck(round, isDictation) {
@@ -1449,7 +1449,7 @@ function setupTypingCheck(round, isDictation) {
     const typed = normalizeAnswer(input.value);
     if (!typed) return;
     if (accepted.includes(typed)) {
-      feedback.innerHTML = copyMode ? tr("👍 Now you've got it!", "👍 Agora sim!") : tr("🌟 Great job!", "🌟 Isso aí!");
+      feedback.innerHTML = copyMode ? tr("Now you've got it!", "Agora sim!") : tr("Great job!", "Isso aí!");
       playCheer();
       if (!copyMode) {
         recordResult(item.id, wrongAttemptsThisRound === 0);
@@ -1475,7 +1475,7 @@ function setupTypingCheck(round, isDictation) {
         <div>${tr("This is how you spell it:", "O jeito certo é:")}</div>
         <div class="sp-target sp-big">${renderTargetHtml(analysis)}</div>
         ${renderTipsHtml(analysis, item)}
-        <div>${tr("Now type it the right way 👇", "Agora digite do jeito certo 👇")}</div>
+        <div>${tr("Now type it the right way", "Agora digite do jeito certo")}</div>
         <button class="skip-btn" id="write-skip">${tr("Next", "Próxima")} ${icon("arrow")}</button>`;
       document.getElementById("write-skip").addEventListener("click", () => goNext(0));
       input.value = "";
@@ -1550,7 +1550,7 @@ function startSpeakAttempt(item) {
     micBtn.classList.remove("listening");
     recordSpeechAttempt(item.id, matched);
     if (matched) {
-      statusEl.textContent = "Arrasou! 🎉";
+      statusEl.textContent = "Arrasou!";
       playCheer();
     } else {
       statusEl.textContent = "Legal! Vamos ouvir de novo.";
@@ -2544,7 +2544,7 @@ function renderSentenceRound(round, container, repeatBtn) {
           feedback.textContent = "";
           if (next === tokens.length) {
             line.innerHTML = `<span class="sl-word">${escapeHtml(item.en)}</span>`;
-            feedback.textContent = tr("🌟 You built it!", "🌟 Montou!");
+            feedback.textContent = tr("You built it!", "Montou!");
             speak(item.en, item.id);
             finishGameRound(item);
           }
@@ -2611,7 +2611,7 @@ function renderSentenceRound(round, container, repeatBtn) {
       if (choiceLocked || btn.disabled) return;
       if (opt === answer) {
         document.getElementById("cloze-sentence").innerHTML = withGap(answer);
-        feedback.textContent = "🌟 Isso!";
+        feedback.textContent = "Isso!";
         speak(item.en, item.id);
         finishGameRound(item);
       } else {
@@ -2695,7 +2695,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
           next++;
           feedback.textContent = "";
           if (next === gs.length) {
-            feedback.textContent = "🌟 You built it!";
+            feedback.textContent = "You built it!";
             speak(item.en, item.id);
             finishGameRound(item);
           }
@@ -2739,7 +2739,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
         if (choiceLocked || btn.disabled) return;
         if (opt === word) {
           btn.classList.add("correct");
-          feedback.textContent = "🌟 Yes!";
+          feedback.textContent = "Yes!";
           finishGameRound(item);
         } else {
           wrongAttemptsThisRound++;
@@ -2776,7 +2776,7 @@ function renderSpellingGameRound(round, container, repeatBtn) {
         if (choiceLocked || btn.disabled) return;
         if (opt === graphemes[gapIndex]) {
           document.getElementById("gap-word").innerHTML = renderWord(opt);
-          feedback.textContent = "🌟 That's it!";
+          feedback.textContent = "That's it!";
           speak(item.en, item.id);
           finishGameRound(item);
         } else {
