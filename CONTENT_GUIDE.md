@@ -168,6 +168,14 @@ esse campo, o item é da trilha infantil (João/André). Os perfis nunca se mist
   contraída e a por extenso (`i'm`/`i am`) — o `write` e o `speak` comparam contra essa lista.
 - Mesma escala de `difficulty` e mesmas cadeias de evolução (seção 8): palavra (1) → chunk (2) →
   sentença curta (3) → sentença completa (4) → versão mais natural/complexa (5).
+- **Dicionário**: palavra ou expressão difícil numa frase adulta nova (inclusive dentro da
+  frase, não só como item) ganha verbete em `ADULT_DICTIONARY`:
+  ```js
+  { term: "settle in", pos: "phrasal verb", def: "to start to feel comfortable in a new place", pt: "se adaptar", forms: ["settling in", "settled in"] },
+  ```
+  Definição curta em inglês simples (sem usar a própria palavra), `pt` curto, e em `forms` toda
+  forma que aparece nas frases. O exemplo vem sozinho de uma frase da trilha. O áudio do termo
+  (`dict_<slug>.mp3`) sai do `generate_audio.py`.
 
 ## 8c. Trilha de ortografia (`track: "spelling"`, André)
 

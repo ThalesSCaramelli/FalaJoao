@@ -453,6 +453,7 @@ function renderHome() {
   document.getElementById("home-greeting").textContent =
     streak.count > 1 ? tr(`${streak.count} days in a row!`, `${streak.count} dias seguidos!`) : tr("Hi! 👋", "Olá! 👋");
   renderHomeStaticTexts();
+  document.getElementById("btn-dictionary").style.display = getActiveProfile().mode === "adult" ? "" : "none";
 
   // missão do dia (sessão adaptativa, com carinha de missão)
   const session = buildSession();
@@ -507,6 +508,11 @@ function openCategory(catId) {
       speak(item.en, item.id);
       markIntroduced(item.id);
       renderHome();
+      // Adulto: tocar numa palavra/expressão que é verbete abre a explicação também.
+      if (getActiveProfile().mode === "adult") {
+        const hit = findDictionaryTerms(item.en).find((f) => f.start === 0 && f.end >= item.en.replace(/[.!?]+$/, "").length);
+        if (hit) openDictionaryEntry(hit.entry, item.id, false);
+      }
     });
     wordGrid.appendChild(card);
   });
@@ -578,7 +584,7 @@ function renderRound() {
     container.innerHTML = `
       <div class="intro-card">
         <span class="word-emoji-big">${renderMedia(round.item)}</span>
-        <span class="word-en">${round.item.en}</span>
+        <span class="word-en">${dictLinkedHtml(round.item.en)}</span>
         <button class="word-pt-btn" id="intro-pt">${icon("sound")}<span class="word-pt">${round.item.pt}</span></button>
         <span class="intro-hint">toque na imagem pra ouvir em inglês · toque na tradução pra ouvir em português</span>
         <button class="big-btn" id="intro-next">Já sei! →</button>
@@ -776,8 +782,8 @@ function renderRound() {
     wrongAttemptsThisRound = 0;
     container.innerHTML = `
       <div class="read-card">
-        <span class="read-word">${round.item.en}</span>
-        <span class="intro-hint">o que isso quer dizer?</span>
+        <span class="read-word">${dictLinkedHtml(round.item.en)}</span>
+        <span class="intro-hint">o que isso quer dizer?${findDictionaryTerms(round.item.en).length ? " · toque numa palavra sublinhada pra ver o significado" : ""}</span>
       </div>
       <div class="situation-options" id="meaning-options"></div>`;
     const optionsWrap = document.getElementById("meaning-options");
@@ -1325,6 +1331,97 @@ function renderSettings() {
   document.getElementById("progress-summary").textContent = buildProgressSummary();
   renderAdaptationLog();
 }
+
+// ===================== Dicionário do adulto (ADULT_DICTIONARY, data.js) =====================
+// Palavras difíceis ficam sublinhadas nas frases (intro e "meaning"); tocar abre o verbete:
+// definição em inglês simples + tradução + áudio + uma frase da própria trilha como exemplo.
+// Também tem a tela "Dictionary" (Home do adulto) com tudo em ordem alfabética e busca.
+// Consultar não mexe no SRS: é apoio pra entender (scaffolding), não resposta avaliada.
+function dictLinkedHtml(text) {
+  if (getActiveProfile().mode !== "adult") return escapeHtml(text);
+  const hits = findDictionaryTerms(text);
+  let html = "", pos = 0;
+  hits.forEach((h) => {
+    html += escapeHtml(text.slice(pos, h.start));
+    html += `<button type="button" class="dict-word" data-term="${escapeHtml(h.entry.term)}">${escapeHtml(text.slice(h.start, h.end))}</button>`;
+    pos = h.end;
+  });
+  return html + escapeHtml(text.slice(pos));
+}
+function dictEntryByTerm(term) {
+  return ADULT_DICTIONARY.find((e) => e.term === term);
+}
+function openDictionaryEntry(entry, excludeItemId, speakTerm = true) {
+  // Se a única frase de exemplo é a própria frase da rodada, não mostra: a tradução dela entregaria
+  // a resposta do round "meaning".
+  let example = dictionaryExample(entry, excludeItemId);
+  if (example && excludeItemId && example.id === excludeItemId) example = null;
+  document.getElementById("dict-sheet-body").innerHTML = `
+    <div class="dict-head">
+      <span class="dict-term" id="dict-sheet-term">${escapeHtml(entry.term)}</span>
+      <button class="dict-audio" id="dict-say" aria-label="Ouvir">${icon("sound")}</button>
+    </div>
+    <div class="dict-pos">${escapeHtml(entry.pos)}</div>
+    <p class="dict-def">${escapeHtml(entry.def)}</p>
+    <p class="dict-pt">🇧🇷 ${escapeHtml(entry.pt)}</p>
+    ${
+      example
+        ? `<button class="dict-example" id="dict-example">
+             <span class="dict-example-label">${icon("sound")} Exemplo</span>
+             <span class="dict-example-en">${escapeHtml(example.en)}</span>
+             <span class="dict-example-pt">${escapeHtml(example.pt)}</span>
+           </button>`
+        : ""
+    }`;
+  const sayTerm = () => speak(entry.term, `dict_${dictSlug(entry.term)}`);
+  document.getElementById("dict-say").addEventListener("click", sayTerm);
+  if (example) document.getElementById("dict-example").addEventListener("click", () => speak(example.en, example.id));
+  document.getElementById("dict-sheet").hidden = false;
+  if (speakTerm) sayTerm();
+}
+function closeDictionaryEntry() {
+  document.getElementById("dict-sheet").hidden = true;
+}
+document.querySelectorAll("[data-dict-close]").forEach((el) => el.addEventListener("click", closeDictionaryEntry));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeDictionaryEntry();
+});
+// Delegação: as palavras sublinhadas são recriadas a cada rodada.
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".dict-word");
+  if (!btn) return;
+  e.stopPropagation();
+  const entry = dictEntryByTerm(btn.dataset.term);
+  const round = quizQueue[quizIndex];
+  if (entry) openDictionaryEntry(entry, round ? round.item.id : null);
+});
+
+function renderDictionaryList() {
+  const q = normalizeAnswer(document.getElementById("dict-search").value || "");
+  const entries = [...ADULT_DICTIONARY]
+    .sort((a, b) => a.term.localeCompare(b.term, "en", { sensitivity: "base" }))
+    .filter((e) => !q || normalizeAnswer(e.term).includes(q) || normalizeAnswer(e.pt).includes(q) || (e.forms || []).some((f) => normalizeAnswer(f).includes(q)));
+  const list = document.getElementById("dict-list");
+  list.innerHTML = entries.length
+    ? entries
+        .map(
+          (e) => `<button class="dict-row" data-term="${escapeHtml(e.term)}">
+            <span class="dict-row-term">${escapeHtml(e.term)}</span>
+            <span class="dict-row-pt">${escapeHtml(e.pt)}</span>
+          </button>`
+        )
+        .join("")
+    : `<div class="empty">Nenhuma palavra encontrada.</div>`;
+  list.querySelectorAll(".dict-row").forEach((row) =>
+    row.addEventListener("click", () => openDictionaryEntry(dictEntryByTerm(row.dataset.term), null))
+  );
+}
+document.getElementById("dict-search").addEventListener("input", renderDictionaryList);
+document.getElementById("btn-dictionary").addEventListener("click", () => {
+  document.getElementById("dict-search").value = "";
+  renderDictionaryList();
+  showScreen("dictionary");
+});
 
 // ===================== Service Worker (offline + atualização) =====================
 // sw.js já usa skipWaiting()/clients.claim() (assume controle rápido), mas isso sozinho não
