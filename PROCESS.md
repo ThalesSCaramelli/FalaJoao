@@ -478,6 +478,31 @@ sobre algo já decidido sem motivo novo.
   avatar e área dos pais; uma varredura com 10.428 rodadas (todos os tipos × todos os itens de cada
   perfil, com e sem dados), sem exceção e sem erro no console.
 
+### Redesign premium: orquestração por agentes, QA e contraste final
+
+- **Contexto**: o usuário pediu as 5 fases do redesign ("cara de app premium"), testadas antes de
+  publicar, com subagentes e um orquestrador. Cada fase foi feita por um agente numa cópia isolada
+  do repositório (worktree), dona de telas diferentes pra não editarem o mesmo trecho; o
+  orquestrador juntou em ondas, resolveu os conflitos (todos de junção: as duas versões ficaram) e
+  testou o conjunto a cada onda. Modelos por tipo de trabalho: Fable pro mais criativo/visual
+  (avatar, mascote e mapa; momentos de recompensa), Opus pro estrutural (temas e Homes; área dos
+  pais), Sonnet pro bem definido (acabamento, pipeline de imagens, QA). As decisões de cada fase
+  estão nas entradas próprias acima.
+- **QA final** (agente dedicado): fluxos completos nos 3 perfis e 3 tamanhos de tela, varredura de
+  todas as rodadas, contraste por tema, offline com o Service Worker ativo. Corrigiu 5 problemas
+  (título do portão ilegível no tema escuro, dois textos abaixo de AA, 🙏 trocado pela variante
+  Medium-Light do Fluent, emoji de texto esquecidos nos feedbacks, e emoji/fotos sem pré-carga
+  offline).
+- **Contraste do tema do João** (pendência do QA, corrigida pelo orquestrador): texto branco sobre
+  o coral #FF7A52 dava 2,6:1 e sobre o teal #1CA7B0, 2,9:1. Agora #E0552F (3,8:1, AA pra texto
+  grande e em negrito, que é o caso dos botões) e #137F86 (4,8:1); o gradiente da missão escureceu
+  junto, e o texto pequeno branco do cartão ganhou uma sombra sutil.
+- **Categoria → voltar** agora leva ao mapa (a grade de categorias mora dentro dele), não à Home.
+- **Pendências registradas** (opcionais): o mascote ainda pode ficar mais "quokka" (bochechas mais
+  altas, orelhas menores e mais afastadas, nariz mais largo); o 🙏 do Fluent continua pouco claro
+  em tamanho pequeno — trocar o emoji dos itens de "thank you"/"please" por outro é mudança de
+  conteúdo, fica pra decidir com o usuário.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

@@ -2375,7 +2375,14 @@ body[data-mode="literacy"] .unlock-reveal h2 { text-transform: uppercase; letter
   --color-text-secondary: #7A6A5E;   /* era #8A7A6E (3.7:1 no creme) → 4.7:1, AA */
   --color-on-primary: #FFFFFF;
   --color-on-secondary: #FFFFFF;
-  --color-primary-shade: #C9472A;    /* "lábio" 3D de botão/ficha primária */
+  /* QA de contraste (AA): o coral #FF7A52 dava 2,6:1 com texto branco nos botões ("Jogar",
+     "Já sei!", "Jogar de novo"). #E0552F dá 3,8:1 — AA pra texto grande e em negrito, que é o
+     caso de todos os botões —, sem perder o calor. O teal #1CA7B0 ("Ouvir de novo") dava 2,9:1;
+     #137F86 dá 4,8:1. */
+  --color-primary: #E0552F;
+  --color-primary-dark: #B8431F;
+  --color-secondary: #137F86;
+  --color-primary-shade: #A93A1A;    /* "lábio" 3D de botão/ficha primária */
   --color-backdrop: #EFE2C8;         /* fora da coluna do app (tablet/desktop) */
   --color-theme-bar: #FDF3E1;        /* barra do sistema (meta theme-color) */
   --color-ink-on-pastel: #3A2E27;    /* texto sobre as cores pastel das categorias */
@@ -2393,12 +2400,14 @@ body[data-mode="literacy"] .unlock-reveal h2 { text-transform: uppercase; letter
   --shadow-shell: 0 0 60px rgba(58,46,42,0.12);
   --shadow-mission: 0 10px 0 var(--color-primary-shade), 0 18px 30px rgba(217,82,47,0.28);
   /* missão (hero) */
-  --mission-bg: linear-gradient(140deg, #FF7A52 0%, #FF9A45 62%, #FFB238 100%);
+  /* mesmo motivo: o gradiente antigo (#FF7A52 → #FFB238) deixava o texto branco abaixo de 2,6:1;
+     este fica ≥ 3,4:1 em toda a área do texto (título grande) */
+  --mission-bg: linear-gradient(140deg, #E0552F 0%, #DD6A1E 62%, #D66A17 100%);
   --mission-fg: #FFFFFF;
   --mission-glow: rgba(255,255,255,0.16);
   --mission-chip: rgba(58,46,39,0.18);
   --mission-cta-bg: #FFFFFF;
-  --mission-cta-fg: #D9522F;
+  --mission-cta-fg: #B8431F;
   /* Word Games (André) — base pra não ficar sem valor */
   --games-bg: linear-gradient(135deg, #1CA7B0, #3F8F5C);
   --games-fg: #FFFFFF;
@@ -2615,3 +2624,8 @@ body[data-mode="adult"] .dict-search:focus { box-shadow: 0 0 0 3px var(--cap-hel
 @media (min-width: 600px) {
   .grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* QA de contraste: texto pequeno branco no cartão da missão do João (duração, rótulo) — uma sombra
+   sutil garante leitura sobre o gradiente quente sem mudar a cor. */
+body[data-mode="oral"] .mission-card .meta,
+body[data-mode="oral"] .mission-card .eyebrow { text-shadow: 0 1px 2px rgba(58, 30, 15, 0.35); }
