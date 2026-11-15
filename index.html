@@ -187,44 +187,112 @@
     </div>
   </section>
 
-  <!-- TELA CONFIGURAÇÕES (pais) -->
-  <section id="screen-settings" class="screen">
-    <header class="sub-header">
+  <!-- TELA ÁREA DOS PAIS (só abre depois do portão — ver openParentGate em app.js) -->
+  <section id="screen-settings" class="screen parents-screen" aria-labelledby="parents-title">
+    <header class="sub-header parents-header">
       <button class="back-btn" data-back="home">⬅️</button>
-      <h2>Configurações</h2>
+      <h2 id="parents-title">Área dos pais</h2>
+      <span class="parents-header-spacer" aria-hidden="true"></span>
     </header>
-    <div class="settings-body">
-      <div class="setting-row profile-row">
-        <span>👤 Perfil</span>
-        <div id="profile-switcher" class="profile-switcher"></div>
-      </div>
-      <hr />
-      <label class="setting-row">
-        <span>Velocidade da voz</span>
-        <input type="range" id="rate-slider" min="0.5" max="1.2" step="0.05" value="0.85" />
-      </label>
-      <label class="setting-row">
-        <span>Voz em inglês</span>
-        <select id="voice-select"></select>
-      </label>
-      <button id="btn-test-voice" class="big-btn">🔊 Testar voz</button>
-      <hr />
-      <button id="btn-check-update" class="big-btn secondary">🔄 Verificar atualização</button>
-      <p class="update-status" id="update-status"></p>
-      <hr />
-      <div class="family-theme" id="family-theme"></div>
-      <hr />
-      <p class="progress-summary" id="progress-summary"></p>
-      <button id="btn-share-report" class="big-btn">📤 Compartilhar relatório</button>
-      <button id="btn-reset-progress" class="big-btn danger">Zerar progresso</button>
-      <hr />
-      <p class="debug-title">🔧 Debug do motor adaptativo</p>
-      <button id="btn-simulate-difficulty" class="big-btn secondary">🧪 Simular dificuldade (banheiro)</button>
-      <div id="adaptation-log" class="adaptation-log"></div>
-      <button id="btn-clear-log" class="big-btn danger">Limpar log</button>
+    <div class="settings-body parents-body">
+
+      <section class="pa-section" aria-labelledby="pa-profiles-title">
+        <h3 class="pa-section-title" id="pa-profiles-title">Quem está usando</h3>
+        <div id="profile-switcher" class="profile-switcher pa-profiles" role="radiogroup" aria-labelledby="pa-profiles-title"></div>
+      </section>
+
+      <!-- Painel do perfil ativo: preenchido por renderParentDashboard (app.js). -->
+      <section class="pa-section" id="parent-dashboard" aria-labelledby="pa-dash-title"></section>
+
+      <section class="pa-section" aria-label="Tema do mês">
+        <div class="family-theme" id="family-theme"></div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-voice-title">
+        <h3 class="pa-section-title" id="pa-voice-title">Voz</h3>
+        <div class="pa-card pa-stack">
+          <div class="pa-field">
+            <span class="pa-label" id="rate-label">Velocidade da fala</span>
+            <div class="pa-segmented" id="rate-segmented" role="radiogroup" aria-labelledby="rate-label"></div>
+          </div>
+          <div class="pa-field">
+            <label class="pa-label" for="voice-select">Voz em inglês <small>(quando não há áudio gravado)</small></label>
+            <div class="pa-select-wrap">
+              <select id="voice-select" class="pa-select"></select>
+            </div>
+          </div>
+          <button id="btn-test-voice" class="pa-btn pa-btn-secondary">🔊 Testar voz</button>
+        </div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-share-title">
+        <h3 class="pa-section-title" id="pa-share-title">Relatório e app</h3>
+        <div class="pa-card pa-stack">
+          <div class="pa-row-text">
+            <strong>Compartilhar relatório</strong>
+            <span>Um resumo em texto, com os dados no fim — dá pra colar numa conversa com o Claude e pedir gráficos.</span>
+          </div>
+          <button id="btn-share-report" class="pa-btn pa-btn-primary">📤 Compartilhar relatório</button>
+          <div class="pa-divider" role="presentation"></div>
+          <div class="pa-row-text">
+            <strong>Atualização</strong>
+            <span>O app se atualiza sozinho; aqui dá pra forçar agora.</span>
+          </div>
+          <button id="btn-check-update" class="pa-btn pa-btn-secondary">🔄 Verificar atualização</button>
+          <p class="update-status" id="update-status" role="status"></p>
+        </div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-danger-title">
+        <h3 class="pa-section-title pa-danger-title" id="pa-danger-title">Zona de perigo</h3>
+        <div class="pa-card pa-danger-card pa-stack">
+          <div class="pa-row-text">
+            <strong id="reset-title">Zerar progresso</strong>
+            <span id="reset-desc">Apaga o que foi aprendido neste perfil. Não dá pra desfazer.</span>
+          </div>
+          <button id="btn-reset-progress" class="pa-btn pa-btn-danger-outline">Zerar progresso…</button>
+          <div class="pa-reset-confirm" id="reset-confirm" hidden>
+            <label class="pa-label" for="reset-confirm-input" id="reset-confirm-label"></label>
+            <input type="text" id="reset-confirm-input" class="pa-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            <div class="pa-btn-row">
+              <button id="btn-reset-cancel" class="pa-btn pa-btn-secondary">Cancelar</button>
+              <button id="btn-reset-confirm" class="pa-btn pa-btn-danger" disabled>Zerar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Debug do motor adaptativo: recolhido por padrão (não é coisa de rotina, nem pra criança). -->
+      <details class="pa-advanced" id="pa-advanced">
+        <summary>Avançado</summary>
+        <div class="pa-card pa-stack">
+          <p class="debug-title">🔧 Debug do motor adaptativo</p>
+          <button id="btn-simulate-difficulty" class="pa-btn pa-btn-secondary">🧪 Simular dificuldade (banheiro)</button>
+          <div id="adaptation-log" class="adaptation-log"></div>
+          <button id="btn-clear-log" class="pa-btn pa-btn-danger-outline">Limpar log</button>
+        </div>
+      </details>
     </div>
   </section>
 
+</div>
+
+<!-- Portão dos pais: a engrenagem da Home abre isto, não a Área dos pais direto (openParentGate). -->
+<div id="parent-gate" class="parent-gate" hidden>
+  <div class="parent-gate-backdrop" data-gate-close></div>
+  <div class="parent-gate-card" role="dialog" aria-modal="true" aria-labelledby="parent-gate-title" aria-describedby="parent-gate-hint">
+    <button class="parent-gate-close" data-gate-close aria-label="Fechar">✕</button>
+    <h2 class="parent-gate-title" id="parent-gate-title">Área dos pais</h2>
+    <p class="parent-gate-hint" id="parent-gate-hint">Segure o botão por 3 segundos para entrar.</p>
+    <button id="parent-gate-hold" class="parent-gate-hold" aria-label="Segure por 3 segundos para entrar na área dos pais">
+      <svg class="parent-gate-ring" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="ring-track" cx="60" cy="60" r="52" />
+        <circle class="ring-fill" id="parent-gate-ring-fill" cx="60" cy="60" r="52" />
+      </svg>
+      <span class="parent-gate-lock" id="parent-gate-icon" aria-hidden="true"></span>
+    </button>
+    <p class="parent-gate-status" id="parent-gate-status" role="status" aria-live="polite"></p>
+  </div>
 </div>
 
 <!-- Verbete do dicionário (abre por cima de qualquer tela) -->

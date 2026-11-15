@@ -44,7 +44,7 @@ function initIcons() {
   const settingsBtn = document.getElementById("btn-settings");
   if (settingsBtn) {
     settingsBtn.innerHTML = icon("settings");
-    settingsBtn.setAttribute("aria-label", "Configurações");
+    settingsBtn.setAttribute("aria-label", "Área dos pais");
   }
   document.querySelectorAll(".back-btn").forEach((el) => {
     const isVoltar = el.textContent.trim().includes("Voltar");
@@ -339,6 +339,12 @@ function populateVoiceSelect() {
   const sel = document.getElementById("voice-select");
   const enVoices = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith("en"));
   sel.innerHTML = "";
+  if (!enVoices.length) {
+    sel.innerHTML = `<option value="">Voz padrão do aparelho</option>`;
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
   enVoices.forEach((v) => {
     const opt = document.createElement("option");
     opt.value = v.voiceURI;
@@ -416,10 +422,8 @@ function showScreen(id) {
 document.querySelectorAll("[data-back]").forEach((btn) => {
   btn.addEventListener("click", () => showScreen(btn.dataset.back));
 });
-document.getElementById("btn-settings").addEventListener("click", () => {
-  renderSettings();
-  showScreen("settings");
-});
+// A engrenagem passa pelo portão dos pais (openParentGate) antes de abrir a Área dos pais.
+document.getElementById("btn-settings").addEventListener("click", () => openParentGate());
 
 // O quiz é aberto de 3 lugares (missão do Home, Categoria, situação do Mapa) — "voltar" precisa
 // lembrar de onde veio, senão cai numa tela de Categoria vazia quando não veio de lá (bug real,
@@ -1112,24 +1116,170 @@ function showUnlockCelebration(newUnlockIds, onDone) {
 }
 document.getElementById("btn-play-again").addEventListener("click", () => startQuiz(buildSession()));
 
-// ===================== Configurações + progresso =====================
+// ===================== Portão dos pais =====================
+// A engrenagem fica na Home, ao alcance das crianças. Antes dela abrir a Área dos pais, um portão
+// simples: SEGURAR um botão por 3 segundos, com um anel que vai se fechando.
+// Por que segurar e não uma continha:
+// - criança de 4 anos toca, não segura — um toque curto nunca passa, e não há nada pra "acertar
+//   no chute" (uma continha com alternativas passa por sorte 1 vez em 3 ou 4);
+// - a instrução é TEXTO ("segure por 3 segundos") — quem ainda não lê não descobre sozinho;
+// - continha vira jogo pro André (8 anos, faz conta) e exige teclado/opções; segurar é um gesto
+//   só, rápido pro adulto, sem nada pra digitar com uma mão segurando o celular.
+// Não é segurança de verdade (não guarda segredo nenhum) — é só pra ninguém zerar o progresso ou
+// trocar de perfil sem querer.
+const PARENT_GATE_HOLD_MS = 3000;
+const GATE_RING_LEN = 2 * Math.PI * 52; // circunferência do anel (r=52 no index.html)
+let gateHoldStart = 0;
+let gateRaf = null;
+let gateReturnFocus = null;
+
+function setGateRing(progress) {
+  const fill = document.getElementById("parent-gate-ring-fill");
+  fill.style.strokeDasharray = String(GATE_RING_LEN);
+  fill.style.strokeDashoffset = String(GATE_RING_LEN * (1 - Math.max(0, Math.min(1, progress))));
+}
+function openParentGate() {
+  const gate = document.getElementById("parent-gate");
+  gateReturnFocus = document.activeElement;
+  gate.hidden = false;
+  gate.classList.remove("holding");
+  document.getElementById("parent-gate-icon").innerHTML = icon("lock");
+  document.getElementById("parent-gate-status").textContent = "";
+  setGateRing(0);
+  document.getElementById("parent-gate-hold").focus();
+}
+function closeParentGate() {
+  stopGateHold(false);
+  document.getElementById("parent-gate").hidden = true;
+  if (gateReturnFocus && gateReturnFocus.focus) gateReturnFocus.focus();
+}
+function startGateHold(e) {
+  if (e) e.preventDefault();
+  if (gateRaf) return;
+  gateHoldStart = performance.now();
+  document.getElementById("parent-gate").classList.add("holding");
+  document.getElementById("parent-gate-status").textContent = "Continue segurando…";
+  const tick = (now) => {
+    const p = (now - gateHoldStart) / PARENT_GATE_HOLD_MS;
+    setGateRing(p);
+    if (p >= 1) {
+      gateRaf = null;
+      passParentGate();
+      return;
+    }
+    gateRaf = requestAnimationFrame(tick);
+  };
+  gateRaf = requestAnimationFrame(tick);
+}
+// Soltou antes da hora: o anel volta e explica — sem bronca, só a instrução de novo.
+function stopGateHold(showHint) {
+  if (!gateRaf) return;
+  cancelAnimationFrame(gateRaf);
+  gateRaf = null;
+  document.getElementById("parent-gate").classList.remove("holding");
+  setGateRing(0);
+  if (showHint) document.getElementById("parent-gate-status").textContent = "Segure até o círculo fechar.";
+}
+function passParentGate() {
+  document.getElementById("parent-gate").hidden = true;
+  document.getElementById("parent-gate").classList.remove("holding");
+  renderSettings();
+  showScreen("settings");
+  document.getElementById("screen-settings").scrollTop = 0;
+  document.getElementById("parents-title").focus({ preventScroll: true });
+}
+(function initParentGate() {
+  const hold = document.getElementById("parent-gate-hold");
+  hold.addEventListener("pointerdown", (e) => {
+    if (e.button !== undefined && e.button > 0) return;
+    try { hold.setPointerCapture(e.pointerId); } catch (err) {}
+    startGateHold(e);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => hold.addEventListener(ev, () => stopGateHold(true)));
+  hold.addEventListener("contextmenu", (e) => e.preventDefault()); // toque longo no iOS/Android abre menu
+  hold.addEventListener("click", (e) => e.preventDefault()); // clique sozinho não faz nada
+  // Teclado: segurar Espaço/Enter (sem contar o auto-repeat) — mesmo gesto, acessível sem toque.
+  hold.addEventListener("keydown", (e) => {
+    if ((e.key === " " || e.key === "Enter") && !e.repeat) startGateHold(e);
+    else if (e.key === " " || e.key === "Enter") e.preventDefault();
+  });
+  hold.addEventListener("keyup", (e) => {
+    if (e.key === " " || e.key === "Enter") stopGateHold(true);
+  });
+  document.querySelectorAll("[data-gate-close]").forEach((el) => el.addEventListener("click", closeParentGate));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !document.getElementById("parent-gate").hidden) closeParentGate();
+  });
+})();
+
+// ===================== Área dos pais (antes "Configurações") =====================
+// Velocidade da voz em 3 botões em vez de slider: os valores são os mesmos de speechRate (0.85 é
+// o ritmo natural do áudio gravado). Valor antigo salvo fora desses 3 (do slider) continua
+// valendo — só destaca o botão mais próximo até alguém escolher outro.
+const RATE_PRESETS = [
+  { id: "slow", label: "Devagar", value: 0.65 },
+  { id: "normal", label: "Normal", value: 0.85 },
+  { id: "fast", label: "Rápido", value: 1.05 },
+];
+function renderRateSegmented() {
+  const el = document.getElementById("rate-segmented");
+  const nearest = RATE_PRESETS.reduce((a, b) => (Math.abs(b.value - speechRate) < Math.abs(a.value - speechRate) ? b : a));
+  el.innerHTML = RATE_PRESETS.map(
+    (p) => `<button class="pa-seg${p.id === nearest.id ? " active" : ""}" role="radio" aria-checked="${p.id === nearest.id}" data-rate="${p.value}">${p.label}</button>`
+  ).join("");
+  el.querySelectorAll(".pa-seg").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      speechRate = parseFloat(btn.dataset.rate);
+      localStorage.setItem(profileKey("meuIngles_rate"), String(speechRate));
+      renderRateSegmented();
+    });
+  });
+}
 document.getElementById("voice-select").addEventListener("change", (e) => {
+  if (!e.target.value) return;
   chosenVoiceURI = e.target.value;
   localStorage.setItem(profileKey("meuIngles_voice"), chosenVoiceURI);
 });
-document.getElementById("rate-slider").addEventListener("input", (e) => {
-  speechRate = parseFloat(e.target.value);
-  localStorage.setItem(profileKey("meuIngles_rate"), String(speechRate));
-});
 document.getElementById("btn-test-voice").addEventListener("click", () => speak("Hello! This is my voice."));
 
+// ---- Zerar progresso: zona de perigo, confirmação digitando o nome do perfil ----
+// (antes era um confirm() nativo — um toque a mais e ia tudo embora). Sem acento e sem
+// maiúscula, pra "joao" valer por "João". O que é apagado não mudou: só o learningState.
+function normalizeName(s) {
+  return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+}
+function resetConfirmMatches() {
+  return normalizeName(document.getElementById("reset-confirm-input").value) === normalizeName(getActiveProfile().name);
+}
+function closeResetConfirm() {
+  document.getElementById("reset-confirm").hidden = true;
+  document.getElementById("btn-reset-progress").hidden = false;
+  document.getElementById("reset-confirm-input").value = "";
+  document.getElementById("btn-reset-confirm").disabled = true;
+}
 document.getElementById("btn-reset-progress").addEventListener("click", () => {
-  if (confirm("Tem certeza que quer zerar todo o progresso?")) {
-    learningState = {};
-    saveLearningState();
-    renderSettings();
-    renderHome();
-  }
+  const name = getActiveProfile().name;
+  document.getElementById("reset-confirm-label").innerHTML = `Para confirmar, digite <strong>${escapeHtml(name)}</strong>:`;
+  document.getElementById("reset-confirm-input").placeholder = name;
+  document.getElementById("reset-confirm").hidden = false;
+  document.getElementById("btn-reset-progress").hidden = true;
+  document.getElementById("reset-confirm-input").focus();
+});
+document.getElementById("reset-confirm-input").addEventListener("input", () => {
+  document.getElementById("btn-reset-confirm").disabled = !resetConfirmMatches();
+});
+document.getElementById("reset-confirm-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && resetConfirmMatches()) document.getElementById("btn-reset-confirm").click();
+});
+document.getElementById("btn-reset-cancel").addEventListener("click", closeResetConfirm);
+document.getElementById("btn-reset-confirm").addEventListener("click", () => {
+  if (!resetConfirmMatches()) return;
+  learningState = {};
+  saveLearningState();
+  closeResetConfirm();
+  renderSettings();
+  renderHome();
+  document.getElementById("update-status").textContent = "";
 });
 
 // "há quanto tempo" em texto — usa streakAtLoad (foto de antes desta sessão tocar o streak), não
@@ -1159,6 +1309,15 @@ function topSpellingPatterns() {
     .slice(0, 5);
 }
 
+// "Com mais dificuldade": mesmo critério em todo lugar (texto, JSON do relatório, painel) — errou
+// 2+ vezes e ainda não saiu das caixas 0/1.
+function getStrugglingItems(limit) {
+  return profileContent().map((it) => ({ it, st: getState(it.id) }))
+    .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
+    .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
+    .slice(0, limit || 8);
+}
+
 function buildProgressSummary() {
   const lastActiveLine = `📅 Última vez que abriu: ${formatLastActive(streakAtLoad.lastActiveDate)}`;
   const lines = profileCategoryIds().map((catId) => {
@@ -1168,11 +1327,7 @@ function buildProgressSummary() {
     const mastered = items.filter((it) => getLearningStage(it.id) === "mastered").length;
     return `${meta.icon} ${meta.namePt}: ${mastered}/${items.length} dominadas (${introduced} vistas)`;
   });
-  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
-    .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
-    .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
-    .slice(0, 8)
-    .map((x) => x.it.en);
+  const struggling = getStrugglingItems(8).map((x) => x.it.en);
   let text = lastActiveLine + "\n\n" + lines.join("\n");
   if (struggling.length) text += `\n\nCom mais dificuldade: ${struggling.join(", ")}`;
   const spelling = topSpellingPatterns();
@@ -1201,11 +1356,7 @@ function buildStructuredReportData() {
   });
   const totals = { new: 0, learning: 0, consolidating: 0, mastered: 0 };
   profileContent().forEach((it) => { totals[getLearningStage(it.id)]++; });
-  const struggling = profileContent().map((it) => ({ it, st: getState(it.id) }))
-    .filter((x) => x.st.introduced && x.st.wrongCount >= 2 && x.st.box <= 1)
-    .sort((a, b) => b.st.wrongCount - a.st.wrongCount)
-    .slice(0, 8)
-    .map((x) => ({ id: x.it.id, en: x.it.en, wrongCount: x.st.wrongCount }));
+  const struggling = getStrugglingItems(8).map((x) => ({ id: x.it.id, en: x.it.en, wrongCount: x.st.wrongCount }));
   return {
     exportedAt: todayStr(),
     profile: getActiveProfile().id,
@@ -1241,7 +1392,7 @@ document.getElementById("btn-share-report").addEventListener("click", () => {
   }
 });
 
-// ---- Debug do motor adaptativo ----
+// ---- Debug do motor adaptativo (seção "Avançado", recolhida) ----
 function renderAdaptationLog() {
   const el = document.getElementById("adaptation-log");
   if (!adaptationLog.length) {
@@ -1301,16 +1452,25 @@ function switchProfile(id) {
   if (id === getActiveProfileId()) return;
   setActiveProfileId(id);
   reloadProfileState();
+  closeResetConfirm();
   renderSettings();
   renderHome();
 }
 
+// Rótulo de cada perfil nos cartões (por modo, não por id — o modo é o que muda a experiência).
+const PROFILE_BLURBS = { oral: "4 anos · ouvir e falar", literacy: "8 anos · ler e escrever", adult: "Adulto · trilha própria" };
 function renderProfileSwitcher() {
   const el = document.getElementById("profile-switcher");
   const activeId = getActiveProfileId();
-  el.innerHTML = PROFILES.map(
-    (p) => `<button class="profile-btn${p.id === activeId ? " active" : ""}" data-profile-id="${p.id}">${p.emoji} ${p.name}</button>`
-  ).join("");
+  el.innerHTML = PROFILES.map((p) => {
+    const active = p.id === activeId;
+    return `<button class="profile-btn pa-profile${active ? " active" : ""}" role="radio" aria-checked="${active}" data-profile-id="${p.id}">
+      <span class="pa-profile-emoji" aria-hidden="true">${p.emoji}</span>
+      <span class="pa-profile-name">${escapeHtml(p.name)}</span>
+      <span class="pa-profile-blurb">${PROFILE_BLURBS[p.mode] || ""}</span>
+      ${active ? `<span class="pa-profile-check" aria-hidden="true">${icon("check")}</span>` : ""}
+    </button>`;
+  }).join("");
   el.querySelectorAll(".profile-btn").forEach((btn) => {
     btn.addEventListener("click", () => switchProfile(btn.dataset.profileId));
   });
@@ -1323,26 +1483,281 @@ function getCurrentFamilyTheme() {
   const started = (typeof FAMILY_THEMES !== "undefined" ? FAMILY_THEMES : []).filter((t) => t.id <= month);
   return started.length ? started[started.length - 1] : null;
 }
+function monthNamePt(themeId) {
+  const [y, m] = themeId.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString("pt-BR", { month: "long", timeZone: "UTC" });
+}
+// Sem tema começado ainda (antes do plano), mostra o próximo como prévia — o relatório
+// compartilhado continua só com o tema atual (getCurrentFamilyTheme), sem mudança.
 function renderFamilyTheme() {
   const el = document.getElementById("family-theme");
   if (!el) return;
-  const theme = getCurrentFamilyTheme();
+  const all = typeof FAMILY_THEMES !== "undefined" ? FAMILY_THEMES : [];
+  const current = getCurrentFamilyTheme();
+  const theme = current || all.find((t) => t.id > todayStr().slice(0, 7));
   if (!theme) {
     el.innerHTML = "";
+    el.parentElement.hidden = true;
     return;
   }
+  el.parentElement.hidden = false;
+  const eyebrow = current ? `Tema do mês · ${monthNamePt(theme.id)}` : `Próximo tema · começa em ${monthNamePt(theme.id)}`;
   el.innerHTML = `
-    <p class="family-theme-title">${theme.icon} Tema do mês: ${theme.namePt}</p>
-    <p class="family-theme-sub">🏠 Pra fazer em casa:</p>
+    <div class="family-theme-head">
+      <span class="family-theme-icon" aria-hidden="true">${theme.icon}</span>
+      <div>
+        <p class="family-theme-eyebrow">${eyebrow}</p>
+        <p class="family-theme-title">${escapeHtml(theme.namePt)}</p>
+      </div>
+    </div>
+    <p class="family-theme-sub">Pra fazer em casa</p>
     <ul class="family-theme-tips">${theme.homeTipsPt.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>`;
+}
+
+// ===================== Painel do perfil ativo (gráficos) =====================
+// Pais como parceiros, não fiscais (LEARNING_PHILOSOPHY.md §32-34): nada de nota nem "% de
+// acerto" — o painel mostra o que foi praticado, o que já está firme e onde dá pra ajudar em
+// casa. Acerto e erro não aparecem separados no gráfico de atividade de propósito: viram
+// "respostas" (praticar é o que importa). Gráficos em SVG feito à mão, cores dos tokens via
+// classe CSS, cada um com <title>/aria-label descrevendo o mesmo dado em texto.
+// A barra mostra só o que já foi visto — a trilha inteira (centenas de itens) afogaria o que
+// importa; o que falta descobrir vira uma nota ao lado.
+const STAGE_META = [
+  { id: "mastered", label: "Já sabe" },
+  { id: "consolidating", label: "Firmando" },
+  { id: "learning", label: "Aprendendo" },
+];
+
+function lastNDays(n) {
+  const out = [];
+  for (let i = n - 1; i >= 0; i--) out.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+  return out;
+}
+
+function activityChartSVG(days) {
+  const W = 340, H = 150, top = 18, bottom = 24, left = 4, right = 4;
+  const plotH = H - top - bottom;
+  const slot = (W - left - right) / days.length;
+  const barW = Math.min(16, slot * 0.62);
+  const max = Math.max(4, ...days.map((d) => d.total));
+  const y = (v) => (v / max) * plotH;
+  const base = top + plotH;
+  let bars = "";
+  days.forEach((d, i) => {
+    const x = left + i * slot + (slot - barW) / 2;
+    const isToday = i === days.length - 1;
+    if (!d.total) {
+      bars += `<rect class="ac-empty" x="${x}" y="${base - 3}" width="${barW}" height="3" rx="1.5"/>`;
+    } else {
+      // empilha de baixo pra cima: respostas, novas, fala
+      let yy = base;
+      [["answers", "ac-answers"], ["seen", "ac-seen"], ["speech", "ac-speech"]].forEach(([k, cls]) => {
+        if (!d[k]) return;
+        const h = Math.max(2, y(d[k]));
+        yy -= h;
+        bars += `<rect class="${cls}" x="${x}" y="${yy}" width="${barW}" height="${h}"/>`;
+      });
+      bars += `<text class="ac-val" x="${x + barW / 2}" y="${yy - 4}" text-anchor="middle">${d.total}</text>`;
+    }
+    const day = d.date.slice(8, 10).replace(/^0/, "");
+    if (isToday || i % 2 === 1) {
+      bars += `<text class="ac-x${isToday ? " today" : ""}" x="${x + barW / 2}" y="${H - 6}" text-anchor="middle">${isToday ? "hoje" : day}</text>`;
+    }
+  });
+  const active = days.filter((d) => d.total).length;
+  const sum = days.reduce((a, d) => a + d.total, 0);
+  const desc = `Atividade dos últimos ${days.length} dias: praticou em ${active} dias, ${sum} interações no total. ` +
+    days.filter((d) => d.total).map((d) => `${d.date.slice(8, 10)}/${d.date.slice(5, 7)}: ${d.answers} respostas, ${d.seen} novas, ${d.speech} de fala`).join("; ");
+  return `<svg class="pa-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(desc)}">
+    <title>${escapeHtml(desc)}</title>
+    <line class="ac-base" x1="0" x2="${W}" y1="${base + 0.5}" y2="${base + 0.5}"/>
+    ${bars}
+  </svg>`;
+}
+
+function stageBarSVG(totals, all) {
+  const W = 340, H = 22;
+  let x = 0, rects = "";
+  STAGE_META.forEach((s) => {
+    const w = all ? (totals[s.id] / all) * W : 0;
+    if (w > 0) rects += `<rect class="st-${s.id}" x="${x}" y="0" width="${w}" height="${H}"/>`;
+    x += w;
+  });
+  const desc = STAGE_META.map((s) => `${s.label}: ${totals[s.id]}`).join(", ") + ` (das ${all} já vistas)`;
+  return `<svg class="pa-chart pa-stagebar" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${escapeHtml(desc)}">
+    <title>${escapeHtml(desc)}</title>
+    <defs><clipPath id="stage-clip"><rect x="0" y="0" width="${W}" height="${H}" rx="${H / 2}"/></clipPath></defs>
+    <g clip-path="url(#stage-clip)"><rect class="st-new" x="0" y="0" width="${W}" height="${H}"/>${rects}</g>
+  </svg>`;
+}
+
+// Barrinha de uma categoria: já sabe (cheio) + já viu (claro) sobre o total.
+function categoryMeterSVG(mastered, introduced, total, label) {
+  const W = 100, H = 8;
+  const wm = total ? (mastered / total) * W : 0;
+  const wi = total ? (introduced / total) * W : 0;
+  const desc = `${label}: já sabe ${mastered}, já viu ${introduced}, de ${total}`;
+  return `<svg class="pa-meter" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${escapeHtml(desc)}">
+    <rect class="mt-track" x="0" y="0" width="${W}" height="${H}" rx="${H / 2}"/>
+    ${wi ? `<rect class="mt-seen" x="0" y="0" width="${wi}" height="${H}" rx="${H / 2}"/>` : ""}
+    ${wm ? `<rect class="mt-mastered" x="0" y="0" width="${wm}" height="${H}" rx="${H / 2}"/>` : ""}
+  </svg>`;
+}
+
+function itemLabel(it) {
+  return it.en.length > 34 ? it.en.slice(0, 32) + "…" : it.en;
+}
+
+function renderParentDashboard() {
+  const el = document.getElementById("parent-dashboard");
+  const profile = getActiveProfile();
+  const name = escapeHtml(profile.name);
+  const isAdult = profile.mode === "adult";
+  const content = profileContent();
+  const introducedItems = content.filter((it) => getState(it.id).introduced);
+  const log = loadActivityLog();
+  const days = lastNDays(14).map((date) => {
+    const d = log[date] || {};
+    const answers = (d.correct || 0) + (d.wrong || 0);
+    return { date, seen: d.seen || 0, answers, speech: d.speech || 0, total: (d.seen || 0) + answers + (d.speech || 0) };
+  });
+  const title = `<h3 class="pa-section-title" id="pa-dash-title">${isAdult ? "Seu progresso" : `Como ${name} está indo`}</h3>`;
+
+  // Estado vazio (DESIGN_BRIEF §34): sem "sem dados" — o começo da aventura, com uma ação clara.
+  if (!introducedItems.length && !days.some((d) => d.total)) {
+    el.innerHTML = `${title}
+      <div class="pa-card pa-empty">
+        <div class="pa-empty-mascot" aria-hidden="true">${mascotSVG()}</div>
+        <p class="pa-empty-title">${isAdult ? "Sua trilha começa aqui!" : `A aventura do ${name} começa aqui!`}</p>
+        <p class="pa-empty-text">${isAdult
+          ? "Depois da primeira missão, aqui aparecem os dias em que você praticou, as expressões que já estão firmes e as que pedem mais revisão."
+          : `Quando ${name} jogar a primeira missão, aqui aparecem os dias em que praticou, as palavras que já sabe e ideias pra usar o inglês em casa.`}</p>
+        <button class="pa-btn pa-btn-primary" id="btn-empty-go-home">Ir para a missão</button>
+      </div>`;
+    document.getElementById("btn-empty-go-home").addEventListener("click", () => {
+      renderHome();
+      showScreen("home");
+    });
+    return;
+  }
+
+  // ---- Números de cabeçalho (streakAtLoad, nunca loadStreak() — ver PROCESS.md) ----
+  const s = streakAtLoad;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const streakAlive = s.lastActiveDate === todayStr() || s.lastActiveDate === yesterday;
+  const lastActive = formatLastActive(s.lastActiveDate).replace(/ \((\d+) dias atrás\)/, "");
+  const daysAgo = s.lastActiveDate ? Math.round((Date.parse(todayStr()) - Date.parse(s.lastActiveDate)) / 86400000) : null;
+  const lastActiveSub = daysAgo && daysAgo > 1 ? `${daysAgo} dias atrás` : "abriu o app";
+  const activeDays = days.filter((d) => d.total).length;
+
+  // ---- Estágios ----
+  const totals = { new: 0, learning: 0, consolidating: 0, mastered: 0 };
+  content.forEach((it) => { totals[getLearningStage(it.id)]++; });
+
+  // ---- Praticou por último (ponte pro mundo real, §33-34) ----
+  const recent = introducedItems.slice().sort((a, b) => (getState(b.id).lastSeen || 0) - (getState(a.id).lastSeen || 0)).slice(0, 6);
+
+  // ---- Categorias: as já exploradas primeiro; as intocadas resumidas numa linha ----
+  const cats = profileCategoryIds().map((catId) => {
+    const meta = CATEGORY_META[catId];
+    const items = CONTENT.filter((it) => it.category === catId);
+    return {
+      meta,
+      total: items.length,
+      introduced: items.filter((it) => getState(it.id).introduced).length,
+      mastered: items.filter((it) => getLearningStage(it.id) === "mastered").length,
+    };
+  });
+  const explored = cats.filter((c) => c.introduced).sort((a, b) => b.introduced / b.total - a.introduced / a.total);
+  const untouched = cats.filter((c) => !c.introduced);
+
+  const struggling = getStrugglingItems(6);
+  const spelling = profile.mode === "literacy" ? topSpellingPatterns() : [];
+  const maxSpell = spelling.length ? spelling[0].count : 1;
+
+  el.innerHTML = `${title}
+    <div class="pa-stats">
+      <div class="pa-stat"><span class="pa-stat-label">Última vez</span><span class="pa-stat-value">${escapeHtml(lastActive)}</span><span class="pa-stat-sub">${lastActiveSub}</span></div>
+      <div class="pa-stat"><span class="pa-stat-label">Sequência</span><span class="pa-stat-value">${streakAlive ? `${s.count} ${s.count === 1 ? "dia" : "dias"}` : "—"}</span><span class="pa-stat-sub">${streakAlive ? "seguidos" : "recomeça na próxima"}</span></div>
+      <div class="pa-stat"><span class="pa-stat-label">Já sabe</span><span class="pa-stat-value">${totals.mastered}</span><span class="pa-stat-sub">${introducedItems.length ? `de ${introducedItems.length} já vistas` : "nenhuma vista ainda"}</span></div>
+    </div>
+
+    <div class="pa-card">
+      <div class="pa-card-head">
+        <p class="pa-card-title">Últimos 14 dias</p>
+        <p class="pa-card-note">Praticou em ${activeDays} ${activeDays === 1 ? "dia" : "dias"}</p>
+      </div>
+      ${activityChartSVG(days)}
+      <ul class="pa-legend" aria-hidden="true">
+        <li><span class="sw ac-answers"></span>Respostas</li>
+        <li><span class="sw ac-seen"></span>Palavras novas</li>
+        <li><span class="sw ac-speech"></span>Tentou falar</li>
+      </ul>
+    </div>
+
+    <div class="pa-card">
+      <div class="pa-card-head">
+        <p class="pa-card-title">Em que pé ${isAdult ? "estão" : "estão as palavras"}</p>
+        <p class="pa-card-note">${introducedItems.length} já ${isAdult ? "vistos" : "vistas"} · ${totals.new} por descobrir</p>
+      </div>
+      ${introducedItems.length ? `${stageBarSVG(totals, introducedItems.length)}
+      <ul class="pa-stage-legend">
+        ${STAGE_META.map((st) => `<li><span class="lbl"><span class="sw st-${st.id}" aria-hidden="true"></span>${st.label}</span><span class="num">${totals[st.id]}</span></li>`).join("")}
+      </ul>` : `<p class="pa-card-text">Ainda nenhuma ${isAdult ? "expressão" : "palavra"} vista neste perfil — elas aparecem aqui conforme a próxima missão for jogada.</p>`}
+    </div>
+
+    ${recent.length ? `
+    <div class="pa-card pa-tip-card">
+      <p class="pa-card-title">${isAdult ? "Praticou por último" : "Pra usar em casa"}</p>
+      <p class="pa-card-text">${isAdult ? "Tente usar uma destas hoje, numa conversa de verdade." : `${name} praticou estas por último. Que tal usar no dia a dia — no jantar, no caminho, brincando?`}</p>
+      <div class="pa-chips">${recent.map((it) => `<span class="pa-chip">${escapeHtml(itemLabel(it))}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${struggling.length ? `
+    <div class="pa-card">
+      <p class="pa-card-title">Onde dá pra ajudar</p>
+      <p class="pa-card-text">${isAdult ? "Estas ainda escapam — vale revisar com calma." : "Estas ainda estão difíceis. Sem pressão: ouvir e usar em casa ajuda mais que repetir."}</p>
+      <div class="pa-chips">${struggling.map((x) => `<span class="pa-chip pa-chip-soft">${escapeHtml(itemLabel(x.it))}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${spelling.length ? `
+    <div class="pa-card">
+      <p class="pa-card-title">Padrões de grafia pra praticar</p>
+      <p class="pa-card-text">Os sons ${name} já acerta; o que confunde é como se escreve cada um.</p>
+      <ul class="pa-spell">
+        ${spelling.map((p) => `<li>
+          <div class="pa-spell-top"><span class="pa-spell-label">${escapeHtml(p.label)}</span><span class="pa-spell-count">${p.count}×</span></div>
+          ${categoryMeterSVG(0, p.count, maxSpell, p.label).replace("mt-seen", "mt-spell")}
+          <div class="pa-spell-ex">${p.examples.map((e) => `<span>${escapeHtml(e)}</span>`).join("")}</div>
+        </li>`).join("")}
+      </ul>
+    </div>` : ""}
+
+    <div class="pa-card">
+      <div class="pa-card-head">
+        <p class="pa-card-title">Por tema</p>
+        <ul class="pa-legend pa-legend-inline" aria-hidden="true"><li><span class="sw mt-mastered"></span>já sabe</li><li><span class="sw mt-seen"></span>já viu</li></ul>
+      </div>
+      <ul class="pa-cats">
+        ${explored.map((c) => `<li>
+          <span class="pa-cat-icon" aria-hidden="true">${c.meta.icon}</span>
+          <div class="pa-cat-main">
+            <div class="pa-cat-top"><span class="pa-cat-name">${escapeHtml(c.meta.namePt)}</span><span class="pa-cat-num">${c.mastered} de ${c.total}</span></div>
+            ${categoryMeterSVG(c.mastered, c.introduced, c.total, c.meta.namePt)}
+          </div>
+        </li>`).join("")}
+      </ul>
+      ${untouched.length ? `<p class="pa-card-note pa-cats-more">${untouched.length} ${untouched.length === 1 ? "tema" : "temas"} por explorar <span class="pa-cats-icons" aria-label="${escapeHtml(untouched.map((c) => c.meta.namePt).join(", "))}">${untouched.map((c) => c.meta.icon).join(" ")}</span></p>` : ""}
+    </div>`;
 }
 
 function renderSettings() {
   renderProfileSwitcher();
+  renderParentDashboard();
   renderFamilyTheme();
   populateVoiceSelect();
-  document.getElementById("rate-slider").value = speechRate;
-  document.getElementById("progress-summary").textContent = buildProgressSummary();
+  renderRateSegmented();
+  document.getElementById("reset-title").textContent = `Zerar progresso de ${getActiveProfile().name}`;
   renderAdaptationLog();
 }
 
