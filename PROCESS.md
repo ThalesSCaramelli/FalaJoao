@@ -271,6 +271,24 @@ sobre algo já decidido sem motivo novo.
   acaso, e poluiria o relatório dos pais e as opções do "Which one is right?". Nos outros dois
   jogos vai (escolher uma grafia é dizer que acha que ela está certa).
 
+### Montar a frase e completar a frase (jan/2027)
+
+- **Contexto**: pendência do André desde o perfil dele ("completar a frase", "montar a frase com
+  blocos") e item de código de janeiro no `CONTENT_PLAN.md`.
+- **`sentence_build`**: as palavras da frase viram blocos, mais 2 distratores de outras frases da
+  mesma trilha (pra ter que LER, não só ordenar). O André ouve a frase (imersão); o adulto vê a
+  tradução. Depois de 2 toques errados, o bloco certo pisca. **Também é o apoio automático**
+  quando uma frase trava (`isStuckSentence`: errou `FAILURE_THRESHOLD` vezes sem sair da caixa 0)
+  — o menor passo é montar com as palavras prontas, em vez de insistir em escrever tudo
+  (LEARNING_PHILOSOPHY.md §16-19). Complementa a decomposição por `prerequisites`, que continua
+  valendo quando o item tem pré-requisito.
+- **`cloze`**: a frase com uma palavra faltando. O André **digita** (mesma correção letra por letra
+  e dicas de phonics do ditado; a palavra escondida é, de preferência, uma da trilha de ortografia
+  dele). O adulto **escolhe** entre 3; a palavra escondida é, de preferência, um termo do dicionário,
+  e as alternativas vêm do dicionário (senão "please"/"water" seriam fáceis demais). Errou, a
+  tradução aparece como apoio.
+- Só pra frases de 3+ palavras, já vistas; o João não usa (ainda não lê).
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

@@ -105,6 +105,15 @@ Férias de verão; Natal e Ano-Novo.
 
 ### Janeiro — 🎒 Pronto para a escola
 O Term 1 começa no fim de janeiro, e este é o mês em que o app mais se paga.
+
+> ✅ **Feito em 15/11/2026.** João: categorias `school_day` e `feelings` (4 palavras + 11 frases,
+> 6 cenários nos lugares Sala de Aula, Lanche, Fazer Amigos e Avisar a Professora; o "I'm tired"
+> que já existia entrou como distrator). André: `spell_ed_ing` (6 palavras + 2 frases, 1 cenário)
+> + 4 tricky words (were, where, there, does); dicas novas para -ed, -ing e "dobrar a consoante",
+> e os minigames dividem -ed/-ing como bloco ("p·l·ay·ed"). Thales: `adult_school_admin` (13 itens,
+> lugar "Secretaria da Escola", 4 cenários) + 10 verbetes no dicionário. Tema do mês com 4 dicas.
+> Código: **montar a frase** (blocos de palavras; também é o apoio automático quando uma frase
+> trava) e **completar a frase** (o André digita, o adulto escolhe).
 - **João**: rotina da escola em frases (tudo vira frase; quase nenhuma palavra solta nova): "Where
   do I put my bag?", "I need to wash my hands.", "I'm finished!", "Can I sit here?". Sentimentos
   com pedido: `sad` → "I'm sad" → "I'm sad, I miss Mum." (comunicar a emoção para a professora é
@@ -174,7 +183,7 @@ calendário precisa:
 | Quando | O quê | Por quê |
 |---|---|---|
 | Dez ✅ | **"Em casa"**: dicas para os pais por tema (`FAMILY_THEMES` em data.js), mostradas em Configurações e no relatório | Ponte com o mundo real (§33, §34); é texto, mas precisa de lugar na tela |
-| Jan | **Montar a frase** com blocos de palavras + **completar a frase** (`I want ___`) | Apoio quando a frase longa trava (§17); já estava na lista de pendências do André |
+| Jan ✅ | **Montar a frase** com blocos de palavras + **completar a frase** (`I want ___`) | Apoio quando a frase longa trava (§17); já estava na lista de pendências do André |
 | Fev | **Modo história**: uma sequência de frases + pergunta de compreensão, reaproveitando os rounds que já existem | Historinhas são o próximo passo de leitura do André (§24, §25) e servem para o João ouvir |
 
 Além disso, a cada categoria nova: **itens de avatar** com `unlockedBy` nela (recompensa visível

@@ -778,6 +778,11 @@ function renderRound() {
     return;
   }
 
+  if (round.roundType === "sentence_build" || round.roundType === "cloze") {
+    renderSentenceRound(round, container, repeatBtn);
+    return;
+  }
+
   if (round.roundType === "build" || round.roundType === "pick_spelling" || round.roundType === "missing_sound") {
     renderSpellingGameRound(round, container, repeatBtn);
     return;
@@ -1339,6 +1344,135 @@ function renderSettings() {
   document.getElementById("rate-slider").value = speechRate;
   document.getElementById("progress-summary").textContent = buildProgressSummary();
   renderAdaptationLog();
+}
+
+// ===================== Montar a frase / completar a frase (jan/2027) =====================
+// sentence_build: blocos de palavras (+2 distratores de outras frases). André ouve a frase
+// (imersão); adulto vê a tradução. É também o apoio automático quando uma frase trava
+// (isStuckSentence, engine.js). cloze: a frase com uma palavra faltando — o André DIGITA (mesma
+// correção letra por letra do ditado), o adulto escolhe entre 3 (vocabulário no contexto).
+function renderSentenceRound(round, container, repeatBtn) {
+  const item = round.item;
+  repeatBtn.style.display = "none";
+  wrongAttemptsThisRound = 0;
+  choiceLocked = false;
+  const listenHead = `<span class="word-emoji-big dictation-media">${item.emoji}</span>
+    <button class="big-btn listen-btn" id="game-listen">${icon("sound")} ${tr("Listen", "Ouvir")}</button>`;
+  const ptHead = `<span class="word-emoji-big dictation-media">${item.emoji}</span>
+    <div class="sentence-pt">🇧🇷 ${escapeHtml(item.pt)}</div>`;
+
+  if (round.roundType === "sentence_build") {
+    const { tokens, distractors, ending } = sentenceBuildPuzzle(item);
+    container.innerHTML = `
+      <div class="write-card">
+        ${isImmersion() ? listenHead : ptHead}
+        <span class="intro-hint">${tr("🧱 Build the sentence", "🧱 Monte a frase em inglês")}</span>
+        <div class="sentence-line" id="sentence-line"></div>
+        <div class="build-tiles" id="build-tiles"></div>
+        <div class="write-feedback" id="game-feedback"></div>
+      </div>`;
+    const line = document.getElementById("sentence-line");
+    const tilesWrap = document.getElementById("build-tiles");
+    const feedback = document.getElementById("game-feedback");
+    let next = 0;
+    const renderLine = () => {
+      line.innerHTML = tokens.map((t, i) => (i < next ? `<span class="sl-word">${escapeHtml(t)}</span>` : `<span class="sl-blank"></span>`)).join(" ");
+    };
+    renderLine();
+    shuffle([...tokens, ...distractors]).forEach((t) => {
+      const btn = document.createElement("button");
+      btn.className = "build-tile word-tile";
+      btn.textContent = t;
+      btn.addEventListener("click", () => {
+        if (choiceLocked || btn.disabled) return;
+        if (normalizeAnswer(t) === normalizeAnswer(tokens[next]) && t === tokens[next]) {
+          btn.disabled = true;
+          next++;
+          renderLine();
+          feedback.textContent = "";
+          if (next === tokens.length) {
+            line.innerHTML = `<span class="sl-word">${escapeHtml(item.en)}</span>`;
+            feedback.textContent = tr("🌟 You built it!", "🌟 Montou!");
+            speak(item.en, item.id);
+            finishGameRound(item);
+          }
+        } else {
+          wrongAttemptsThisRound++;
+          playGentle();
+          shakeEl(btn);
+          if (wrongAttemptsThisRound >= 2) {
+            const right = [...tilesWrap.children].find((b) => !b.disabled && b.textContent === tokens[next]);
+            if (right) right.classList.add("hint");
+            feedback.textContent = tr(`The next word is "${tokens[next]}"`, `A próxima palavra é "${tokens[next]}"`);
+          } else {
+            feedback.textContent = tr("Almost! Listen again.", "Quase! Qual palavra vem agora?");
+          }
+          if (isImmersion()) speak(item.en, item.id);
+        }
+      });
+      tilesWrap.appendChild(btn);
+    });
+    const lb = document.getElementById("game-listen");
+    if (lb) lb.addEventListener("click", () => speak(item.en, item.id));
+    if (isImmersion()) speak(item.en, item.id);
+    return;
+  }
+
+  // cloze
+  const { tokens, gapIndex, answer, options } = clozePuzzle(item);
+  const withGap = (fill) =>
+    tokens.map((t, i) => (i === gapIndex ? `<span class="gap${fill ? " filled" : ""}">${fill ? escapeHtml(fill) : "____"}</span>${escapeHtml(t.slice(answer.length))}` : escapeHtml(t))).join(" ") +
+    escapeHtml((item.en.trim().match(/[.!?]+$/) || [""])[0]);
+  if (isImmersion()) {
+    container.innerHTML = `
+      <div class="write-card">
+        ${listenHead}
+        <span class="intro-hint">Listen and write the missing word</span>
+        <div class="cloze-sentence" id="cloze-sentence">${withGap("")}</div>
+        <input type="text" id="write-input" class="write-input" inputmode="text" autocapitalize="off"
+               autocomplete="off" autocorrect="off" spellcheck="false" placeholder="the missing word..." />
+        <button class="big-btn" id="write-submit">Check</button>
+        <div class="write-feedback" id="write-feedback"></div>
+      </div>`;
+    document.getElementById("game-listen").addEventListener("click", () => speak(item.en, item.id));
+    speak(item.en, item.id);
+    // Mesma correção do ditado, mas o alvo é só a palavra que falta (o progresso continua sendo
+    // registrado na frase — mesmo id).
+    setupTypingCheck({ item: { ...item, en: answer, acceptedAnswers: [answer.toLowerCase()] } }, true);
+    return;
+  }
+  container.innerHTML = `
+    <div class="write-card">
+      <span class="word-emoji-big dictation-media">${item.emoji}</span>
+      <span class="intro-hint">Complete a frase</span>
+      <div class="cloze-sentence" id="cloze-sentence">${withGap("")}</div>
+      <div class="build-tiles" id="cloze-options"></div>
+      <div class="write-feedback" id="game-feedback"></div>
+    </div>`;
+  const wrap = document.getElementById("cloze-options");
+  const feedback = document.getElementById("game-feedback");
+  options.forEach((opt) => {
+    const btn = document.createElement("button");
+    btn.className = "build-tile word-tile";
+    btn.textContent = opt;
+    btn.addEventListener("click", () => {
+      if (choiceLocked || btn.disabled) return;
+      if (opt === answer) {
+        document.getElementById("cloze-sentence").innerHTML = withGap(answer);
+        feedback.textContent = "🌟 Isso!";
+        speak(item.en, item.id);
+        finishGameRound(item);
+      } else {
+        wrongAttemptsThisRound++;
+        btn.disabled = true;
+        playGentle();
+        shakeEl(btn);
+        // Depois do erro, a tradução da frase aparece como apoio (o sentido ajuda a achar a palavra).
+        feedback.innerHTML = `Quase! A frase quer dizer: <i>${escapeHtml(item.pt)}</i>`;
+      }
+    });
+    wrap.appendChild(btn);
+  });
 }
 
 // ===================== Minigames do André (engine.js: segmentGraphemes, misspellingsFor...) =====================
