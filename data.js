@@ -28,6 +28,15 @@ const CATEGORY_META = {
   adult_social: { namePt: "Conversa e Small Talk", icon: "☕", color: "#D9B99B" },
   adult_opinion: { namePt: "Opinião e Argumento", icon: "🗣️", color: "#C3B1E1" },
   adult_connectors: { namePt: "Conectores", icon: "🔗", color: "#A7D8DE" },
+  // ---- trilha de ortografia (André) — agrupada por padrão de som (phonics), não por tema ----
+  spell_oo: { namePt: "Spelling · oo", icon: "🌙", color: "#B9C6F2" },
+  spell_digraphs: { namePt: "Spelling · sh ch th", icon: "🐚", color: "#F5C2C7" },
+  spell_ee_ea: { namePt: "Spelling · ee ea", icon: "🌳", color: "#BFE3C0" },
+  spell_ai_ay: { namePt: "Spelling · ai ay", icon: "🌧️", color: "#C7E3F5" },
+  spell_magic_e: { namePt: "Spelling · magic e", icon: "🚲", color: "#FFE0A3" },
+  spell_igh_ow: { namePt: "Spelling · igh ow ou", icon: "💡", color: "#E5D4F5" },
+  spell_r_vowels: { namePt: "Spelling · ar or ir ur", icon: "🦈", color: "#A8DDE0" },
+  spell_tricky: { namePt: "Spelling · tricky words", icon: "🧠", color: "#F7C6A3" },
 };
 
 // Itens de customização do avatar — desbloqueados por progresso em categoria (ver engine.js,
@@ -83,19 +92,21 @@ const SITUATIONS = [
 // em inglês pra resolver — a atividade central do LEARNING_PHILOSOPHY.md ("learn through doing",
 // seção 2/5/9.2). correctId/distractorIds sempre apontam pra itens reais de CONTENT (mesmo áudio,
 // mesmo registro de progresso — não é conteúdo paralelo).
+// `promptEn`: a mesma situação em inglês, usada pelo perfil em imersão (André, modo "literacy") —
+// ele já entende inglês, então o problema chega em inglês também (áudio em assets/audio/en/<id>).
 const SCENARIOS = [
-  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_water_please", "phrase_help_please"] },
-  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", correctId: "phrase_water_please", distractorIds: ["phrase_bathroom_please", "phrase_help_please"] },
-  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", correctId: "phrase_help_please", distractorIds: ["phrase_bathroom_please", "phrase_water_please"] },
-  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", correctId: "survival_my_name_is", distractorIds: ["phrase_your_name", "phrase_excuse_me"] },
-  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", correctId: "phrase_play_with_you", distractorIds: ["phrase_can_i_borrow", "phrase_can_i_have_this"] },
-  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
-  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
-  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
-  { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
-  { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
-  { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
-  { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
+  { id: "scn_bathroom", situationId: "bathroom", promptPt: "Você não sabe onde fica o banheiro.", promptEn: "You don't know where the bathroom is.", correctId: "phrase_bathroom_please", distractorIds: ["phrase_water_please", "phrase_help_please"] },
+  { id: "scn_water", situationId: "water", promptPt: "Você está com muita sede.", promptEn: "You are really thirsty.", correctId: "phrase_water_please", distractorIds: ["phrase_bathroom_please", "phrase_help_please"] },
+  { id: "scn_help", situationId: "help", promptPt: "Você não está conseguindo fazer uma atividade sozinho.", promptEn: "You can't do an activity by yourself.", correctId: "phrase_help_please", distractorIds: ["phrase_bathroom_please", "phrase_water_please"] },
+  { id: "scn_greetings", situationId: "greetings", promptPt: "Uma criança nova pergunta seu nome.", promptEn: "A new kid asks what your name is.", correctId: "survival_my_name_is", distractorIds: ["phrase_your_name", "phrase_excuse_me"] },
+  { id: "scn_friends", situationId: "friends", promptPt: "Você quer brincar com uma criança no playground.", promptEn: "You want to play with a kid at the playground.", correctId: "phrase_play_with_you", distractorIds: ["phrase_can_i_borrow", "phrase_can_i_have_this"] },
+  { id: "scn_sharing", situationId: "sharing", promptPt: "Você quer brincar com o brinquedo de um amigo.", promptEn: "You want to play with your friend's toy.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_play_with_you"] },
+  { id: "scn_teacher_tell", situationId: "teacher_tell", promptPt: "Você se machucou no playground.", promptEn: "You got hurt at the playground.", correctId: "phrase_im_hurt", distractorIds: ["phrase_help_please", "phrase_dont_understand"] },
+  { id: "scn_goodbye", situationId: "goodbye", promptPt: "A aula acabou e seus pais chegaram.", promptEn: "School is over and your parents are here.", correctId: "phrase_see_you_later", distractorIds: ["survival_hello", "phrase_help_please"] },
+  { id: "scn_animals", situationId: "animals", promptPt: "Seu amigo pergunta qual bicho de estimação você gosta mais.", promptEn: "Your friend asks which pet you like best.", correctId: "combo_i_like_dogs", distractorIds: ["combo_i_like_cats", "phrase_i_dont_like_it"] },
+  { id: "scn_home", situationId: "home", promptPt: "Você terminou a lição de casa e quer relaxar. O que você pergunta pros seus pais?", promptEn: "You finished your homework and want to relax. What do you ask your parents?", correctId: "home_can_i_watch_tv", distractorIds: ["phrase_can_i_have_this", "phrase_help_please"] },
+  { id: "scn_toys", situationId: "toys", promptPt: "Você quer brincar com o brinquedo do seu amigo.", promptEn: "Your friend has a cool toy and you want to play with it.", correctId: "phrase_can_i_borrow", distractorIds: ["phrase_can_i_have_this", "phrase_my_turn"] },
+  { id: "scn_classroom", situationId: "classroom", promptPt: "A professora falou rápido demais e você não entendeu.", promptEn: "The teacher talked too fast and you didn't understand.", correctId: "phrase_dont_understand", distractorIds: ["phrase_help_please", "phrase_im_hurt"] },
 
   // ---- trilha adulta: vários cenários por lugar (o primeiro de cada situationId abre a visita no
   // mapa; os outros entram nas rodadas situation/read/write via SCENARIO_BY_CORRECT_ID). `speaker`
@@ -121,6 +132,13 @@ const SCENARIOS = [
   { id: "scn_social_catch_up", situationId: "small_talk", speaker: "🧑", promptPt: "Você encontra um amigo no supermercado, mas está com pressa. Quer marcar de conversar outro dia.", correctId: "adult_social_we_should_catch_up", distractorIds: ["adult_social_looking_forward", "adult_social_what_do_you_do"] },
   { id: "scn_opinion_disagree", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Um colega apresenta uma ideia. Você reconhece que faz sentido, mas ainda tem dúvidas.", correctId: "adult_opinion_see_your_point", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_rather_not"] },
   { id: "scn_opinion_end", situationId: "discussion", speaker: "🧑‍💼", promptPt: "A discussão não chega a lugar nenhum e vocês querem encerrar o assunto numa boa.", correctId: "adult_opinion_agree_to_disagree", distractorIds: ["adult_opinion_fair_point", "adult_opinion_what_do_you_think"] },
+  // ---- trilha de ortografia (André): a frase de cada grupo de som vira resposta de um problema
+  // real, pra escrita não ser só ditado. situationId reaproveita lugares das crianças (não muda
+  // quem abre a visita no mapa — o primeiro cenário de cada lugar continua o mesmo).
+  { id: "scn_spell_school", situationId: "classroom", promptPt: "A professora pergunta como você vai para a escola.", promptEn: "Your teacher asks how you get to school.", correctId: "spell_walk_to_school", distractorIds: ["spell_bike_home", "spell_chicken_lunch"] },
+  { id: "scn_spell_lunch", situationId: "cafeteria", promptPt: "Sua mãe pergunta o que você comeu na escola hoje.", promptEn: "Mum asks what you ate at school today.", correctId: "spell_chicken_lunch", distractorIds: ["spell_read_tree", "spell_walk_to_school"] },
+  { id: "scn_spell_rain", situationId: "home", promptPt: "Seu pai pergunta o que vocês fizeram no dia de chuva.", promptEn: "Dad asks what you did on the rainy day.", correctId: "spell_rained_played", distractorIds: ["spell_park_storm", "spell_bike_home"] },
+  { id: "scn_spell_birthday", situationId: "friends", promptPt: "A professora pergunta por que seus amigos vão na sua casa.", promptEn: "Your teacher asks why your friends are coming to your house.", correctId: "spell_friends_because", distractorIds: ["spell_friend_said", "spell_walk_to_school"] },
   { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
@@ -808,5 +826,141 @@ const CONTENT = [
     en: "I prefer working from home, whereas my colleague prefers the office.", pt: "eu prefiro trabalhar de casa, ao passo que meu colega prefere o escritório.", emoji: "🏠🏢",
     category: "adult_connectors", difficulty: 5, prerequisites: ["adult_conn_whereas"],
     acceptedAnswers: ["i prefer working from home whereas my colleague prefers the office"],
+  },
+
+  // ======================================================================================
+  // ---- TRILHA DE ORTOGRAFIA (André, 8 anos — já fala inglês, precisa ESCREVER certo) ----
+  // `track: "spelling"`: só o perfil do André vê (engine.js, PROFILES.tracks). Agrupada por padrão
+  // de som (phonics), que é como a alfabetização em inglês é ensinada: cada categoria é UMA regra
+  // de grafia ("oo" em school/moon/food), e as dicas de erro (PHONICS_PATTERNS, engine.js) usam
+  // essas palavras como exemplo. Mesma metodologia do resto: palavras (1-2) → frase que usa as
+  // palavras (4) → versão mais longa (5), ligadas por `prerequisites`; as frases têm cenário.
+  // `spellingTip` (tricky words): palavra que não segue regra — a dica é um macete pra decorar.
+  // ======================================================================================
+
+  // ---- oo ----
+  { id: "spell_school", track: "spelling", contentType: "word", en: "school", pt: "escola", emoji: "🏫", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_moon", track: "spelling", contentType: "word", en: "moon", pt: "lua", emoji: "🌙", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_food", track: "spelling", contentType: "word", en: "food", pt: "comida", emoji: "🍲", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_pool", track: "spelling", contentType: "word", en: "pool", pt: "piscina", emoji: "🏊", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_room", track: "spelling", contentType: "word", en: "room", pt: "quarto / sala", emoji: "🚪", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  { id: "spell_zoo", track: "spelling", contentType: "word", en: "zoo", pt: "zoológico", emoji: "🦓", category: "spell_oo", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_walk_to_school", track: "spelling", contentType: "sentence",
+    en: "I walk to school.", pt: "eu vou a pé para a escola.", emoji: "🚶🏫",
+    category: "spell_oo", difficulty: 4, prerequisites: ["spell_school"],
+    acceptedAnswers: ["i walk to school"],
+  },
+  {
+    id: "spell_walk_to_school_friends", track: "spelling", contentType: "sentence",
+    en: "I walk to school with my friends every morning.", pt: "eu vou a pé para a escola com meus amigos toda manhã.", emoji: "🚶🧑‍🤝‍🧑🏫",
+    category: "spell_oo", difficulty: 5, prerequisites: ["spell_walk_to_school", "spell_friend"],
+    acceptedAnswers: ["i walk to school with my friends every morning"],
+  },
+
+  // ---- sh / ch / th (duas letras, um som) ----
+  { id: "spell_shop", track: "spelling", contentType: "word", en: "shop", pt: "loja", emoji: "🏪", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_shell", track: "spelling", contentType: "word", en: "shell", pt: "concha", emoji: "🐚", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_lunch", track: "spelling", contentType: "word", en: "lunch", pt: "almoço / lanche", emoji: "🥪", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_chicken", track: "spelling", contentType: "word", en: "chicken", pt: "frango", emoji: "🍗", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_think", track: "spelling", contentType: "word", en: "think", pt: "pensar", emoji: "🤔", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  { id: "spell_mother", track: "spelling", contentType: "word", en: "mother", pt: "mãe", emoji: "👩", category: "spell_digraphs", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_chicken_lunch", track: "spelling", contentType: "sentence",
+    en: "We had chicken for lunch.", pt: "comemos frango no almoço.", emoji: "🍗🥪",
+    category: "spell_digraphs", difficulty: 4, prerequisites: ["spell_chicken", "spell_lunch"],
+    acceptedAnswers: ["we had chicken for lunch"],
+  },
+
+  // ---- ee / ea ----
+  { id: "spell_tree", track: "spelling", contentType: "word", en: "tree", pt: "árvore", emoji: "🌳", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_sleep", track: "spelling", contentType: "word", en: "sleep", pt: "dormir", emoji: "😴", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_feet", track: "spelling", contentType: "word", en: "feet", pt: "pés", emoji: "🦶", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_beach", track: "spelling", contentType: "word", en: "beach", pt: "praia", emoji: "🏖️", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_read", track: "spelling", contentType: "word", en: "read", pt: "ler", emoji: "📖", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  { id: "spell_dream", track: "spelling", contentType: "word", en: "dream", pt: "sonho", emoji: "💭", category: "spell_ee_ea", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_read_tree", track: "spelling", contentType: "sentence",
+    en: "We read books under the tree.", pt: "a gente lê livros embaixo da árvore.", emoji: "📖🌳",
+    category: "spell_ee_ea", difficulty: 4, prerequisites: ["spell_read", "spell_tree"],
+    acceptedAnswers: ["we read books under the tree"],
+  },
+
+  // ---- ai / ay ----
+  { id: "spell_rain", track: "spelling", contentType: "word", en: "rain", pt: "chuva", emoji: "🌧️", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_paint", track: "spelling", contentType: "word", en: "paint", pt: "tinta / pintar", emoji: "🎨", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_snail", track: "spelling", contentType: "word", en: "snail", pt: "caracol", emoji: "🐌", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_day", track: "spelling", contentType: "word", en: "day", pt: "dia", emoji: "☀️", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_play", track: "spelling", contentType: "word", en: "play", pt: "brincar", emoji: "🤸", category: "spell_ai_ay", difficulty: 1, prerequisites: [] },
+  { id: "spell_birthday", track: "spelling", contentType: "word", en: "birthday", pt: "aniversário", emoji: "🎂", category: "spell_ai_ay", difficulty: 2, prerequisites: [] },
+  {
+    id: "spell_rained_played", track: "spelling", contentType: "sentence",
+    en: "It rained all day, so we played inside.", pt: "choveu o dia todo, então brincamos dentro de casa.", emoji: "🌧️🏠",
+    category: "spell_ai_ay", difficulty: 5, prerequisites: ["spell_rain", "spell_day", "spell_play"],
+    acceptedAnswers: ["it rained all day so we played inside"],
+  },
+
+  // ---- magic e (a_e, i_e, o_e) ----
+  { id: "spell_cake", track: "spelling", contentType: "word", en: "cake", pt: "bolo", emoji: "🍰", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_game", track: "spelling", contentType: "word", en: "game", pt: "jogo", emoji: "🎲", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_bike", track: "spelling", contentType: "word", en: "bike", pt: "bicicleta", emoji: "🚲", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_time", track: "spelling", contentType: "word", en: "time", pt: "hora / tempo", emoji: "⏰", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_home", track: "spelling", contentType: "word", en: "home", pt: "casa (lar)", emoji: "🏠", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  { id: "spell_bone", track: "spelling", contentType: "word", en: "bone", pt: "osso", emoji: "🦴", category: "spell_magic_e", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_bike_home", track: "spelling", contentType: "sentence",
+    en: "I ride my bike home after school.", pt: "eu volto de bicicleta para casa depois da escola.", emoji: "🚲🏠",
+    category: "spell_magic_e", difficulty: 4, prerequisites: ["spell_bike", "spell_home"],
+    acceptedAnswers: ["i ride my bike home after school"],
+  },
+
+  // ---- igh / ow / ou ----
+  { id: "spell_night", track: "spelling", contentType: "word", en: "night", pt: "noite", emoji: "🌃", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_light", track: "spelling", contentType: "word", en: "light", pt: "luz", emoji: "💡", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_right", track: "spelling", contentType: "word", en: "right", pt: "certo / direita", emoji: "✅", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_house", track: "spelling", contentType: "word", en: "house", pt: "casa", emoji: "🏡", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_mouse", track: "spelling", contentType: "word", en: "mouse", pt: "rato", emoji: "🐭", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  { id: "spell_snow", track: "spelling", contentType: "word", en: "snow", pt: "neve", emoji: "❄️", category: "spell_igh_ow", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_moon_bright", track: "spelling", contentType: "sentence",
+    en: "The moon is bright tonight.", pt: "a lua está brilhante hoje à noite.", emoji: "🌙✨",
+    category: "spell_igh_ow", difficulty: 4, prerequisites: ["spell_moon", "spell_night"],
+    acceptedAnswers: ["the moon is bright tonight"],
+  },
+
+  // ---- ar / or / ir / ur ----
+  { id: "spell_park", track: "spelling", contentType: "word", en: "park", pt: "parque", emoji: "🛝", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_shark", track: "spelling", contentType: "word", en: "shark", pt: "tubarão", emoji: "🦈", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_storm", track: "spelling", contentType: "word", en: "storm", pt: "tempestade", emoji: "⛈️", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_girl", track: "spelling", contentType: "word", en: "girl", pt: "menina", emoji: "👧", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_first", track: "spelling", contentType: "word", en: "first", pt: "primeiro", emoji: "🥇", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  { id: "spell_nurse", track: "spelling", contentType: "word", en: "nurse", pt: "enfermeira", emoji: "🧑‍⚕️", category: "spell_r_vowels", difficulty: 1, prerequisites: [] },
+  {
+    id: "spell_park_storm", track: "spelling", contentType: "sentence",
+    en: "We left the park before the storm.", pt: "saímos do parque antes da tempestade.", emoji: "🛝⛈️",
+    category: "spell_r_vowels", difficulty: 4, prerequisites: ["spell_park", "spell_storm"],
+    acceptedAnswers: ["we left the park before the storm"],
+  },
+
+  // ---- tricky words (não seguem regra — macete pra decorar em `spellingTip`) ----
+  { id: "spell_because", track: "spelling", contentType: "word", en: "because", pt: "porque", emoji: "❓", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: be-CAU-se. The /z/ sound is spelled with an s" },
+  { id: "spell_friend", track: "spelling", contentType: "word", en: "friend", pt: "amigo", emoji: "🧑‍🤝‍🧑", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It has an i before the e: fr-I-E-nd. A friend is a friend to the END" },
+  { id: "spell_people", track: "spelling", contentType: "word", en: "people", pt: "pessoas", emoji: "👥", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: pe-O-ple" },
+  { id: "spell_said", track: "spelling", contentType: "word", en: "said", pt: "disse", emoji: "💬", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like sed, but it is spelled s-a-i-d" },
+  { id: "spell_was", track: "spelling", contentType: "word", en: "was", pt: "era / estava", emoji: "⏪", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like woz, but it is spelled w-a-s" },
+  { id: "spell_they", track: "spelling", contentType: "word", en: "they", pt: "eles / elas", emoji: "👉👉", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It ends in ey, like hey: th-EY" },
+  { id: "spell_could", track: "spelling", contentType: "word", en: "could", pt: "poderia / conseguia", emoji: "🤷", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! could, would and should all end in o-u-l-d, and the l is silent" },
+  { id: "spell_beautiful", track: "spelling", contentType: "word", en: "beautiful", pt: "bonito / lindo", emoji: "🌸", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! Say it in a funny way: be-a-u-ti-ful" },
+  {
+    id: "spell_friend_said", track: "spelling", contentType: "sentence",
+    en: "My friend said it was beautiful.", pt: "meu amigo disse que estava lindo.", emoji: "💬🌸",
+    category: "spell_tricky", difficulty: 4, prerequisites: ["spell_friend", "spell_said", "spell_beautiful"],
+    acceptedAnswers: ["my friend said it was beautiful"],
+  },
+  {
+    id: "spell_friends_because", track: "spelling", contentType: "sentence",
+    en: "My friends are coming because it is my birthday.", pt: "meus amigos vão vir porque é meu aniversário.", emoji: "🧑‍🤝‍🧑🎂",
+    category: "spell_tricky", difficulty: 5, prerequisites: ["spell_because", "spell_friend", "spell_birthday"],
+    acceptedAnswers: ["my friends are coming because it is my birthday", "my friends are coming because it's my birthday"],
   },
 ];

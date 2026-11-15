@@ -170,6 +170,40 @@ sobre algo já decidido sem motivo novo.
   `AVATAR_ITEMS` pra categorias `adult_*`. Áudio neural dos 70 itens/22 cenários/6 lugares novos
   ainda não gerado (ver checklist em `CONTENT_GUIDE.md`) — até lá cai no TTS do navegador.
 
+### André: imersão em inglês + ditado + correção por padrão de som (phonics)
+
+- **Contexto**: o usuário contou que o André (8 anos) tem muita dificuldade de escrever certo —
+  "school" vira "scull". Ele já fala e entende inglês; o round `write` pedia a palavra a partir da
+  tradução em português e, no erro, só dizia "Quase!". Pedido: foco em escrever certo, tudo em inglês.
+- **Diagnóstico**: "scull" acerta os SONS (s-k-oo-l) e erra a GRAFIA de dois deles ("ch" com som
+  de /k/, "oo"). Alfabetização em inglês é ensinada assim (phonics): cada som tem algumas grafias e
+  a criança aprende os padrões. Então o app precisa ensinar o padrão, não só marcar errado.
+- **Escolha** (4 peças, todas determinísticas):
+  1. **Imersão** (`isImmersion`/`tr`, app.js): no modo `literacy` todo texto do quiz é em inglês;
+     cenários ganharam `promptEn` (com áudio em inglês); a ajuda é ouvir em inglês, não traduzir.
+     João e Thales não mudam.
+  2. **Ditado** (`roundType: "dictation"`): ouve e escreve. Vira o round principal do André
+     (`pickLiteracyRoundType`, engine.js). `write` só com cenário — sem a tradução, imagem sozinha
+     é ambígua demais pra pedir escrita.
+  3. **Correção que ensina** (`analyzeSpelling`, engine.js; `setupTypingCheck`, app.js): 1º erro
+     mostra as letras dele (verde/vermelho/riscado/"_") + a dica do padrão de som do pedaço que
+     errou, com outras palavras do app que seguem a regra ("'oo' says /oo/ — like moon, food,
+     pool"), sem entregar a palavra. 2º erro conta no SRS, mostra a grafia certa com o padrão
+     destacado e pede pra digitar certo uma vez (não pontua; dá pra pular).
+  4. **Trilha `spelling`** (60 itens): palavras agrupadas por padrão (oo, sh/ch/th, ee/ea, ai/ay,
+     magic e, igh/ow/ou, ar/or/ir/ur, tricky words com `spellingTip`), cada grupo com frase(s) que
+     usam as palavras e 4 cenários. Perfil passa a ter `tracks` (lista) e `focusTrack` (o que entra
+     primeiro como novo); o André vê `["kids", "spelling"]`.
+- **Relatório dos pais**: `logSpellingMistake` guarda por perfil quais padrões ele erra, com
+  exemplo ("'ch' com som de /k/: school → scull") — aparece em Configurações e no relatório
+  compartilhado (`spellingPatterns` no JSON). É o dado mais útil pra ajudar em casa.
+- **Porquê assim**: scaffolding em vez de punição (LEARNING_PHILOSOPHY.md seções 16, 35, 36): o
+  menor passo que deixa ele acertar sozinho é ver QUAIS letras e QUAL regra. Regra por regex, sem
+  "IA" (seção 39) — dá pra explicar exatamente por que cada dica apareceu.
+- **Fica pra depois**: montar a frase com blocos de palavras (apoio quando ele trava numa frase
+  longa) e completar a frase (`I want ___`); historinhas curtas com pergunta de compreensão;
+  mais grupos de padrão conforme o relatório mostrar onde ele mais erra.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

@@ -1048,3 +1048,51 @@ body[data-mode="adult"] .read-card .read-word {
 body[data-mode="adult"] .situation-option .opt-text {
   text-align: left;
 }
+
+/* ===== Ortografia (André): correção letra por letra =====
+   Verde = letra certa; vermelho = letra trocada; riscado = letra a mais; "_" = letra que faltou.
+   Na grafia certa, o padrão de som (oo, ch, magic e...) vem destacado, e as outras letras que
+   ele errou ficam sublinhadas. Fonte monoespaçada não: a de display já é bem legível pra criança. */
+.write-feedback .sp-line,
+.write-feedback .sp-target {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+.write-feedback .sp-big { font-size: 2rem; }
+.sp-ok { color: #2E9E5B; }
+.sp-bad { color: #D64545; text-decoration: underline wavy #D64545; }
+.sp-extra { color: #D64545; text-decoration: line-through; opacity: 0.7; }
+.sp-missing { color: #D64545; font-weight: 800; }
+.sp-pattern {
+  background: var(--cap-help-soft);
+  color: var(--color-primary-dark);
+  border-radius: 6px;
+  padding: 0 2px;
+}
+.sp-fix { text-decoration: underline; text-decoration-color: #D64545; text-decoration-thickness: 3px; }
+.sp-tip {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  background: var(--cap-understand-soft);
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+}
+.write-feedback > div + div { margin-top: 6px; }
+.skip-btn {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.dictation-media { font-size: 3.5rem; }
+.listen-btn { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+.listen-btn .icon { width: 1.3em; height: 1.3em; }

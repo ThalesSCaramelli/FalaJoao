@@ -1,6 +1,7 @@
 """
 Gera o audio em ingles (voz neural Natasha, via edge-tts) pra todo item de CONTENT em data.js
-que ainda nao tem arquivo em assets/audio/en/<id>.mp3.
+que ainda nao tem arquivo em assets/audio/en/<id>.mp3 -- e tambem pro `promptEn` de cada cenario
+de SCENARIOS (a situacao em ingles do perfil em imersao), salvo como assets/audio/en/<scn_id>.mp3.
 
 Uso (da raiz do projeto):
     pip install edge-tts   # só na primeira vez
@@ -41,6 +42,13 @@ def extract_items():
     return items
 
 
+def extract_scenario_prompts():
+    text = open(DATA_JS, encoding="utf-8").read()
+    block = text.split("const SCENARIOS = [", 1)[1].split("\n];", 1)[0]
+    pattern = re.compile(r'\{\s*id:\s*"([^"]+)"[^\n]*?promptEn:\s*"([^"]+)"')
+    return [(m.group(1), m.group(2)) for m in pattern.finditer(block)]
+
+
 async def gen(text, path):
     await edge_tts.Communicate(text, VOICE).save(path)
 
@@ -49,6 +57,9 @@ async def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     items = extract_items()
     print(f"{len(items)} itens em CONTENT.")
+    prompts = extract_scenario_prompts()
+    print(f"{len(prompts)} cenarios com promptEn.")
+    items += prompts
     done = 0
     for id_, en in items:
         path = os.path.join(OUT_DIR, f"{id_}.mp3")

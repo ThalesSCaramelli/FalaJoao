@@ -169,6 +169,27 @@ esse campo, o item é da trilha infantil (João/André). Os perfis nunca se mist
 - Mesma escala de `difficulty` e mesmas cadeias de evolução (seção 8): palavra (1) → chunk (2) →
   sentença curta (3) → sentença completa (4) → versão mais natural/complexa (5).
 
+## 8c. Trilha de ortografia (`track: "spelling"`, André)
+
+Palavras pro André treinar ESCRITA, agrupadas por padrão de som (phonics) — uma categoria
+`spell_*` por regra de grafia, não por tema. Só o perfil do André vê (`PROFILES.tracks`, engine.js).
+
+```js
+{ id: "spell_moon", track: "spelling", contentType: "word", en: "moon", pt: "lua", emoji: "🌙", category: "spell_oo", difficulty: 1, prerequisites: [] },
+```
+
+- Escolha palavras que sejam **exemplo limpo** do padrão da categoria (as dicas de erro usam
+  essas palavras como "like moon, food, pool" — `phonicsExamples`, engine.js).
+- Palavra que não segue regra (because, friend, said) vai em `spell_tricky` com `spellingTip`:
+  um macete curto, em inglês, pra decorar ("Say it in a funny way: be-CAU-se").
+- Cada grupo tem ao menos uma `sentence` que usa as palavras (`prerequisites` apontando pra elas,
+  difficulty 4-5, com `acceptedAnswers`) e, quando der, um cenário em `SCENARIOS` com `promptPt` e
+  `promptEn` — é o que libera o round `write` (sem cenário, só ditado e leitura).
+- Padrão de grafia novo (ex. "ew", "kn") vai em `PHONICS_PATTERNS` (engine.js): `re` sobre o texto
+  normalizado, `tip` em inglês pra criança, `labelPt` pro relatório dos pais.
+- **Cenário infantil novo**: sempre com `promptEn` também (o André vê a situação em inglês).
+  `python scripts/generate_audio.py` gera o áudio do `promptEn` em `assets/audio/en/<scn_id>.mp3`.
+
 ## 9. Checklist antes de publicar conteúdo novo
 
 - [ ] Item(ns) adicionados em `CONTENT` com id estável e único
