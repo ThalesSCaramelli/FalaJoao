@@ -85,6 +85,29 @@ em vez de depender da busca automática, tem duas opções diretas (sem passar p
 - **Linha de comando**: `python scripts/curate_images.py add <item_id> <url_ou_caminho_local>` —
   mesmo resultado, sem servidor.
 
+### Emoji do item (Fluent 3D) e fotos puladas
+
+Todo emoji de conteúdo (`emoji`, `icon`, `speaker` em `data.js`) é desenhado como PNG do Fluent
+Emoji 3D (assets/emoji), pra ficar igual em qualquer celular. Depois de adicionar um item/categoria/
+situação com emoji novo:
+
+```
+pip install pillow emoji        # emoji (nomes CLDR) é opcional, mas acha bem mais pastas
+python scripts/fetch_fluent_emoji.py
+```
+
+O script é idempotente (só baixa o que falta), atualiza `assets/emoji/manifest.json` e o bloco
+`EMOJI_ASSETS` de `data.js` (não edite à mão), e lista os que ficaram "SEM PNG" — esses aparecem como
+emoji de texto no app. Pra resolver um: ache a pasta em
+`github.com/microsoft/fluentui-emoji/tree/main/assets` e ponha em `OVERRIDES` no script (ou, se o
+Fluent não tiver, em `COMPOSE`, que junta emoji existentes). Combinações como "🏊❓" são quebradas em
+emoji individuais sozinhas. Faça commit dos PNGs novos.
+
+**Foto vs. Fluent**: o item com `image` usa a foto, a não ser que o id esteja em `PHOTO_SKIP`
+(`data.js`, comentado por motivo). Ao curar uma foto nova, só deixe-a se for limpa e coerente com
+as outras (sem fundo xadrez, gravura, marca d'água, fora de contexto); senão nem aplique, o Fluent
+já cobre o item.
+
 ## 4. Adicionar uma situação nova (mapa "My English World")
 
 Edite `data.js`, array `SITUATIONS`:

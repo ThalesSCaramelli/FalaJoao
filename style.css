@@ -373,6 +373,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-size: 3rem;
 }
 
+/* Emoji de conteúdo em PNG (Fluent 3D, ver emojiHtml em app.js): escala com o font-size do contexto,
+   então substitui o emoji de texto sem mudar o tamanho de nenhuma tela. */
+.emo {
+  height: 1em;
+  width: auto;
+  vertical-align: -0.12em;
+  pointer-events: none; /* o toque vai pro botão/cartão em volta, não pra imagem */
+  -webkit-user-drag: none;
+}
+
 .word-photo {
   /* rem, não em: dentro de .quiz-option (font-size:3.2rem, pensado pra emoji) um tamanho em "em"
      herdava essa fonte gigante e estourava a foto pra ~150px, quebrando a grade de 3 colunas. */
