@@ -2,7 +2,8 @@
 Gera o audio em ingles (voz neural Natasha, via edge-tts) pra todo item de CONTENT em data.js
 que ainda nao tem arquivo em assets/audio/en/<id>.mp3 -- e tambem pro `promptEn` de cada cenario
 de SCENARIOS (a situacao em ingles do perfil em imersao), salvo como assets/audio/en/<scn_id>.mp3,
-e pro `nameEn` de cada lugar de SITUATIONS, salvo como assets/audio/en/place_<id>.mp3.
+e pro `nameEn` de cada lugar de SITUATIONS, salvo como assets/audio/en/place_<id>.mp3, e pro
+`term` de cada verbete de ADULT_DICTIONARY, salvo como assets/audio/en/dict_<slug>.mp3.
 
 Uso (da raiz do projeto):
     pip install edge-tts   # só na primeira vez
@@ -51,6 +52,20 @@ def extract_place_names():
     return [(f"place_{m.group(1)}", m.group(2)) for m in pattern.finditer(block)]
 
 
+def extract_dictionary_terms():
+    """`term` de ADULT_DICTIONARY (dicionario do adulto), salvo como dict_<slug>.mp3 --
+    mesmo slug do app (engine.js, dictSlug): minusculas, tudo que nao e' letra/numero vira _."""
+    text = open(DATA_JS, encoding="utf-8").read()
+    if "const ADULT_DICTIONARY = [" not in text:
+        return []
+    block = text.split("const ADULT_DICTIONARY = [", 1)[1].split("\n];", 1)[0]
+    out = []
+    for m in re.finditer(r'term:\s*"([^"]+)"', block):
+        slug = re.sub(r"[^a-z0-9]+", "_", m.group(1).lower()).strip("_")
+        out.append((f"dict_{slug}", m.group(1)))
+    return out
+
+
 def extract_scenario_prompts():
     text = open(DATA_JS, encoding="utf-8").read()
     block = text.split("const SCENARIOS = [", 1)[1].split("\n];", 1)[0]
@@ -72,6 +87,9 @@ async def main():
     places = extract_place_names()
     print(f"{len(places)} lugares com nameEn.")
     items += places
+    dict_terms = extract_dictionary_terms()
+    print(f"{len(dict_terms)} verbetes do dicionario.")
+    items += dict_terms
     done = 0
     for id_, en in items:
         path = os.path.join(OUT_DIR, f"{id_}.mp3")

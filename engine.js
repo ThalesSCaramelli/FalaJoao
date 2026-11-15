@@ -604,3 +604,42 @@ function logSpellingMistake(analysis, item) {
   });
   localStorage.setItem(profileKey("meuIngles_spelling_v1"), JSON.stringify(log));
 }
+
+// ===================== Dicionário do adulto: achar os termos num texto =====================
+// Determinístico: compara o texto com o `term` e as `forms` de cada verbete (ADULT_DICTIONARY,
+// data.js), da forma mais longa pra mais curta ("on the same page" antes de "page"), sem sobrepor,
+// e só em fronteira de palavra ("lease" não casa dentro de "please").
+function dictSlug(term) {
+  return term.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+const DICT_FORMS = (typeof ADULT_DICTIONARY !== "undefined" ? ADULT_DICTIONARY : [])
+  .flatMap((entry) => [entry.term, ...(entry.forms || [])].map((form) => ({ entry, form: form.toLowerCase() })))
+  .sort((a, b) => b.form.length - a.form.length);
+function findDictionaryTerms(text) {
+  const lower = text.toLowerCase();
+  const isWordChar = (c) => !!c && /[a-z']/.test(c);
+  const taken = new Array(lower.length).fill(false);
+  const found = [];
+  DICT_FORMS.forEach(({ entry, form }) => {
+    let from = 0, i;
+    while ((i = lower.indexOf(form, from)) !== -1) {
+      const end = i + form.length;
+      from = i + 1;
+      if (isWordChar(lower[i - 1]) || isWordChar(lower[end])) continue;
+      let free = true;
+      for (let k = i; k < end; k++) if (taken[k]) free = false;
+      if (!free) continue;
+      for (let k = i; k < end; k++) taken[k] = true;
+      found.push({ start: i, end, entry });
+    }
+  });
+  return found.sort((a, b) => a.start - b.start);
+}
+// Frase da própria trilha adulta que usa o termo — é o exemplo do verbete (contexto real do app,
+// não uma frase inventada à parte). Evita repetir a frase em que ele acabou de tocar, se der.
+function dictionaryExample(entry, excludeId) {
+  const withTerm = CONTENT.filter(
+    (it) => itemTrack(it) === "adult" && it.contentType === "sentence" && findDictionaryTerms(it.en).some((f) => f.entry === entry)
+  );
+  return withTerm.find((it) => it.id !== excludeId) || withTerm[0] || null;
+}

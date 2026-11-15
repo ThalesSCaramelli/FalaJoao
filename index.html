@@ -54,10 +54,30 @@
       <div class="world-banner-preview" id="world-banner-preview"></div>
     </button>
 
+    <!-- Dicionário — só aparece no perfil adulto (renderHome). -->
+    <button id="btn-dictionary" class="world-banner dict-banner" style="display:none">
+      <div class="world-banner-head">
+        <span class="ic">📖</span>
+        <div class="txt">Dictionary<small>Palavras e expressões explicadas</small></div>
+        <span>›</span>
+      </div>
+    </button>
+
     <button id="btn-avatar-hero" class="avatar-hero-home">
       <div id="home-avatar-mount" class="voxel-avatar"></div>
       <span class="avatar-hero-hint" id="avatar-unlock-hint-home"></span>
     </button>
+  </section>
+
+  <!-- TELA DICIONÁRIO (perfil adulto) -->
+  <section id="screen-dictionary" class="screen">
+    <header class="sub-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2>📖 Dictionary</h2>
+    </header>
+    <input type="search" id="dict-search" class="dict-search" placeholder="buscar palavra (inglês ou português)..."
+           autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
+    <div id="dict-list" class="dict-list"></div>
   </section>
 
   <!-- TELA MAPA -->
@@ -187,6 +207,15 @@
     </div>
   </section>
 
+</div>
+
+<!-- Verbete do dicionário (abre por cima de qualquer tela) -->
+<div id="dict-sheet" class="dict-sheet" hidden>
+  <div class="dict-sheet-backdrop" data-dict-close></div>
+  <div class="dict-sheet-card" role="dialog" aria-modal="true" aria-labelledby="dict-sheet-term">
+    <button class="dict-sheet-close" data-dict-close aria-label="Fechar">✕</button>
+    <div id="dict-sheet-body"></div>
+  </div>
 </div>
 
 <script src="data.js"></script>

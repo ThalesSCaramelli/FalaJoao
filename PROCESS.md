@@ -212,6 +212,25 @@ sobre algo já decidido sem motivo novo.
   longa) e completar a frase (`I want ___`); historinhas curtas com pergunta de compreensão;
   mais grupos de padrão conforme o relatório mostrar onde ele mais erra.
 
+### Dicionário do adulto: definição em inglês simples, achada no próprio texto
+
+- **Contexto**: o usuário pediu, no perfil adulto, um dicionário explicando o significado das
+  palavras.
+- **Escolha**: `ADULT_DICTIONARY` (data.js) com 83 verbetes: `term`, `pos`, definição em inglês
+  simples (estilo dicionário pra quem aprende), tradução em português como apoio, e `forms` (outras
+  formas que aparecem nas frases: settling in, sorted out). Cobre também palavras que só aparecem
+  DENTRO das frases (overwhelmed, circumstances), não só os itens. `findDictionaryTerms`
+  (engine.js) acha os termos no texto: do mais longo pro mais curto, sem sobrepor, só em fronteira
+  de palavra ("lease" não casa em "please"). Três pontos de uso: palavras sublinhadas no `intro` e
+  no `meaning`, a tela "Dictionary" (Home do adulto, com busca em inglês ou português) e a grade da
+  categoria (tocar num item que é verbete abre a explicação).
+- **Exemplo do verbete não é escrito à mão**: é uma frase da própria trilha que usa o termo
+  (`dictionaryExample`) — contexto real, com áudio que já existe. Se a única frase de exemplo é a
+  própria frase da rodada, o exemplo some: a tradução dela entregaria a resposta do `meaning`.
+- **Consultar não mexe no SRS** — é scaffolding pra entender, não resposta avaliada.
+- **Regra daqui pra frente**: frase adulta nova com palavra difícil pede verbete novo no
+  `ADULT_DICTIONARY` (ver CONTENT_GUIDE.md).
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
