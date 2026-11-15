@@ -4,7 +4,7 @@
 // - MEDIA_CACHE: áudios e imagens. ESTÁVEL entre versões — uma atualização só baixa o que falta,
 //   em vez de baixar de novo os ~600 áudios (~9 MB) a cada versão. Só mude o nome dele se um
 //   áudio/imagem EXISTENTE for regravado com o mesmo nome e precisar ser trocado nos aparelhos.
-const CACHE_NAME = "meu-ingles-v46";
+const CACHE_NAME = "meu-ingles-v47";
 const MEDIA_CACHE = "meu-ingles-media-v1";
 const APP_SHELL = [
   "./",
@@ -642,6 +642,7 @@ const PT_AUDIO_SHELL = [
   "assets/audio/pt/onboarding_greeting.mp3",
   "assets/audio/pt/parent_teacher.mp3",
   "assets/audio/pt/rental.mp3",
+  "assets/audio/pt/result_congrats.mp3",
   "assets/audio/pt/school_office.mp3",
   "assets/audio/pt/scn_admin_contact.mp3",
   "assets/audio/pt/scn_admin_first_day.mp3",
