@@ -289,6 +289,43 @@ sobre algo já decidido sem motivo novo.
   tradução aparece como apoio.
 - Só pra frases de 3+ palavras, já vistas; o João não usa (ainda não lê).
 
+### Área dos pais: portão de "segurar 3 s" + painel de parceria (redesign, fase 5)
+
+- **Contexto**: a tela de Configurações misturava perfil, voz, atualização, tema do mês, um
+  resumo em texto, compartilhar, zerar progresso e botões de debug — com slider/select nativos e
+  `<hr>` quebrados — e abria com um toque na engrenagem da Home, ao alcance das crianças.
+- **Portão**: a engrenagem abre um diálogo "segure o botão por 3 segundos", com anel de
+  progresso (`openParentGate`, app.js). Escolhido em vez de uma continha: criança de 4 anos toca,
+  não segura; a instrução é texto (quem não lê não descobre); não há resposta pra acertar no
+  chute; e continha vira desafio pro André (8 anos). Toque curto ou soltar antes da hora não abre
+  (o anel volta e repete a instrução, sem bronca). Teclado: segurar Espaço/Enter; Esc fecha. Não é
+  segurança — é pra ninguém trocar de perfil ou zerar sem querer.
+- **Painel do perfil ativo** (`renderParentDashboard`): números de cabeçalho (última vez,
+  sequência, já sabe), atividade de 14 dias em barras empilhadas, estágios dos itens já vistos,
+  "pra usar em casa" (o que praticou por último), "onde dá pra ajudar", padrões de grafia (só
+  André) e progresso por tema. Gráficos em SVG à mão, cor por classe → token, cada um com
+  `aria-label`/`<title>` com o mesmo dado em texto.
+- **Linguagem de parceria** (LEARNING_PHILOSOPHY.md §32-34): nenhuma porcentagem, nenhuma
+  "nota". Acerto e erro **não** aparecem separados no gráfico de atividade — viram "respostas":
+  o que importa pro pai é que praticou, não a taxa de acerto. Itens difíceis aparecem como
+  "onde dá pra ajudar", com sugestão de usar em casa.
+- **Preservado**: "última vez" e sequência continuam lendo `streakAtLoad` (nunca `loadStreak()`
+  depois do touch); `buildProgressSummary`/`buildStructuredReportData` geram o mesmo relatório
+  (o critério de "com mais dificuldade" virou `getStrugglingItems`, igual ao de antes, usado nos
+  três lugares); chaves `profileKey('meuIngles_rate')`/`('meuIngles_voice')` e formato dos dados
+  intactos; motor não mudou.
+- **Voz**: slider vira 3 botões (Devagar 0.65 · Normal 0.85 · Rápido 1.05 — mesma escala de
+  `speechRate`); valor antigo fora desses três continua valendo, só destaca o mais próximo.
+- **Zerar progresso** foi pra "Zona de perigo": em vez de `confirm()`, digitar o nome do perfil
+  (sem acento/maiúscula). Apaga o mesmo que antes (só o `learningState`).
+- **Debug** (simular dificuldade, log de adaptação) dentro de "Avançado", um `<details>` recolhido.
+- **Tema do mês**: sem tema começado ainda, mostra o próximo como prévia ("começa em dezembro");
+  o relatório compartilhado continua só com o tema atual.
+- **Testado** (Playwright, 390×844 e 768×1024): toque curto e 1,5 s não abrem, 3 s abre; troca
+  de perfil; velocidade/voz salvando no perfil certo; compartilhar (mock de `navigator.share` e
+  fallback de clipboard); zerar com nome errado (bloqueado), cancelar, nome certo (só o perfil
+  ativo); debug escondido e acessível; estado vazio (Thales sem dados); sem erro no console.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
@@ -362,9 +399,9 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
   possam estar fora de contexto (usuário mencionou isso, nunca chegamos a fazer a revisão
   completa — só corrigimos `animals_bird.jpg` pontualmente) + buscar fotos pra `hello`/`bye_bye`/
   `see_you_later` (hoje só emoji, a solução definitiva é foto contextual) e `school_glue`.
-- Telas "menos glamurosas" (Configurações, Resultado, celebração de desbloqueio) ainda não
-  receberam nenhum tratamento visual da paleta/identidade Quokka Bay — continuam com a cara
-  antiga (sliders/combobox padrão de navegador).
+- Telas "menos glamurosas" (Resultado, celebração de desbloqueio) ainda não receberam
+  tratamento visual da paleta/identidade Quokka Bay. (Configurações virou a Área dos pais —
+  ver decisão "Área dos pais: portão de 'segurar 3 s'".)
 
 ### LATER
 
