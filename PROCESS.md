@@ -249,6 +249,28 @@ sobre algo já decidido sem motivo novo.
   um áudio EXISTENTE for regravado com o mesmo nome, é preciso trocar o `MEDIA_CACHE` também,
   senão o aparelho continua com o antigo. Resolve a pendência de NOW sobre o offline.
 
+### Minigames do André: jogos de ortografia por SOM (não por letra)
+
+- **Contexto**: o usuário pediu minigames pro André. Regra do projeto: o jogo tem que servir ao
+  aprendizado (LEARNING_PHILOSOPHY.md §46), sem XP/pontos (§29), e o erro não pune (§35).
+- **Escolha**: três jogos, todos sobre a mesma lacuna dele (som certo, grafia errada):
+  1. **Build it**: monta a palavra com blocos de grafema (`s·ch·oo·l`), misturados com as grafias
+     que soam igual (`u`, `k`). Depois de 2 toques errados, o bloco certo pisca (scaffolding).
+  2. **Which one is right?**: a grafia certa entre 3; as erradas vêm primeiro dos ERROS REAIS dele
+     (registro de `logSpellingMistake`: "scull"), depois de trocas plausíveis de um grafema — nunca
+     outra palavra de verdade ("sink" pra "sing").
+  3. **Missing sound**: `n_t` → igh / i / y; o pedaço escondido é, de preferência, de um padrão em
+     que ele mais erra.
+  Base comum em engine.js: `segmentGraphemes` (divide em sons), `GRAPHEME_ALTERNATES` (o que soa
+  igual), `selectGameItems` (as palavras que ele mais erra / vencidas / com os padrões fracos).
+- **Contam no SRS** (acerto de primeira = `recordResult(true)`) e aparecem também nas sessões
+  normais, pra palavras de ortografia já vistas. Entrada própria: "🎮 Word Games" na Home do André
+  (rodada de 8 palavras por jogo).
+- **Tricky words** só no "Which one is right?" ("laugh" não se divide em sons).
+- **Toque errado no "Build it" não vai pro registro de erros de grafia**: é muitas vezes toque ao
+  acaso, e poluiria o relatório dos pais e as opções do "Which one is right?". Nos outros dois
+  jogos vai (escolher uma grafia é dizer que acha que ela está certa).
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
