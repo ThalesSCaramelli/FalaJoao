@@ -5,22 +5,22 @@
 // (engine.js), porque é sobre o aluno, não sobre o conteúdo.
 
 const CATEGORY_META = {
-  survival: { namePt: "Sobrevivência", icon: "🚸", color: "#FF8FA3" },
-  colors: { namePt: "Cores", icon: "🎨", color: "#FF6B6B" },
-  numbers: { namePt: "Números", icon: "🔢", color: "#4ECDC4" },
-  shapes: { namePt: "Formas", icon: "🔺", color: "#FFD93D" },
-  animals: { namePt: "Animais", icon: "🐶", color: "#95E1D3" },
-  food: { namePt: "Comida", icon: "🍎", color: "#F38181" },
-  body: { namePt: "Corpo", icon: "🧑", color: "#AA96DA" },
-  family: { namePt: "Família", icon: "👨‍👩‍👧", color: "#FCBAD3" },
-  clothes: { namePt: "Roupas", icon: "👕", color: "#A8D8EA" },
-  school: { namePt: "Escola", icon: "🎒", color: "#FFAAA6" },
-  combos: { namePt: "Combinações", icon: "🧩", color: "#C9A7EB" },
-  phrases: { namePt: "Frases do dia a dia", icon: "💬", color: "#8AC6D1" },
-  seasons: { namePt: "Estações e Clima", icon: "🌤️", color: "#A0D2EB" },
-  home: { namePt: "Casa", icon: "🏠", color: "#FFCF9C" },
-  toys: { namePt: "Brinquedos", icon: "🧸", color: "#B5EAD7" },
-  beach: { namePt: "Praia", icon: "🏖️", color: "#FFE3A3" }, // CONTENT_PLAN.md, dez/2026
+  survival: { namePt: "Sobrevivência", nameEn: "School survival", icon: "🚸", color: "#FF8FA3" },
+  colors: { namePt: "Cores", nameEn: "Colours", icon: "🎨", color: "#FF6B6B" },
+  numbers: { namePt: "Números", nameEn: "Numbers", icon: "🔢", color: "#4ECDC4" },
+  shapes: { namePt: "Formas", nameEn: "Shapes", icon: "🔺", color: "#FFD93D" },
+  animals: { namePt: "Animais", nameEn: "Animals", icon: "🐶", color: "#95E1D3" },
+  food: { namePt: "Comida", nameEn: "Food", icon: "🍎", color: "#F38181" },
+  body: { namePt: "Corpo", nameEn: "My body", icon: "🧑", color: "#AA96DA" },
+  family: { namePt: "Família", nameEn: "Family", icon: "👨‍👩‍👧", color: "#FCBAD3" },
+  clothes: { namePt: "Roupas", nameEn: "Clothes", icon: "👕", color: "#A8D8EA" },
+  school: { namePt: "Escola", nameEn: "School", icon: "🎒", color: "#FFAAA6" },
+  combos: { namePt: "Combinações", nameEn: "Word combos", icon: "🧩", color: "#C9A7EB" },
+  phrases: { namePt: "Frases do dia a dia", nameEn: "Everyday phrases", icon: "💬", color: "#8AC6D1" },
+  seasons: { namePt: "Estações e Clima", nameEn: "Seasons & weather", icon: "🌤️", color: "#A0D2EB" },
+  home: { namePt: "Casa", nameEn: "Home", icon: "🏠", color: "#FFCF9C" },
+  toys: { namePt: "Brinquedos", nameEn: "Toys", icon: "🧸", color: "#B5EAD7" },
+  beach: { namePt: "Praia", nameEn: "Beach", icon: "🏖️", color: "#FFE3A3" }, // CONTENT_PLAN.md, dez/2026
   // ---- trilha adulta (perfil Thales) — só aparecem pra perfis com track "adult" (engine.js) ----
   adult_work: { namePt: "Trabalho", icon: "💼", color: "#9FB7E8" },
   adult_health: { namePt: "Saúde e Médico", icon: "🩺", color: "#F2A7A7" },
@@ -81,25 +81,26 @@ const FAMILY_THEMES = [
   },
 ];
 
-// Situações — "My English World". Cada uma reaproveita conteúdo que já existe (categoria inteira ou
+// Situações — "My English World". `nameEn`: nome do lugar no perfil em imersão (André) — mostrado
+// no mapa e falado em inglês ao tocar (áudio em assets/audio/en/place_<id>.mp3). Cada uma reaproveita conteúdo que já existe (categoria inteira ou
 // uma lista de ids específica pra grupos temáticos que cruzam categorias, tipo "banheiro" que usa
 // survival + phrases). Nada de currículo novo, só uma segunda forma de agrupar o que já foi curado.
 const SITUATIONS = [
-  { id: "greetings", namePt: "Se Apresentar", icon: "👋", mapPos: { top: "15%", left: "20%" }, itemIds: ["survival_hello", "survival_bye_bye", "survival_my_name_is", "phrase_your_name"] },
-  { id: "help", namePt: "Pedir Ajuda", icon: "🆘", mapPos: { top: "15%", left: "75%" }, itemIds: ["survival_help", "phrase_help_please"] },
-  { id: "bathroom", namePt: "Banheiro", icon: "🚻", mapPos: { top: "40%", left: "12%" }, itemIds: ["survival_bathroom", "survival_please", "survival_go_to_the_bathroom", "phrase_bathroom_please"] },
-  { id: "water", namePt: "Água", icon: "💧", mapPos: { top: "38%", left: "50%" }, itemIds: ["survival_water", "combo_i_want_water", "phrase_water_please"] },
-  { id: "cafeteria", namePt: "Lanche", icon: "🍎", mapPos: { top: "40%", left: "85%" }, categoryId: "food" },
-  { id: "classroom", namePt: "Sala de Aula", icon: "🎒", mapPos: { top: "68%", left: "25%" }, categoryId: "school" },
-  { id: "family", namePt: "Família", icon: "👨‍👩‍👧", mapPos: { top: "70%", left: "60%" }, categoryId: "family" },
-  { id: "animals", namePt: "Bichinhos", icon: "🐶", mapPos: { top: "85%", left: "85%" }, categoryId: "animals" },
-  { id: "friends", namePt: "Fazer Amigos", icon: "🤝", mapPos: { top: "15%", left: "48%" }, itemIds: ["phrase_play_with_you", "phrase_lets_play", "phrase_my_turn", "phrase_your_turn"] },
-  { id: "sharing", namePt: "Dividir e Emprestar", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
-  { id: "teacher_tell", namePt: "Avisar a Professora", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
-  { id: "goodbye", namePt: "Hora de ir Embora", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
-  { id: "home", namePt: "Casa", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
-  { id: "toys", namePt: "Brinquedos", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
-  { id: "beach", namePt: "Praia", icon: "🏖️", mapPos: { top: "31%", left: "70%" }, categoryId: "beach" },
+  { id: "greetings", namePt: "Se Apresentar", nameEn: "Saying hello", icon: "👋", mapPos: { top: "15%", left: "20%" }, itemIds: ["survival_hello", "survival_bye_bye", "survival_my_name_is", "phrase_your_name"] },
+  { id: "help", namePt: "Pedir Ajuda", nameEn: "Asking for help", icon: "🆘", mapPos: { top: "15%", left: "75%" }, itemIds: ["survival_help", "phrase_help_please"] },
+  { id: "bathroom", namePt: "Banheiro", nameEn: "Bathroom", icon: "🚻", mapPos: { top: "40%", left: "12%" }, itemIds: ["survival_bathroom", "survival_please", "survival_go_to_the_bathroom", "phrase_bathroom_please"] },
+  { id: "water", namePt: "Água", nameEn: "Water", icon: "💧", mapPos: { top: "38%", left: "50%" }, itemIds: ["survival_water", "combo_i_want_water", "phrase_water_please"] },
+  { id: "cafeteria", namePt: "Lanche", nameEn: "Lunch time", icon: "🍎", mapPos: { top: "40%", left: "85%" }, categoryId: "food" },
+  { id: "classroom", namePt: "Sala de Aula", nameEn: "Classroom", icon: "🎒", mapPos: { top: "68%", left: "25%" }, categoryId: "school" },
+  { id: "family", namePt: "Família", nameEn: "Family", icon: "👨‍👩‍👧", mapPos: { top: "70%", left: "60%" }, categoryId: "family" },
+  { id: "animals", namePt: "Bichinhos", nameEn: "Animals", icon: "🐶", mapPos: { top: "85%", left: "85%" }, categoryId: "animals" },
+  { id: "friends", namePt: "Fazer Amigos", nameEn: "Making friends", icon: "🤝", mapPos: { top: "15%", left: "48%" }, itemIds: ["phrase_play_with_you", "phrase_lets_play", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "sharing", namePt: "Dividir e Emprestar", nameEn: "Sharing", icon: "🧸", mapPos: { top: "58%", left: "15%" }, itemIds: ["phrase_can_i_have_this", "phrase_can_i_borrow", "phrase_my_turn", "phrase_your_turn"] },
+  { id: "teacher_tell", namePt: "Avisar a Professora", nameEn: "Telling the teacher", icon: "🙋", mapPos: { top: "58%", left: "78%" }, itemIds: ["phrase_im_hurt", "phrase_help_please", "phrase_dont_understand"] },
+  { id: "goodbye", namePt: "Hora de ir Embora", nameEn: "Home time", icon: "👋", mapPos: { top: "85%", left: "45%" }, itemIds: ["survival_bye_bye", "phrase_see_you_later"] },
+  { id: "home", namePt: "Casa", nameEn: "Home", icon: "🏠", mapPos: { top: "50%", left: "30%" }, categoryId: "home" },
+  { id: "toys", namePt: "Brinquedos", nameEn: "Toys", icon: "🧸", mapPos: { top: "85%", left: "15%" }, categoryId: "toys" },
+  { id: "beach", namePt: "Praia", nameEn: "Beach", icon: "🏖️", mapPos: { top: "31%", left: "70%" }, categoryId: "beach" },
   // ---- trilha adulta: mesmo mapa, outros lugares (profileSituations em engine.js filtra por track) ----
   { id: "work", track: "adult", namePt: "Trabalho", icon: "💼", mapPos: { top: "18%", left: "22%" }, categoryId: "adult_work" },
   { id: "doctor", track: "adult", namePt: "Médico", icon: "🩺", mapPos: { top: "18%", left: "72%" }, categoryId: "adult_health" },

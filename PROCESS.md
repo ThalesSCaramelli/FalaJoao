@@ -200,6 +200,14 @@ sobre algo já decidido sem motivo novo.
 - **Porquê assim**: scaffolding em vez de punição (LEARNING_PHILOSOPHY.md seções 16, 35, 36): o
   menor passo que deixa ele acertar sozinho é ver QUAIS letras e QUAL regra. Regra por regex, sem
   "IA" (seção 39) — dá pra explicar exatamente por que cada dica apareceu.
+- **Correção (15/11/2026, feedback do usuário: "muito áudio em português")**: sobravam dois
+  caminhos com narração em PT pro André — o nome do lugar ao tocar no mapa e o cenário que abre
+  cada visita (round `situation`, que ainda não olhava o modo). Agora: lugares e categorias têm
+  `nameEn` (mostrado e falado em inglês, áudio `place_<id>`); o cenário de abertura vira `write`
+  pra ele (foco em escrita) com a situação em inglês tocando sozinha; o round `situation` também
+  respeita a imersão; textos da Home e do mapa seguem o idioma do perfil (`renderHomeStaticTexts`).
+  Regra daqui pra frente: **nada falado em português no perfil do André** — todo `speakPT` novo
+  precisa de um caminho em inglês quando `isImmersion()`.
 - **Fica pra depois**: montar a frase com blocos de palavras (apoio quando ele trava numa frase
   longa) e completar a frase (`I want ___`); historinhas curtas com pergunta de compreensão;
   mais grupos de padrão conforme o relatório mostrar onde ele mais erra.

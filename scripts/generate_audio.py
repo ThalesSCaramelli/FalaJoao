@@ -1,7 +1,8 @@
 """
 Gera o audio em ingles (voz neural Natasha, via edge-tts) pra todo item de CONTENT em data.js
 que ainda nao tem arquivo em assets/audio/en/<id>.mp3 -- e tambem pro `promptEn` de cada cenario
-de SCENARIOS (a situacao em ingles do perfil em imersao), salvo como assets/audio/en/<scn_id>.mp3.
+de SCENARIOS (a situacao em ingles do perfil em imersao), salvo como assets/audio/en/<scn_id>.mp3,
+e pro `nameEn` de cada lugar de SITUATIONS, salvo como assets/audio/en/place_<id>.mp3.
 
 Uso (da raiz do projeto):
     pip install edge-tts   # só na primeira vez
@@ -42,6 +43,14 @@ def extract_items():
     return items
 
 
+def extract_place_names():
+    """nameEn de SITUATIONS (nome do lugar no perfil em imersao), salvo como place_<id>.mp3."""
+    text = open(DATA_JS, encoding="utf-8").read()
+    block = text.split("const SITUATIONS = [", 1)[1].split("\n];", 1)[0]
+    pattern = re.compile(r'\{\s*id:\s*"([^"]+)"[^\n]*?nameEn:\s*"([^"]+)"')
+    return [(f"place_{m.group(1)}", m.group(2)) for m in pattern.finditer(block)]
+
+
 def extract_scenario_prompts():
     text = open(DATA_JS, encoding="utf-8").read()
     block = text.split("const SCENARIOS = [", 1)[1].split("\n];", 1)[0]
@@ -60,6 +69,9 @@ async def main():
     prompts = extract_scenario_prompts()
     print(f"{len(prompts)} cenarios com promptEn.")
     items += prompts
+    places = extract_place_names()
+    print(f"{len(places)} lugares com nameEn.")
+    items += places
     done = 0
     for id_, en in items:
         path = os.path.join(OUT_DIR, f"{id_}.mp3")

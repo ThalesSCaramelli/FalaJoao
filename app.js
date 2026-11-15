@@ -156,7 +156,8 @@ function renderAvatarScreen() {
         const hintEl = document.getElementById("avatar-unlock-hint");
         if (!unlocked) {
           const catMeta = CATEGORY_META[item.unlockedBy];
-          hintEl.textContent = `🔒 Continue praticando "${catMeta ? catMeta.namePt : item.unlockedBy}" pra desbloquear!`;
+          const catName = catMeta ? displayName(catMeta) : item.unlockedBy;
+          hintEl.textContent = tr(`🔒 Keep practising "${catName}" to unlock it!`, `🔒 Continue praticando "${catName}" pra desbloquear!`);
           btn.style.animation = "none";
           void btn.offsetWidth;
           btn.style.animation = "shake 0.4s";
@@ -192,7 +193,7 @@ function renderWorldMap() {
     pin.className = "pin";
     pin.style.top = situation.mapPos.top;
     pin.style.left = situation.mapPos.left;
-    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${situation.namePt}</div>`;
+    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${displayName(situation)}</div>`;
     pin.addEventListener("click", () => goToSituation(situation));
     pinsWrap.appendChild(pin);
   });
@@ -200,12 +201,16 @@ function renderWorldMap() {
   const hintEl = document.querySelector("#world-map .world-hint");
   if (hintEl) {
     const anyIntroduced = profileContent().some((it) => getState(it.id).introduced);
-    hintEl.textContent = anyIntroduced ? "👉 Toque num lugar pra ir e jogar lá!" : "🌱 Sua aventura começa aqui — toque num lugar!";
+    hintEl.textContent = anyIntroduced
+      ? tr("👉 Tap a place to go and play there!", "👉 Toque num lugar pra ir e jogar lá!")
+      : tr("🌱 Your adventure starts here — tap a place!", "🌱 Sua aventura começa aqui — toque num lugar!");
   }
 }
 
 function goToSituation(situation) {
-  speakPT(situation.namePt, situation.id);
+  // André (imersão) ouve o nome do lugar em inglês; os outros, em português.
+  if (isImmersion() && situation.nameEn) speak(situation.nameEn, `place_${situation.id}`);
+  else speakPT(situation.namePt, situation.id);
   const avatarEl = document.getElementById("world-avatar");
   avatarEl.style.top = situation.mapPos.top;
   avatarEl.style.left = situation.mapPos.left;
@@ -221,8 +226,9 @@ function goToSituation(situation) {
     // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
     // do lugar vem depois, como prática complementar.
     const scenario = getScenarioForSituation(situation.id);
+    // André: o cenário de abertura vira escrita (o foco dele), não o round "situation" de ouvir.
     if (scenario) {
-      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: "situation", scenario });
+      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: isImmersion() ? "write" : "situation", scenario });
     }
     quizReturnScreen = "world";
     startQuiz(queue);
@@ -444,7 +450,9 @@ function renderHome() {
   // streak
   const streak = touchStreak();
   document.getElementById("streak-badge").innerHTML = streak.count > 0 ? `🔥 ${streak.count}` : "👋";
-  document.getElementById("home-greeting").textContent = streak.count > 1 ? `${streak.count} dias seguidos!` : "Olá! 👋";
+  document.getElementById("home-greeting").textContent =
+    streak.count > 1 ? tr(`${streak.count} days in a row!`, `${streak.count} dias seguidos!`) : tr("Hi! 👋", "Olá! 👋");
+  renderHomeStaticTexts();
 
   // missão do dia (sessão adaptativa, com carinha de missão)
   const session = buildSession();
@@ -453,13 +461,15 @@ function renderHome() {
   const topCatId = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a])[0];
   const topCat = topCatId ? CATEGORY_META[topCatId] : null;
   const estMinutes = Math.max(1, Math.round(session.length / 3));
-  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${topCat.namePt}` : "🎉 Tudo em dia!";
-  document.getElementById("mission-meta").textContent = session.length ? `⏱ ~${estMinutes} min · ${session.length} atividades` : "Volta mais tarde pra revisar!";
+  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
+  document.getElementById("mission-meta").textContent = session.length
+    ? tr(`⏱ ~${estMinutes} min · ${session.length} activities`, `⏱ ~${estMinutes} min · ${session.length} atividades`)
+    : tr("Come back later to review!", "Volta mais tarde pra revisar!");
 
   // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
   const nextSituations = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
   document.getElementById("world-banner-preview").innerHTML = nextSituations
-    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${s.namePt}</div>`)
+    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${displayName(s)}</div>`)
     .join("");
 }
 
@@ -475,7 +485,7 @@ function renderCategoryGrid() {
     const btn = document.createElement("button");
     btn.className = "cat-card";
     btn.style.background = meta.color;
-    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${meta.namePt}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
+    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${displayName(meta)}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
     btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
@@ -486,7 +496,7 @@ let currentCategoryId = null;
 function openCategory(catId) {
   currentCategoryId = catId;
   const meta = CATEGORY_META[catId];
-  document.getElementById("category-title").textContent = meta.namePt;
+  document.getElementById("category-title").textContent = displayName(meta);
   const wordGrid = document.getElementById("word-grid");
   wordGrid.innerHTML = "";
   CONTENT.filter((it) => it.category === catId).forEach((item) => {
@@ -611,12 +621,12 @@ function renderRound() {
         <div class="scenario-emoji">${round.item.emoji}</div>
         <div class="scenario-bubble">
           <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
-          <span class="txt">"${scenario.promptPt}"</span>
+          <span class="txt">"${scenarioPrompt(scenario)}"</span>
           <button class="speaker" id="scenario-replay" aria-label="Ouvir de novo">${icon("sound")}</button>
         </div>
       </div>
-      <div class="prompt-line">O que você fala? 🇬🇧</div>
-      <div class="situation-status" id="situation-status">🔊 ouvindo as opções... toque numa carta pra ouvir de novo</div>
+      <div class="prompt-line">${tr("What do you say?", "O que você fala?")} 🇬🇧</div>
+      <div class="situation-status" id="situation-status">${tr("🔊 listening to the options... tap a card to hear it again", "🔊 ouvindo as opções... toque numa carta pra ouvir de novo")}</div>
       <div class="situation-options" id="situation-options"></div>`;
     const optionsWrap = document.getElementById("situation-options");
     const statusEl = document.getElementById("situation-status");
@@ -639,8 +649,10 @@ function renderRound() {
       });
       optionsWrap.appendChild(btn);
     });
-    document.getElementById("scenario-replay").addEventListener("click", () => speakPT(scenario.promptPt, scenario.id));
-    speakPT(scenario.promptPt, scenario.id);
+    const playPrompt = () =>
+      isImmersion() && scenario.promptEn ? speak(scenario.promptEn, scenario.id) : speakPT(scenario.promptPt, scenario.id);
+    document.getElementById("scenario-replay").addEventListener("click", playPrompt);
+    playPrompt();
     options.forEach((opt, i) => {
       setTimeout(() => {
         const btn = optionsWrap.children[[...optionsWrap.children].findIndex((b) => b.dataset.itemId === opt.id)];
@@ -652,7 +664,7 @@ function renderRound() {
     setTimeout(() => {
       optionsWrap.querySelectorAll(".situation-option").forEach((b) => b.classList.remove("reading", "locked"));
       choiceLocked = false;
-      statusEl.textContent = "👉 toque na certa!";
+      statusEl.textContent = tr("👉 tap the right one!", "👉 toque na certa!");
     }, 2200 + options.length * 2000);
     return;
   }
@@ -749,6 +761,9 @@ function renderRound() {
     const ptBtn = document.getElementById("write-pt");
     if (ptBtn) ptBtn.addEventListener("click", () => speakPT(round.item.pt));
     if (isDictation) speak(round.item.en, round.item.id);
+    // Imersão: a situação em inglês toca sozinha (é contexto, não a resposta — ele ainda precisa
+    // saber O QUE dizer e COMO se escreve).
+    else if (scenario && isImmersion() && scenario.promptEn) speak(scenario.promptEn, scenario.id);
     setupTypingCheck(round, isDictation);
     return;
   }
@@ -807,6 +822,24 @@ function isImmersion() {
 // Texto de interface: inglês no perfil em imersão, português nos outros.
 function tr(en, pt) {
   return isImmersion() ? en : pt;
+}
+// Nome de lugar/categoria: `nameEn` no perfil em imersão (quando existe), senão `namePt`.
+function displayName(obj) {
+  return isImmersion() && obj.nameEn ? obj.nameEn : obj.namePt;
+}
+// Textos fixos da Home e do mapa (index.html) — trocados aqui pra seguir o idioma do perfil.
+function renderHomeStaticTexts() {
+  const set = (sel, text) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = text;
+  };
+  set("#btn-session .eyebrow", tr("Your mission", "Sua Missão"));
+  set("#btn-world-banner .txt small", tr("Explore places and practise there", "Explore lugares e pratique lá"));
+  set("#screen-world .section-title", tr("Explore by category", "Explorar por categoria"));
+  const pill = document.querySelector("#btn-session .play-pill");
+  if (pill) pill.innerHTML = icon("play") + " " + tr("PLAY", "JOGAR");
+  const playQuizBtn = document.getElementById("btn-play-quiz");
+  if (playQuizBtn) playQuizBtn.innerHTML = icon("play") + " " + tr("Play", "Jogar");
 }
 function scenarioPrompt(scenario) {
   return isImmersion() && scenario.promptEn ? scenario.promptEn : scenario.promptPt;

@@ -188,6 +188,8 @@ Palavras pro André treinar ESCRITA, agrupadas por padrão de som (phonics) — 
 - Padrão de grafia novo (ex. "ew", "kn") vai em `PHONICS_PATTERNS` (engine.js): `re` sobre o texto
   normalizado, `tip` em inglês pra criança, `labelPt` pro relatório dos pais.
 - **Cenário infantil novo**: sempre com `promptEn` também (o André vê a situação em inglês).
+  **Lugar ou categoria infantil novo**: sempre com `nameEn` também (o André vê e ouve o nome em
+  inglês; o áudio do lugar é `place_<id>`, gerado pelo `generate_audio.py`).
   `python scripts/generate_audio.py` gera o áudio do `promptEn` em `assets/audio/en/<scn_id>.mp3`.
 
 ## 8d. Tema da família do mês (`FAMILY_THEMES`)
