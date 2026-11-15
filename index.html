@@ -104,12 +104,30 @@
       <button class="back-btn" data-back="home">⬅️</button>
       <h2>🏝️ Quokka Bay</h2>
     </header>
+    <div class="world-hint">Toque num lugar pra ir e jogar lá!</div>
     <div class="world-map" id="world-map">
-      <div class="bay-sun"></div>
-      <div class="bay-hill" style="width:140px;height:140px;top:50px;left:-40px;"></div>
-      <div class="bay-hill" style="width:100px;height:100px;top:90px;right:-25px;"></div>
-      <div class="bay-sand"></div>
-      <div class="world-hint">👉 Toque num lugar pra ir e jogar lá!</div>
+      <!-- Ilha de Quokka Bay: ilustração de fundo (mar, espuma, praia, grama, árvores). Só cenário —
+           os lugares (#world-pins) e a trilha (#world-trail-path) são desenhados pelo renderWorldMap. -->
+      <svg class="bay-art" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="bay-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#63C9D6"/><stop offset="1" stop-color="#3FB3C6"/></linearGradient>
+          <path id="bay-island" d="M70 26 C130 8 240 10 300 28 C338 40 350 90 346 150 C344 200 350 240 344 268 C340 284 318 286 318 298 C318 312 342 312 346 332 C352 400 350 500 336 548 C322 584 240 590 180 588 C110 586 40 590 22 540 C8 500 12 430 12 380 C12 300 8 230 14 204 C20 186 62 188 62 166 C62 146 20 146 14 128 C6 90 20 40 70 26Z"/>
+          <g id="bay-tree"><ellipse cx="0" cy="1" rx="13" ry="4" fill="#3A2E27" opacity="0.14"/><rect x="-2.5" y="-12" width="5" height="13" rx="2" fill="#9A6B45"/><circle cx="0" cy="-22" r="14" fill="#4FA862"/><circle cx="-9" cy="-15" r="9" fill="#4FA862"/><circle cx="9" cy="-15" r="9" fill="#4FA862"/><circle cx="-3" cy="-26" r="8" fill="#74C47A"/><circle cx="6" cy="-20" r="5" fill="#74C47A"/></g>
+          <g id="bay-palm"><ellipse cx="0" cy="1" rx="11" ry="3.5" fill="#3A2E27" opacity="0.14"/><path d="M0 0 Q-3 -14 3 -27" fill="none" stroke="#B48655" stroke-width="4.5" stroke-linecap="round"/><g fill="none" stroke="#3F9E5C" stroke-width="4.5" stroke-linecap="round"><path d="M3 -27 Q-6 -36 -16 -30"/><path d="M3 -27 Q12 -37 21 -30"/><path d="M3 -27 Q-4 -28 -12 -19"/><path d="M3 -27 Q11 -28 17 -19"/></g><path d="M3 -27 Q3 -38 4 -41" fill="none" stroke="#5FBE74" stroke-width="4.5" stroke-linecap="round"/><circle cx="1.5" cy="-25" r="2.4" fill="#8A5A3C"/></g>
+          <g id="bay-bush"><ellipse cx="0" cy="1" rx="14" ry="3.5" fill="#3A2E27" opacity="0.12"/><circle cx="-7" cy="-4" r="7" fill="#5DB56C"/><circle cx="6" cy="-5" r="8" fill="#5DB56C"/><circle cx="0" cy="-9" r="7" fill="#7BCB80"/></g>
+          <path id="bay-wave" d="M0 0 q4 -4 8 0 t8 0 t8 0" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+        </defs>
+        <rect width="360" height="600" fill="url(#bay-sea)"/>
+        <use href="#bay-island" fill="#8FDDE3" stroke="#8FDDE3" stroke-width="46" stroke-linejoin="round" opacity="0.75"/>
+        <use href="#bay-island" fill="#EAFBF8" stroke="#EAFBF8" stroke-width="20" stroke-linejoin="round"/>
+        <use href="#bay-island" fill="#FBE7B2" stroke="#FBE7B2" stroke-width="8" stroke-linejoin="round"/>
+        <use href="#bay-island" fill="#F3D793" transform="translate(180 300) scale(0.955 0.972) translate(-180 -300)"/>
+        <use href="#bay-island" fill="#BFE5A0" transform="translate(180 300) scale(0.9 0.94) translate(-180 -300)"/>
+        <g fill="#ACDB8E"><ellipse cx="110" cy="120" rx="52" ry="30"/><ellipse cx="262" cy="232" rx="46" ry="34"/><ellipse cx="96" cy="430" rx="50" ry="36"/><ellipse cx="250" cy="520" rx="56" ry="26"/><ellipse cx="190" cy="300" rx="34" ry="22"/></g>
+        <use href="#bay-wave" transform="translate(8 22) scale(1)"/><use href="#bay-wave" transform="translate(326 10) scale(0.9)"/><use href="#bay-wave" transform="translate(330 590) scale(0.9)"/><use href="#bay-wave" transform="translate(4 588) scale(1)"/><use href="#bay-wave" transform="translate(26 160) scale(0.8)"/><use href="#bay-wave" transform="translate(326 304) scale(0.7)"/><g transform="translate(22 168)"><path d="M0 8 H26 L21 15 H5Z" fill="#FF7A52"/><path d="M12 8 V-12" stroke="#8A5A3C" stroke-width="2" stroke-linecap="round"/><path d="M14 -11 L25 5 H14Z" fill="#FFFFFF"/><path d="M10 -8 L3 5 H10Z" fill="#FFE9B8"/></g><path d="M14 548 q6 -9 14 -3 q5 5 -1 9 q-9 3 -13 -6Z" fill="#B9B4AC"/><path d="M336 126 q5 -7 11 -2 q3 5 -2 7 q-7 2 -9 -5Z" fill="#B9B4AC"/><ellipse cx="160" cy="364" rx="27" ry="14" fill="#8DD7E4"/><ellipse cx="160" cy="364" rx="27" ry="14" fill="none" stroke="#C9EFA9" stroke-width="3"/><path d="M148 361 q5 -3 10 0 M162 368 q5 -3 10 0" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/><g fill="#FFFFFF"><circle cx="120" cy="232" r="2"/><circle cx="129" cy="237" r="2"/><circle cx="114" cy="240" r="2"/></g><g fill="#FFD36B"><circle cx="238" cy="150" r="2"/><circle cx="247" cy="155" r="2"/><circle cx="232" cy="158" r="2"/></g><g fill="#FFFFFF"><circle cx="240" cy="470" r="2"/><circle cx="249" cy="475" r="2"/><circle cx="234" cy="478" r="2"/></g><g fill="#FF9E8A"><circle cx="96" cy="470" r="2"/><circle cx="105" cy="475" r="2"/><circle cx="90" cy="478" r="2"/></g><g fill="#FFD36B"><circle cx="300" cy="395" r="2"/><circle cx="309" cy="400" r="2"/><circle cx="294" cy="403" r="2"/></g><use href="#bay-palm" transform="translate(326 440) scale(1 1)"/><use href="#bay-palm" transform="translate(30 462) scale(-0.95 0.95)"/><use href="#bay-palm" transform="translate(124 48) scale(-0.85 0.85)"/><use href="#bay-palm" transform="translate(226 44) scale(0.85 0.85)"/><use href="#bay-palm" transform="translate(336 214) scale(0.8 0.8)"/><use href="#bay-palm" transform="translate(30 318) scale(-0.8 0.8)"/><use href="#bay-bush" transform="translate(116 562) scale(1)"/><use href="#bay-bush" transform="translate(244 566) scale(0.9)"/><use href="#bay-bush" transform="translate(206 152) scale(0.9)"/><use href="#bay-bush" transform="translate(286 300) scale(0.8)"/><use href="#bay-bush" transform="translate(134 452) scale(0.8)"/><use href="#bay-tree" transform="translate(316 158) scale(1)"/><use href="#bay-tree" transform="translate(298 172) scale(0.75)"/><use href="#bay-tree" transform="translate(118 168) scale(0.9)"/><use href="#bay-tree" transform="translate(244 300) scale(0.9)"/><use href="#bay-tree" transform="translate(196 352) scale(0.85)"/><use href="#bay-tree" transform="translate(124 372) scale(0.8)"/><use href="#bay-tree" transform="translate(328 478) scale(0.8)"/><use href="#bay-tree" transform="translate(214 500) scale(0.75)"/><use href="#bay-tree" transform="translate(84 196) scale(0.7)"/>
+      </svg>
+      <svg class="world-trail" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path id="world-trail-path" d=""/></svg>
+      
       <div id="world-pins"></div>
       <div class="world-avatar" id="world-avatar" style="top:55%;left:45%;"></div>
     </div>
@@ -124,20 +142,20 @@
       <h2>Meu Avatar</h2>
     </header>
     <div class="avatar-hero">
-      <div id="avatar-hero-mount" class="voxel-avatar"></div>
+      <div class="avatar-stage"><div id="avatar-hero-mount" class="voxel-avatar"></div></div>
       <div class="unlocked-count" id="avatar-unlocked-count"></div>
     </div>
     <div class="unlock-hint" id="avatar-unlock-hint">&nbsp;</div>
     <div class="item-group">
-      <div class="label">👕 Camiseta</div>
+      <div class="label"><span>Camiseta</span><span class="count" id="count-shirt"></span></div>
       <div class="item-row" id="row-shirt"></div>
     </div>
     <div class="item-group">
-      <div class="label">🧢 Chapéu</div>
+      <div class="label"><span>Chapéu</span><span class="count" id="count-hat"></span></div>
       <div class="item-row" id="row-hat"></div>
     </div>
     <div class="item-group">
-      <div class="label">🎒 Mochila</div>
+      <div class="label"><span>Mochila</span><span class="count" id="count-backpack"></span></div>
       <div class="item-row" id="row-backpack"></div>
     </div>
   </section>

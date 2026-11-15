@@ -748,7 +748,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 96px; height: 96px; border-radius: 50%;
   background: var(--locked);
   display: flex; align-items: center; justify-content: center;
-  color: #fff;
+  color: var(--color-surface);
+  box-shadow: var(--shadow-physical);
 }
 .unlock-lock .icon { width: 2.2em; height: 2.2em; }
 .unlock-lock.sparkle { animation: unlock-shake 0.9s ease; }
@@ -761,10 +762,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .unlock-reveal { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: round-enter 0.4s ease; }
 .unlock-reveal h2 { margin: 0; font-size: 1.4rem; }
-.unlock-reveal #unlock-item-preview .item-swatch {
-  width: 96px; height: 96px; font-size: 2.4rem;
+/* Recompensa concreta: o avatar já vestindo o item novo, raios dourados girando atrás e o cartão
+   do item "carimbado" no canto. */
+#unlock-item-preview {
+  position: relative; width: 230px; height: 236px;
+  display: flex; align-items: center; justify-content: center;
+}
+.unlock-burst {
+  position: absolute; inset: -14px; border-radius: 50%;
+  background: repeating-conic-gradient(var(--reward-ray) 0 12deg, transparent 12deg 30deg);
+  -webkit-mask: radial-gradient(circle, black 24%, transparent 68%);
+  mask: radial-gradient(circle, black 24%, transparent 68%);
+  animation: unlock-rays 18s linear infinite;
+}
+@keyframes unlock-rays { to { transform: rotate(360deg); } }
+.unlock-avatar { position: relative; width: 150px; animation: pop 0.5s ease; }
+#unlock-item-preview .item-swatch {
+  position: absolute; right: 2px; bottom: 10px; width: 78px;
+  transform: rotate(7deg);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--item-color, var(--color-border)) 26%, var(--color-surface));
   box-shadow: var(--shadow-physical);
-  border-width: 4px;
+  cursor: default;
 }
 #unlock-item-name { color: var(--color-text-secondary); font-weight: 700; }
 
@@ -831,7 +850,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   padding: 0 var(--space-5);
 }
 .onboarding-mascot { width: 160px; }
-.onboarding-mascot svg { display: block; filter: drop-shadow(0 8px 8px rgba(58,46,42,0.12)); }
+.onboarding-mascot svg { display: block; }
 .onboarding-title { font-size: 1.6rem; margin: 0; }
 .onboarding-sub { color: var(--color-text-secondary); font-size: 1rem; margin: 0 0 var(--space-2); max-width: 280px; }
 
@@ -929,39 +948,106 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   font-style: italic;
 }
 
-/* ===================== Mascote (quokka, SVG original) ===================== */
-.quokka .ear { fill: #C9987A; }
-.quokka .ear-inner { fill: #F3D9C4; }
-.quokka .body { fill: #C9987A; }
-.quokka .belly { fill: #F3D9C4; }
-.quokka .eye { fill: #3A2E2A; }
+/* ===================== Identidade ilustrada: tokens próprios (mascote, avatar, mapa) ===================== */
+:root {
+  --avatar-stage-floor: rgba(255,255,255,0.72);
+  --item-art-shadow: drop-shadow(0 3px 2px rgba(58,46,42,0.2));
+  --reward-ray: rgba(255,178,56,0.34);
+  --map-sea: #4FBBCB;
+  --map-trail: #FFF8E0;
+  --map-trail-shadow: drop-shadow(0 1.5px 0 rgba(58,46,42,0.22));
+  --shadow-node: 0 4px 0 rgba(58,46,42,0.26), 0 9px 12px rgba(58,46,42,0.16);
+  --shadow-node-pressed: 0 1px 0 rgba(58,46,42,0.26), 0 3px 6px rgba(58,46,42,0.14);
+  --shadow-avatar: drop-shadow(0 3px 2px rgba(58,46,42,0.2));
+}
 
-/* ===================== AVATAR (voxel, customizável) ===================== */
+/* ===================== Mascote (quokka, SVG original — cores fixas no desenho, em app.js) ===================== */
+.quokka { display: block; width: 100%; height: auto; overflow: visible; }
+.quokka .q-eye { transform-box: fill-box; transform-origin: center; animation: av-blink 5.4s infinite; }
+.quokka .q-ear-r { transform-box: fill-box; transform-origin: 30% 90%; animation: q-ear-twitch 7s infinite; }
+@keyframes q-ear-twitch {
+  0%, 86%, 100% { transform: rotate(0); }
+  89% { transform: rotate(11deg); }
+  92% { transform: rotate(-3deg); }
+  95% { transform: rotate(7deg); }
+}
+
+/* ===================== AVATAR (voxel chibi, customizável) ===================== */
+svg.voxel-avatar { display: block; width: 100%; height: auto; overflow: visible; }
+/* idle sutil: respira (corpo sobe 1,6 unidade), pisca de vez em quando, sombra acompanha */
+.voxel-avatar .av-bob { animation: av-breathe 3.4s ease-in-out infinite; }
+.voxel-avatar .av-eye { transform-box: fill-box; transform-origin: center; animation: av-blink 4.6s infinite; }
+.voxel-avatar .av-shadow { transform-box: fill-box; transform-origin: center; animation: av-shadow 3.4s ease-in-out infinite; }
+@keyframes av-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px); } }
+@keyframes av-shadow { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.95); } }
+@keyframes av-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.12); } }
+@media (prefers-reduced-motion: reduce) {
+  .voxel-avatar .av-bob, .voxel-avatar .av-eye, .voxel-avatar .av-shadow,
+  .quokka .q-eye, .quokka .q-ear-r, .unlock-burst, .unlock-avatar, .world-avatar.walking { animation: none; }
+}
+
 .avatar-hero {
-  background: #fff; border-radius: 24px;
-  padding: 20px; text-align: center; box-shadow: var(--shadow-card);
-  margin-bottom: 16px;
+  background: var(--color-surface); border-radius: var(--radius-xl);
+  padding: var(--space-3); text-align: center; box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-4);
 }
-.avatar-hero .voxel-avatar { width: 140px; height: auto; margin: 0 auto; }
-.avatar-hero .unlocked-count { font-size: 0.78rem; color: #999; font-weight: 700; margin-top: 8px; }
+/* palco: céu suave + "chão" claro onde o avatar pisa */
+.avatar-stage {
+  position: relative; overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--cap-understand-soft) 0%, var(--cap-say-soft) 100%);
+  padding: var(--space-4) 0 var(--space-3);
+}
+.avatar-stage::after {
+  content: ""; position: absolute; left: 50%; bottom: -34px; width: 300px; height: 84px;
+  transform: translateX(-50%); border-radius: 50%; background: var(--avatar-stage-floor);
+}
+.avatar-hero .voxel-avatar { position: relative; z-index: 1; width: 150px; height: auto; margin: 0 auto; }
+.avatar-hero .unlocked-count {
+  display: inline-block; margin-top: var(--space-3); padding: 3px 12px;
+  border-radius: var(--radius-pill); background: var(--cap-say-soft);
+  font-size: 0.78rem; color: var(--color-text); font-weight: 800;
+}
 
-.item-group { margin-bottom: 18px; }
-.item-group .label { font-size: 0.8rem; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-.item-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.item-group { margin-bottom: var(--space-5); }
+.item-group .label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 0.8rem; font-weight: 800; color: var(--color-text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);
+}
+.item-group .label .count { letter-spacing: 0; }
+.item-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4) var(--space-3); }
+/* Cartão colecionável: o item desenhado sobre um fundo tingido com a cor dele (--item-color). */
 .item-swatch {
-  flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
-  border: 3px solid transparent; position: relative; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-  box-shadow: var(--shadow-btn);
-}
-.item-swatch.selected { border-color: #333; }
-.item-swatch.locked { opacity: 0.55; }
-.item-swatch .lock-badge {
-  position: absolute; bottom: -4px; right: -4px; background: #333;
-  color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem;
+  position: relative; aspect-ratio: 1 / 1.06; padding: 0;
+  border-radius: var(--radius-md); border: 3px solid var(--color-surface);
+  background: color-mix(in srgb, var(--item-color, var(--color-border)) 22%, var(--color-surface));
+  color: var(--color-text-secondary); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-physical-sm);
+  transition: transform 0.12s;
 }
-.unlock-hint { text-align: center; font-size: 0.75rem; font-weight: 700; color: var(--color-primary-dark); min-height: 1.4em; margin-top: -8px; margin-bottom: 14px; }
+.item-swatch:active { transform: translateY(2px); }
+.item-swatch .item-art { width: 72%; height: auto; overflow: visible; filter: var(--item-art-shadow); }
+.item-swatch.is-none .item-art { filter: none; }
+.item-swatch.selected {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--item-color, var(--color-border)) 34%, var(--color-surface));
+}
+.item-swatch .check-badge, .item-swatch .lock-badge {
+  position: absolute; width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--color-surface); color: var(--color-surface);
+}
+.item-swatch .check-badge .icon, .item-swatch .lock-badge .icon { width: 13px; height: 13px; }
+.item-swatch .check-badge { top: -9px; right: -9px; background: var(--color-primary); }
+/* trancado: dá pra ver o que é (silhueta desbotada), mas claramente "ainda não é meu" */
+.item-swatch.locked {
+  background: var(--color-background); border: 2px dashed var(--locked); box-shadow: none;
+}
+.item-swatch.locked .item-art { filter: saturate(0.3) opacity(0.5); }
+.item-swatch .lock-badge { bottom: -10px; left: 50%; margin-left: -12px; background: var(--color-text-secondary); }
+.unlock-hint { text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--color-primary-dark); min-height: 1.4em; margin-top: calc(var(--space-2) * -1); margin-bottom: var(--space-3); }
 
 /* ===================== MY ENGLISH WORLD (mapa) ===================== */
 .world-banner {
@@ -983,45 +1069,80 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .world-banner-preview .chip .chip-ic { display: block; font-size: 1.3rem; margin-bottom: 2px; }
 
+/* Mapa ilustrado de Quokka Bay: a ilha (SVG em index.html) no fundo, a trilha tracejada ligando
+   os lugares e, por cima, os nós de aventura (#world-pins) e o avatar. Proporção fixa 3:5 — a
+   mesma do desenho — pra ilha nunca esticar; os pinos continuam em % (mapPos, data.js). */
 .world-map {
-  position: relative;
-  border-radius: 24px;
-  background: linear-gradient(180deg, #BEE6EC 0%, #D7F0DD 46%, #F3E3B7 78%, #F3E3B7 100%);
-  min-height: 480px;
+  position: relative; flex: 0 0 auto;
+  aspect-ratio: 3 / 5;
+  border-radius: var(--radius-xl);
+  background: var(--map-sea);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
-/* Cenário de baía: sol + colinas + areia, atrás dos pinos (que continuam vindo depois no DOM,
-   então ficam por cima). Decorativo, não muda nenhuma lógica de #world-pins/#world-avatar. */
-.bay-sun {
-  position: absolute; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%;
-  background: #FFD97A; box-shadow: 0 0 0 10px rgba(255, 217, 122, 0.3);
+.bay-art, .world-trail { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.world-trail { filter: var(--map-trail-shadow); }
+.world-trail path {
+  fill: none; stroke: var(--map-trail); stroke-width: 4; stroke-linecap: round;
+  stroke-dasharray: 7 9; vector-effect: non-scaling-stroke;
 }
-.bay-hill { position: absolute; border-radius: 50%; background: #BFE0B8; opacity: 0.85; }
-.bay-sand { position: absolute; left: -20%; right: -20%; bottom: -80px; height: 220px; border-radius: 50%; background: #F6DFA6; }
 .world-hint {
-  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-  background: #fff; border-radius: 999px; padding: 6px 14px; font-size: 0.72rem; font-weight: 800;
-  box-shadow: var(--shadow-btn); color: #999; white-space: nowrap; z-index: 6;
+  align-self: center; margin: 0 0 var(--space-3);
+  background: var(--color-surface); border-radius: var(--radius-pill); padding: 6px 16px;
+  font-size: 0.8rem; font-weight: 800; color: var(--color-text-secondary);
+  box-shadow: var(--shadow-btn); text-align: center;
 }
 .pin {
-  position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  transform: translate(-50%, -50%); background: none; border: none; cursor: pointer; font-family: inherit;
+  position: absolute; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transform: translate(-50%, -50%); background: none; border: none; padding: 0;
+  cursor: pointer; font-family: inherit; z-index: 2;
 }
+/* Nó de aventura: disco branco com anel de progresso em volta (conic-gradient até --pin-progress)
+   e "lábio" físico embaixo. O conteúdo (emoji/imagem do lugar) é só um slot centralizado. */
 .pin-badge {
-  position: relative;
-  width: 54px; height: 54px; border-radius: 50%; background: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-  box-shadow: var(--shadow-btn); border: 3px solid #fff;
+  position: relative; isolation: isolate;
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.45rem; line-height: 1;
+  background: conic-gradient(var(--color-success) var(--pin-progress, 0%), var(--color-surface) 0);
+  box-shadow: var(--shadow-node);
+  transition: transform 0.12s, box-shadow 0.12s;
 }
-.pin .label { background: #fff; border-radius: 999px; padding: 2px 10px; font-size: 0.66rem; font-weight: 800; box-shadow: var(--shadow-btn); }
-.pin .ring { position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 50%; border: 3px solid var(--cap-communicate); }
+.pin-badge::before {
+  content: ""; position: absolute; inset: 5px; border-radius: 50%;
+  background: var(--color-surface); z-index: -1;
+}
+.pin-badge > img, .pin-badge > svg { width: 62%; height: 62%; object-fit: contain; }
+.pin:active .pin-badge { transform: translateY(3px); box-shadow: var(--shadow-node-pressed); }
+.pin.is-done .pin-badge { background: var(--color-accent); }
+.pin.is-done .pin-badge::before { inset: 4px; }
+/* Lugar conquistado (passou do limiar): medalha de estrela dourada no canto do nó */
+.pin .ring {
+  position: absolute; top: -9px; right: -9px; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--color-accent); color: var(--color-surface);
+  border: 2.5px solid var(--color-surface);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-physical-sm);
+}
+.pin .ring .icon { width: 13px; height: 13px; }
+.pin .label {
+  background: var(--color-surface); color: var(--color-text);
+  border-radius: var(--radius-sm); padding: 2px 9px; max-width: 92px;
+  font-size: 0.68rem; font-weight: 800; line-height: 1.15; text-align: center;
+  box-shadow: var(--shadow-physical-sm);
+}
+.pin.is-done .label { background: var(--cap-say-soft); }
 
-.world-avatar { position: absolute; width: 56px; transform: translate(-50%,-50%); transition: top 0.9s ease, left 0.9s ease; z-index: 5; }
+/* o avatar fica "em pé" logo acima do nó (não em cima do ícone do lugar) */
+.world-avatar {
+  position: absolute; width: 46px; margin-top: -20px;
+  transform: translate(-50%, -100%);
+  transition: top 0.9s ease, left 0.9s ease; z-index: 5; pointer-events: none;
+}
 .world-avatar.walking { animation: avatar-bounce 0.35s ease infinite; }
-@keyframes avatar-bounce { 0%,100% { transform: translate(-50%,-50%) translateY(0); } 50% { transform: translate(-50%,-50%) translateY(-6px); } }
-.world-avatar svg { display: block; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.18)); }
+@keyframes avatar-bounce { 0%,100% { transform: translate(-50%,-100%) translateY(0); } 50% { transform: translate(-50%,-100%) translateY(-6px); } }
+.world-avatar svg { display: block; filter: var(--shadow-avatar); }
 
 /* ===== Trilha adulta (perfil mode "adult") =====
    Frases longas ("Would it be possible to extend the deadline until Friday?"): sem caixa alta,
