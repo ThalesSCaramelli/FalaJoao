@@ -2,9 +2,38 @@
 // Usa CONTENT/CATEGORY_META (data.js) e o motor de aprendizagem (engine.js). Não guarda estado próprio
 // de progresso — só estado de navegação/tela.
 
+// ===================== Emoji de conteúdo (Fluent 3D, PNG local) =====================
+// Emoji de texto muda de aparelho pra aparelho; o PNG Fluent (assets/emoji, licença MIT) é igual em
+// todos. EMOJI_ASSETS (data.js, gerado por scripts/fetch_fluent_emoji.py) lista as sequências que
+// têm PNG; as outras caem no emoji de texto.
+const EMOJI_PNG = new Set((typeof EMOJI_ASSETS !== "undefined" ? EMOJI_ASSETS : []).map(emojiKey));
+// Sequência de emoji: bandeira (2 indicadores), keycap, ou pictograma + variação/tom de pele,
+// encadeado por ZWJ.
+const EMOJI_SEQ_RE = /\p{Regional_Indicator}{2}|[0-9#*]\uFE0F?\u20E3|\p{Extended_Pictographic}(?:\uFE0F|[\u{1F3FB}-\u{1F3FF}])*(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|[\u{1F3FB}-\u{1F3FF}])*)*/gu;
+
+// Codepoints em hex (sem FE0F) separados por "-": é o nome do arquivo em assets/emoji.
+function emojiKey(seq) {
+  return Array.from(seq).filter((c) => c !== "\uFE0F").map((c) => c.codePointAt(0).toString(16)).join("-");
+}
+
+// Troca cada emoji da string por <img class="emo"> (quando há PNG) ou deixa o texto. Texto que
+// não é emoji passa direto.
+function emojiHtml(str) {
+  return String(str || "").replace(EMOJI_SEQ_RE, (seq) => {
+    const key = emojiKey(seq);
+    return EMOJI_PNG.has(key)
+      ? `<img class="emo" src="assets/emoji/${key}.png" alt="${seq}" draggable="false" />`
+      : seq;
+  });
+}
+
 function renderMedia(item) {
-  if (item.image) return `<img class="word-photo" src="${item.image}" alt="${item.en}" />`;
-  return item.emoji;
+  // Foto só quando existe e não está na lista PHOTO_SKIP (data.js) — e, se pulada, só se o emoji
+  // tem PNG Fluent (senão a foto continua sendo melhor que um emoji de texto).
+  if (item.image && !(PHOTO_SKIP.has(item.id) && emojiHtml(item.emoji).includes("<img"))) {
+    return `<img class="word-photo" src="${item.image}" alt="${item.en}" />`;
+  }
+  return emojiHtml(item.emoji);
 }
 
 // ===================== Ícones de interface (SVG, substituem emoji de UI) =====================
@@ -221,7 +250,7 @@ function renderWorldMap() {
     pin.className = "pin";
     pin.style.top = situation.mapPos.top;
     pin.style.left = situation.mapPos.left;
-    pin.innerHTML = `<div class="pin-badge">${situation.icon}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${displayName(situation)}</div>`;
+    pin.innerHTML = `<div class="pin-badge">${emojiHtml(situation.icon)}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${displayName(situation)}</div>`;
     pin.addEventListener("click", () => goToSituation(situation));
     pinsWrap.appendChild(pin);
   });
@@ -511,7 +540,7 @@ function renderHome() {
   const topCatId = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a])[0];
   const topCat = topCatId ? CATEGORY_META[topCatId] : null;
   const estMinutes = Math.max(1, Math.round(session.length / 3));
-  document.getElementById("mission-title").textContent = topCat ? `${topCat.icon} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
+  document.getElementById("mission-title").innerHTML = topCat ? `${emojiHtml(topCat.icon)} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
   document.getElementById("mission-meta").innerHTML = session.length
     ? icon("clock") + " " + tr(`~${estMinutes} min · ${session.length} activities`, `~${estMinutes} min · ${session.length} atividades`)
     : tr("Come back later to review!", "Volta mais tarde pra revisar!");
@@ -519,7 +548,7 @@ function renderHome() {
   // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
   const nextSituations = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
   document.getElementById("world-banner-preview").innerHTML = nextSituations
-    .map((s) => `<div class="chip"><span class="chip-ic">${s.icon}</span>${displayName(s)}</div>`)
+    .map((s) => `<div class="chip"><span class="chip-ic">${emojiHtml(s.icon)}</span>${displayName(s)}</div>`)
     .join("");
 }
 
@@ -535,7 +564,7 @@ function renderCategoryGrid() {
     const btn = document.createElement("button");
     btn.className = "cat-card";
     btn.style.background = meta.color;
-    btn.innerHTML = `<span class="cat-icon">${meta.icon}</span><span>${displayName(meta)}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
+    btn.innerHTML = `<span class="cat-icon">${emojiHtml(meta.icon)}</span><span>${displayName(meta)}</span>${renderDots(masteredCount, items.length, "sm cat-progress")}`;
     btn.addEventListener("click", () => openCategory(catId));
     grid.appendChild(btn);
   });
@@ -674,9 +703,9 @@ function renderRound() {
     const scenario = round.scenario;
     container.innerHTML = `
       <div class="situation-card">
-        <div class="scenario-emoji">${round.item.emoji}</div>
+        <div class="scenario-emoji">${emojiHtml(round.item.emoji)}</div>
         <div class="scenario-bubble">
-          <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
+          <span class="avatar">${emojiHtml(scenario.speaker || "👩‍🏫")}</span>
           <span class="txt">"${scenarioPrompt(scenario)}"</span>
           <button class="speaker" id="scenario-replay" aria-label="Ouvir de novo">${icon("sound")}</button>
         </div>
@@ -694,7 +723,7 @@ function renderRound() {
     options.forEach((opt) => {
       const btn = document.createElement("button");
       btn.className = "quiz-option situation-option locked";
-      btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span><span class="opt-text">${opt.en}</span>`;
+      btn.innerHTML = `<span class="opt-emoji">${emojiHtml(opt.emoji)}</span><span class="opt-text">${opt.en}</span>`;
       btn.dataset.itemId = opt.id;
       btn.addEventListener("click", () => {
         if (choiceLocked) {
@@ -734,9 +763,9 @@ function renderRound() {
       // problem-posing do round "situation" do João, só que lendo em vez de ouvir.
       container.innerHTML = `
         <div class="situation-card">
-          <div class="scenario-emoji">${round.item.emoji}</div>
+          <div class="scenario-emoji">${emojiHtml(round.item.emoji)}</div>
           <div class="scenario-bubble">
-            <span class="avatar">${scenario.speaker || "👩‍🏫"}</span>
+            <span class="avatar">${emojiHtml(scenario.speaker || "👩‍🏫")}</span>
             <span class="txt">"${scenarioPrompt(scenario)}"</span>
           </div>
         </div>
@@ -747,7 +776,7 @@ function renderRound() {
       options.forEach((opt) => {
         const btn = document.createElement("button");
         btn.className = "quiz-option situation-option";
-        btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span><span class="opt-text">${opt.en}</span>`;
+        btn.innerHTML = `<span class="opt-emoji">${emojiHtml(opt.emoji)}</span><span class="opt-text">${opt.en}</span>`;
         btn.dataset.itemId = opt.id;
         btn.addEventListener("click", () => handleChoice(btn, opt, round.item, optionsWrap));
         optionsWrap.appendChild(btn);
@@ -792,8 +821,8 @@ function renderRound() {
               <button class="big-btn listen-btn" id="write-listen">${icon("sound")} ${tr("Listen", "Ouvir")}</button>
               <span class="intro-hint">${tr("Listen and write what you hear", "Ouça e escreva o que ouviu")}</span>`;
     } else if (scenario) {
-      head = `<div class="scenario-emoji">${round.item.emoji}</div>
-              <div class="scenario-bubble"><span class="avatar">${scenario.speaker || "👩‍🏫"}</span><span class="txt">"${scenarioPrompt(scenario)}"</span>
+      head = `<div class="scenario-emoji">${emojiHtml(round.item.emoji)}</div>
+              <div class="scenario-bubble"><span class="avatar">${emojiHtml(scenario.speaker || "👩‍🏫")}</span><span class="txt">"${scenarioPrompt(scenario)}"</span>
                 ${isImmersion() ? `<button class="speaker" id="write-listen" aria-label="Listen">${icon("sound")}</button>` : ""}</div>
               ${isImmersion() ? `<span class="intro-hint">What do you say? Write it.</span>` : ""}`;
     } else {
@@ -1813,9 +1842,9 @@ function renderSentenceRound(round, container, repeatBtn) {
   repeatBtn.style.display = "none";
   wrongAttemptsThisRound = 0;
   choiceLocked = false;
-  const listenHead = `<span class="word-emoji-big dictation-media">${item.emoji}</span>
+  const listenHead = `<span class="word-emoji-big dictation-media">${emojiHtml(item.emoji)}</span>
     <button class="big-btn listen-btn" id="game-listen">${icon("sound")} ${tr("Listen", "Ouvir")}</button>`;
-  const ptHead = `<span class="word-emoji-big dictation-media">${item.emoji}</span>
+  const ptHead = `<span class="word-emoji-big dictation-media">${emojiHtml(item.emoji)}</span>
     <div class="sentence-pt">🇧🇷 ${escapeHtml(item.pt)}</div>`;
 
   if (round.roundType === "sentence_build") {
@@ -1900,7 +1929,7 @@ function renderSentenceRound(round, container, repeatBtn) {
   }
   container.innerHTML = `
     <div class="write-card">
-      <span class="word-emoji-big dictation-media">${item.emoji}</span>
+      <span class="word-emoji-big dictation-media">${emojiHtml(item.emoji)}</span>
       <span class="intro-hint">Complete a frase</span>
       <div class="cloze-sentence" id="cloze-sentence">${withGap("")}</div>
       <div class="build-tiles" id="cloze-options"></div>
@@ -1938,7 +1967,7 @@ function renderSentenceRound(round, container, repeatBtn) {
 // pontos/XP (LEARNING_PHILOSOPHY.md §29, §46) — a recompensa é a palavra montada + as estrelas do
 // fim, iguais às do resto do app.
 function gameHead(item) {
-  return `<span class="word-emoji-big dictation-media">${renderMedia(item)}</span>
+  return `<span class="word-emoji-big dictation-media">${emojiHtml(item.emoji)}</span>
           <button class="big-btn listen-btn" id="game-listen">${icon("sound")} Listen</button>`;
 }
 function finishGameRound(item) {

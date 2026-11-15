@@ -313,6 +313,26 @@ const SCENARIOS = [
   { id: "scn_opinion_commit", situationId: "discussion", speaker: "🧑‍💼", promptPt: "Pedem pra você assumir um projeto novo, mas você ainda não tem certeza se consegue.", correctId: "adult_opinion_rather_not", distractorIds: ["adult_opinion_agree_to_disagree", "adult_opinion_what_do_you_think"] },
 ];
 
+// Fotos de assets/images que o app NÃO usa: nesses itens renderMedia cai no emoji Fluent 3D
+// (assets/emoji, ver scripts/fetch_fluent_emoji.py), mais consistente. Os arquivos de foto continuam
+// no disco; pra voltar a usar uma foto, é só tirar o id daqui. Revisão visual de todas as 71 fotos
+// em 2026-11 (Fase 4a): as que ficam são fotos limpas e coerentes (cat/dog etc. foram trocados
+// pelo conjunto por categoria, não item a item).
+const PHOTO_SKIP = new Set([
+  // Gravura/ilustração antiga ou desenho que destoa do conjunto 3D; animais ficam TODOS no Fluent pra uma pergunta de animais não misturar foto, gravura e desenho
+  "animals_bear", "animals_bird", "animals_cat", "animals_dog", "animals_duck", "animals_elephant", "animals_fish", "animals_frog", "animals_lion", "animals_rabbit",
+  // Partes do corpo: recortes de rosto sem contexto ('nose' mostra dentes, 'mouth'/'tooth' quase iguais, 'eyes' cortado); o conjunto todo vai pro Fluent pra ficar coerente
+  "body_ear", "body_eyes", "body_foot", "body_hair", "body_hand", "body_mouth", "body_nose", "body_tooth",
+  // Fora de contexto (criança na grama pra 'hat', homem andando em P&B pra 'pants', jaqueta com logo de marca registrada)
+  "clothes_hat", "clothes_jacket", "clothes_pants",
+  // Desenho/cartoon (grandpa e grandma com fundo xadrez falso de transparência ou estilo diferente do resto)
+  "family_brother", "family_grandma", "family_grandpa",
+  // Fora de contexto ou render de baixa qualidade (água = piscina; leite = render em fundo cinza)
+  "food_milk", "food_water",
+  // Escola: desenhos/cartoons (xadrez falso de transparência no glue), marca d'água de site (crayon), cena que não mostra o item (book borrada, chair = auditório)
+  "school_book", "school_chair", "school_close_your_book", "school_crayon", "school_glue", "school_open_your_book", "school_sit_down",
+]);
+
 const CONTENT = [
   // ---- survival (sobrevivência escolar) ----
   { id: "survival_hello", contentType: "word", en: "hello", pt: "olá", emoji: "👋", category: "survival", difficulty: 1, prerequisites: [] },
@@ -1437,3 +1457,7 @@ const CONTENT = [
   { id: "spell_there", track: "spelling", contentType: "word", en: "there", pt: "lá / ali", emoji: "👉📍", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! there has the word here inside it: t-HERE" },
   { id: "spell_does", track: "spelling", contentType: "word", en: "does", pt: "faz (ele/ela)", emoji: "🛠️", category: "spell_tricky", difficulty: 2, prerequisites: [], spellingTip: "Tricky word! It sounds like duz, but it is spelled d-o-e-s" },
 ];
+
+// EMOJI_ASSETS:begin (gerado por scripts/fetch_fluent_emoji.py — nao editar a mao)
+const EMOJI_ASSETS = ["🆘", "🌃", "🌅", "🌍", "🌙", "🌤️", "🌦️", "🌧️", "🌨️", "🌳", "🌴", "🌷", "🌸", "🍂", "🍇", "🍊", "🍌", "🍎", "🍗", "🍞", "🍪", "🍰", "🍱", "🍲", "🍴", "🍽️", "🎁", "🎂", "🎄", "🎈", "🎉", "🎒", "🎤", "🎧", "🎨", "🎫", "🎮", "🎲", "🏃", "🏊", "🏖️", "🏠", "🏡", "🏢", "🏨", "🏪", "🏫", "🏰", "🐇", "🐌", "🐍", "🐑", "🐘", "🐚", "🐟", "🐢", "🐦", "🐨", "🐭", "🐮", "🐰", "🐱", "🐴", "🐵", "🐶", "🐷", "🐸", "🐻", "👀", "👂", "👃", "👄", "👆", "👇", "👉", "👋", "👍", "👎", "👕", "👖", "👟", "👥", "👦", "👧", "👨", "👨‍👩‍👦", "👨‍👩‍👧", "👩", "👩‍🏫", "👩‍⚕️", "👫", "👴", "👵", "👶", "👷", "💇", "💉", "💊", "💗", "💡", "💧", "💨", "💪", "💬", "💭", "💰", "💵", "💸", "💼", "📄", "📅", "📆", "📋", "📍", "📏", "📕", "📖", "📚", "📝", "📞", "📦", "📧", "📰", "📱", "📺", "🔁", "🔄", "🔍", "🔑", "🔒", "🔗", "🔙", "🔟", "🔢", "🔧", "🔴", "🔵", "🔶", "🔺", "🕐", "🕳️", "🖊️", "🖍️", "🖐️", "🗂️", "🗑️", "🗓️", "🗣️", "🗺️", "😂", "😄", "😊", "😍", "😕", "😖", "😟", "😠", "😢", "😨", "😰", "😴", "😵", "🙂", "🙃", "🙅", "🙅‍♀️", "🙇", "🙋", "🙌", "🙏", "🚂", "🚆", "🚗", "🚚", "🚧", "🚪", "🚫", "🚰", "🚲", "🚶", "🚸", "🚻", "🚿", "🛁", "🛋️", "🛍️", "🛎️", "🛏️", "🛑", "🛝", "🛠️", "🟠", "🟡", "🟢", "🟣", "🟤", "🤒", "🤔", "🤕", "🤖", "🤗", "🤙", "🤝", "🤢", "🤧", "🤨", "🤫", "🤷", "🤷‍♀️", "🤸", "🥃", "🥄", "🥇", "🥚", "🥛", "🥣", "🥤", "🥪", "🥰", "🥱", "🥵", "🥶", "🥺", "🦁", "🦆", "🦈", "🦋", "🦓", "🦘", "🦜", "🦴", "🦵", "🦶", "🦷", "🧀", "🧍‍♀️", "🧍‍♂️", "🧐", "🧑", "🧑‍🏫", "🧑‍💼", "🧑‍🤝‍🧑", "🧑‍⚕️", "🧑‍✈️", "🧒", "🧘", "🧠", "🧢", "🧥", "🧦", "🧩", "🧱", "🧳", "🧴", "🧸", "🧹", "🧻", "🧼", "🩺", "🪁", "🪑", "🪟", "🪢", "🪥", "🪨", "🫵", "↔️", "⌛", "⏩", "⏪", "⏰", "⏱️", "⏳", "⏸️", "☀️", "☁️", "☎️", "☕", "☝️", "⚖️", "⚠️", "⚪", "⚫", "⚽", "⛄", "⛈️", "⛱️", "✂️", "✅", "✈️", "✋", "✍️", "✏️", "✨", "❄️", "❓", "❤️", "➕", "➡️", "⬆️", "⬇️", "⬛", "⭐", "⭕", "0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+// EMOJI_ASSETS:end

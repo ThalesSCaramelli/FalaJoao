@@ -328,6 +328,35 @@ sobre algo já decidido sem motivo novo.
 
 ---
 
+### Emoji de conteúdo em PNG Fluent 3D, e fotos só quando claramente boas (Fase 4a, nov/2026)
+
+- **Contexto**: emoji de texto é desenhado de um jeito diferente em cada celular, e as fotos de
+  `assets/images` misturavam estilos (gravura, desenho com fundo xadrez de transparência colado no
+  JPG, foto). Numa mesma pergunta aparecia uma borboleta de desenho, um leão xadrez e um cachorro
+  em gravura; o app perdia a cara de premium (`DESIGN_BRIEF.md`).
+- **Escolha**: os emoji de conteúdo viram PNG do Fluent Emoji 3D (Microsoft, MIT), 160x160, em
+  `assets/emoji/<codepoints>.png`, baixados por `scripts/fetch_fluent_emoji.py`. `emojiHtml()`
+  (app.js) troca cada emoji da string por `<img class="emo">` e cai no texto quando não há PNG;
+  `.emo` tem `height: 1em`, então cada tela mantém o tamanho que já tinha. A lista de PNGs
+  (`EMOJI_ASSETS`) fica inline em `data.js`, gerada pelo script (funciona offline, sem fetch extra).
+  `renderMedia` pula a foto dos ids em `PHOTO_SKIP` (data.js, lista comentada por motivo) quando o
+  emoji do item tem PNG.
+- **Fotos**: revisão visual das 71. 33 vão pro Fluent: todos os animais e todo o corpo (pra um
+  conjunto inteiro não misturar foto + gravura + desenho), mais as fora de contexto, desenhadas ou
+  com marca d'água. As 38 que ficam são fotos limpas. Nenhum arquivo foi apagado.
+- **Porquê**: um estilo único e reconhecível vale mais que a foto "real" em itens que o aluno tem
+  só que identificar. Fluent é MIT e vem como PNG (sem depender da fonte do aparelho).
+- **Limites**: o Fluent 3D não tem família, "pessoas de mãos dadas" nem bandeiras. As três
+  primeiras o script monta juntando emoji (`COMPOSE`); as bandeiras (🇧🇷, 🇦🇺) ficam em texto.
+  Perguntas de comida/escola ainda podem misturar uma foto mantida com um Fluent. Os PNGs pesam
+  ~5,8 MB no total, mas só são baixados sob demanda (entram no `MEDIA_CACHE` do `sw.js` via
+  `/assets/emoji/`).
+- **Consequência**: emoji novo em `data.js` → rodar `python scripts/fetch_fluent_emoji.py`
+  (`CONTENT_GUIDE.md` seção 3); se não resolver, ele aparece na lista de "SEM PNG" e o app usa o
+  texto.
+
+---
+
 ## Arquitetura de conteúdo (5 camadas)
 
 Cada camada responde uma pergunta diferente. Útil pra decidir "isso é dado de `CONTENT`, ou é

@@ -712,7 +712,7 @@ const PT_AUDIO_SHELL = [
   "assets/audio/pt/work.mp3",
 ];
 
-const isMedia = (url) => url.includes("/assets/audio/") || url.includes("/assets/images/");
+const isMedia = (url) => url.includes("/assets/audio/") || url.includes("/assets/images/") || url.includes("/assets/emoji/");
 
 // Baixa pro MEDIA_CACHE só o que ainda não está em NENHUM cache (inclusive caches de versões
 // antigas — na primeira vez depois desta mudança, os áudios que já estavam no aparelho são
