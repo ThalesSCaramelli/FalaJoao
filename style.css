@@ -1510,7 +1510,7 @@ button.home-card { cursor: pointer; font-family: var(--font-body); }
 .parent-gate-backdrop { position: absolute; inset: 0; background: var(--color-scrim); }
 .parent-gate-card {
   position: relative; width: 100%; max-width: 340px;
-  background: var(--color-surface); border-radius: var(--radius-xl);
+  background: var(--color-surface); color: var(--color-text); border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
   padding: var(--space-6) var(--space-5) var(--space-5);
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2);
