@@ -120,17 +120,34 @@ function initIcons() {
 initIcons();
 
 // ===================== Mascote (quokka) e avatar (voxel customizável) — SVG original =====================
+// Quokka de verdade (não um urso genérico): cabeça larga de bochechas cheias, orelhinhas redondas
+// no alto, focinho claro com nariz escuro e o sorriso famoso, patinhas no peito segurando uma
+// folha, pés grandes de canguruzinho e rabo grosso. Cores fixas dentro do desenho; a animação
+// (piscar + orelha) fica no CSS (.quokka) e respeita prefers-reduced-motion.
 function mascotSVG() {
-  return `<svg class="quokka" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <ellipse class="ear" cx="24" cy="26" rx="14" ry="16"/>
-    <ellipse class="ear" cx="76" cy="26" rx="14" ry="16"/>
-    <ellipse class="ear-inner" cx="24" cy="28" rx="7" ry="9"/>
-    <ellipse class="ear-inner" cx="76" cy="28" rx="7" ry="9"/>
-    <circle class="body" cx="50" cy="56" r="38"/>
-    <ellipse class="belly" cx="50" cy="66" rx="22" ry="18"/>
-    <circle class="eye" cx="38" cy="48" r="4.5"/>
-    <circle class="eye" cx="62" cy="48" r="4.5"/>
-    <path d="M35 62 Q50 74 65 62" stroke="#3A2E2A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  return `<svg class="quokka" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quokka">
+    <ellipse cx="60" cy="124" rx="36" ry="6" fill="#3A2E27" opacity="0.12"/>
+    <path d="M78 102 C94 114 111 110 112 91 C112 87 106 87 105.5 91 C104 101 94 103 84 96Z" fill="#9C6B47"/>
+    <ellipse cx="41" cy="119" rx="15" ry="7" fill="#9C6B47"/>
+    <ellipse cx="79" cy="119" rx="15" ry="7" fill="#9C6B47"/>
+    <path d="M60 68 C82 68 90 84 88 100 C86 114 76 122 60 122 C44 122 34 114 32 100 C30 84 38 68 60 68Z" fill="#BE8A60"/>
+    <ellipse cx="60" cy="102" rx="17" ry="17" fill="#F6E1C5"/>
+    <g class="q-ear q-ear-l"><circle cx="31" cy="24" r="10.5" fill="#BE8A60"/><circle cx="32" cy="25" r="5.6" fill="#E3A189"/></g>
+    <g class="q-ear q-ear-r"><circle cx="89" cy="24" r="10.5" fill="#BE8A60"/><circle cx="88" cy="25" r="5.6" fill="#E3A189"/></g>
+    <path d="M60 11 C79 11 92 24 96 42 C102 66 85 81 60 81 C35 81 18 66 24 42 C28 24 41 11 60 11Z" fill="#BE8A60"/>
+    <path d="M53 12.5 Q56 6 60 11 Q64 5 67 12.5Z" fill="#BE8A60"/>
+    <path d="M60 47 C72 47 81 55 80 65 C79 74 71 78.5 60 78.5 C49 78.5 41 74 40 65 C39 55 48 47 60 47Z" fill="#F6E1C5"/>
+    <ellipse cx="32" cy="59" rx="6" ry="4" fill="#F0907C" opacity="0.5"/>
+    <ellipse cx="88" cy="59" rx="6" ry="4" fill="#F0907C" opacity="0.5"/>
+    <g class="q-eye"><circle cx="42.5" cy="42.5" r="4.6" fill="#3A2E27"/><circle cx="44.2" cy="40.8" r="1.7" fill="#fff"/></g>
+    <g class="q-eye"><circle cx="77.5" cy="42.5" r="4.6" fill="#3A2E27"/><circle cx="79.2" cy="40.8" r="1.7" fill="#fff"/></g>
+    <path d="M52.5 51.5 Q60 47 67.5 51.5 Q68 58 60 60.5 Q52 58 52.5 51.5Z" fill="#3A2E27"/>
+    <ellipse cx="57.5" cy="52.5" rx="2.4" ry="1.2" fill="#fff" opacity="0.55"/>
+    <path d="M60 60.5 V64 M45 61.5 Q52 73.5 60 64 Q68 73.5 75 61.5" fill="none" stroke="#3A2E27" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M60 104 C50 98 50 86 60 80 C70 86 70 98 60 104Z" fill="#6FBF73"/>
+    <path d="M60 83 V101" stroke="#4E9A58" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="47" cy="95" rx="6.5" ry="9" transform="rotate(-38 47 95)" fill="#9C6B47"/>
+    <ellipse cx="73" cy="95" rx="6.5" ry="9" transform="rotate(38 73 95)" fill="#9C6B47"/>
   </svg>`;
 }
 
@@ -146,41 +163,125 @@ function saveAvatarState() {
   localStorage.setItem(profileKey("meuIngles_avatar_v1"), JSON.stringify(avatarState));
 }
 
+// ---- Kit voxel: cada peça do avatar (e cada item colecionável) é um bloquinho com 3 faces ----
+// Mistura duas cores hex (t = 0..1) — dá a face clara (topo) e a escura (lado) a partir da cor do item.
+function mixHex(hex, target, t) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(target.slice(1), 16);
+  const ch = (sh) => Math.round(((a >> sh) & 255) * (1 - t) + ((b >> sh) & 255) * t);
+  return "#" + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1);
+}
+const voxLight = (c, t) => mixHex(c, "#FFFFFF", t == null ? 0.3 : t);
+const voxDark = (c, t) => mixHex(c, "#3A2E27", t == null ? 0.24 : t);
+// Um bloco em projeção oblíqua: frente (cor cheia), topo (mais claro) e lado direito (mais escuro).
+// (x, y, w, h) = face da frente; (dx, dy) = profundidade. Cantos levemente arredondados pelo stroke.
+function voxBox(x, y, w, h, color, dx, dy) {
+  dx = dx == null ? 8 : dx;
+  dy = dy == null ? 6 : dy;
+  const top = voxLight(color), side = voxDark(color);
+  const j = 'stroke-width="1.6" stroke-linejoin="round"';
+  return (
+    `<polygon points="${x + w},${y} ${x + w + dx},${y - dy} ${x + w + dx},${y + h - dy} ${x + w},${y + h}" fill="${side}" stroke="${side}" ${j}/>` +
+    `<polygon points="${x},${y} ${x + dx},${y - dy} ${x + w + dx},${y - dy} ${x + w},${y}" fill="${top}" stroke="${top}" ${j}/>` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.2" fill="${color}" stroke="${color}" ${j}/>`
+  );
+}
+
 function svgHat(item) {
   if (!item || !item.type) return "";
-  if (item.type === "cap") return `<path d="M30 16 Q50 -2 70 16 L70 22 L30 22 Z" fill="${item.color}"/><rect x="26" y="20" width="48" height="6" rx="3" fill="${item.color}"/>`;
-  if (item.type === "party") return `<path d="M50 -4 L68 20 L32 20 Z" fill="${item.color}"/><circle cx="50" cy="-4" r="4" fill="#fff"/>`;
-  return "";
-}
-// Ícone de cada item de avatar no seletor/celebração — cada categoria tem seu próprio símbolo,
-// "sem item" (hat:none / backpack:none) fica só com a cor, sem ícone confuso.
-function avatarItemIcon(cat, item) {
-  if (cat === "shirt") return "👕";
-  if (cat === "hat") return item.type === "cap" ? "🧢" : item.type === "party" ? "🎉" : "";
-  if (cat === "backpack") return item.color ? "🎒" : "";
+  const c = item.color;
+  // boné: copa em cima do cabelo + aba pra frente
+  if (item.type === "cap") {
+    return voxBox(25, 16, 66, 14, c, 11, 8) + voxBox(21, 30, 62, 5, voxDark(c, 0.16), 5, 3.5) +
+      voxBox(55, 13.5, 8, 3, voxLight(c, 0.45), 4, 3);
+  }
+  // chapéu de festa: pirâmide em degraus (voxel) com pompom
+  if (item.type === "party") {
+    const alt = voxLight(c, 0.62);
+    return voxBox(40, 10, 36, 13, c, 7, 5) + voxBox(46, 0, 24, 10, alt, 6, 4.5) +
+      voxBox(52, -8, 12, 8, c, 5, 3.5) + voxBox(55.5, -13, 5.5, 5, "#FFFFFF", 3, 2.2);
+  }
   return "";
 }
 function svgBackpack(item) {
   if (!item || !item.color) return "";
-  return `<rect x="6" y="62" width="14" height="32" rx="5" fill="${item.color}"/>`;
+  // mochila grandona atrás do corpo: sobra dos dois lados (as alças entram depois, por cima da camiseta)
+  return `<rect x="24" y="86" width="8" height="25" rx="2" fill="${voxDark(item.color, 0.12)}"/>` + voxBox(44, 80, 53, 32, item.color, 8, 6);
 }
+function svgBackpackStraps(item) {
+  if (!item || !item.color) return "";
+  const c = voxDark(item.color, 0.1);
+  return `<rect x="45" y="85" width="5.5" height="27" fill="${c}"/><rect x="68" y="85" width="5.5" height="27" fill="${c}"/>` +
+    `<rect x="50.5" y="96" width="17.5" height="3" fill="${c}"/><rect x="56.5" y="95" width="5" height="5" rx="1" fill="${voxLight(item.color, 0.55)}"/>`;
+}
+
+// Avatar voxel "chibi": cabeção em bloco com volume (3 faces), olhos com brilho, bochechas,
+// corpinho pequeno e sombra no chão. Mesmo `state` de sempre ({ shirt, hat, backpack }), viewBox
+// fixo (o chapéu não faz o boneco pular de lugar) — funciona de 44px (mapa) a 150px (tela do avatar).
+// Idle (respirar + piscar) é CSS: .av-bob / .av-eye / .av-shadow.
 function avatarSVG(state) {
-  const shirt = AVATAR_ITEMS.shirt.find((i) => i.id === state.shirt);
-  const hat = AVATAR_ITEMS.hat.find((i) => i.id === state.hat);
-  const backpack = AVATAR_ITEMS.backpack.find((i) => i.id === state.backpack);
-  return `<svg class="voxel-avatar" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
-    ${svgBackpack(backpack)}
-    <rect x="34" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
-    <rect x="52" y="96" width="14" height="28" rx="3" fill="#4A3F3A"/>
-    <rect x="14" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
-    <rect x="72" y="60" width="14" height="34" rx="5" fill="${shirt.color}"/>
-    <rect x="26" y="58" width="48" height="42" rx="6" fill="${shirt.color}"/>
-    <rect x="30" y="14" width="40" height="40" rx="8" fill="#F3C79A"/>
-    <circle cx="42" cy="34" r="3.2" fill="#3A2E2A"/>
-    <circle cx="58" cy="34" r="3.2" fill="#3A2E2A"/>
-    <path d="M40 42 Q50 48 60 42" stroke="#3A2E2A" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-    ${svgHat(hat)}
+  const find = (cat) => AVATAR_ITEMS[cat].find((i) => i.id === state[cat]) || AVATAR_ITEMS[cat][0];
+  const shirt = find("shirt"), hat = find("hat"), backpack = find("backpack");
+  const SKIN = "#F8CFA6", HAIR = "#7A4A2B", PANTS = "#51609A", SHOE = "#2F3857", INK = "#3A2E27";
+  const sc = shirt.color;
+  const eye = (x) =>
+    `<g class="av-eye"><rect x="${x}" y="52" width="8.5" height="11" rx="2.6" fill="${INK}"/>` +
+    `<rect x="${x + 4.6}" y="53.6" width="2.7" height="3.4" rx="0.9" fill="#fff"/>` +
+    `<rect x="${x + 1.5}" y="59" width="1.6" height="1.6" rx="0.5" fill="#fff" opacity="0.7"/></g>`;
+  return `<svg class="voxel-avatar" viewBox="0 0 124 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Avatar">
+    <ellipse class="av-shadow" cx="63" cy="158" rx="33" ry="7" fill="${INK}" opacity="0.16"/>
+    <g transform="translate(0 20)">
+      ${voxBox(44, 114, 13, 15, PANTS, 5, 3.8)}${voxBox(61, 114, 13, 15, PANTS, 5, 3.8)}
+      ${voxBox(43, 128, 15, 8, SHOE, 5, 3.8)}${voxBox(60, 128, 15, 8, SHOE, 5, 3.8)}
+      <g class="av-bob">
+        ${svgBackpack(backpack)}
+        ${voxBox(29, 88, 11, 12, sc, 6, 4.5)}${voxBox(29, 100, 11, 11, SKIN, 6, 4.5)}
+        ${voxBox(40, 84, 38, 32, sc)}
+        <rect x="40" y="111.5" width="38" height="4.5" fill="${voxDark(sc, 0.14)}"/>
+        ${svgBackpackStraps(backpack)}
+        ${voxBox(78, 100, 11, 11, SKIN, 6, 4.5)}${voxBox(78, 88, 11, 12, sc, 6, 4.5)}
+        ${voxBox(27, 30, 62, 54, SKIN, 10, 7.5)}
+        ${voxBox(27, 24, 62, 27, HAIR, 10, 7.5)}
+        <path d="M33 51.8 V39 H54 V36 H83 V51.8Z" fill="${SKIN}"/>
+        ${eye(41.5)}${eye(66)}
+        <rect x="33" y="65.5" width="8.5" height="5" rx="2.5" fill="#FF8F80" opacity="0.75"/>
+        <rect x="74.5" y="65.5" width="8.5" height="5" rx="2.5" fill="#FF8F80" opacity="0.75"/>
+        <path d="M52 67.5 h12 a6 6 0 0 1 -12 0z" fill="#7A2E2A"/>
+        <ellipse cx="58" cy="72" rx="3.2" ry="1.5" fill="#F58A84"/>
+        ${svgHat(hat)}
+      </g>
+    </g>
   </svg>`;
+}
+
+// Desenho de cada item de avatar (cartão do seletor + celebração): o item em si, em voxel, na cor
+// dele — não um emoji genérico. "Sem item" (hat:none / backpack:none) vira um vazio discreto.
+function avatarItemIcon(cat, item) {
+  const wrap = (inner) => `<svg class="item-art" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
+  const c = item && item.color;
+  if (cat === "shirt") {
+    return wrap(
+      voxBox(4, 14, 10, 11, c, 4, 3) + voxBox(14, 13, 20, 26, c, 5, 3.8) + voxBox(34, 14, 9, 11, c, 4, 3) +
+      `<rect x="19.5" y="12.5" width="9" height="3.5" rx="1" fill="${voxDark(c, 0.2)}"/><rect x="14" y="35.5" width="20" height="3.5" fill="${voxDark(c, 0.14)}"/>`
+    );
+  }
+  if (cat === "hat" && item.type === "cap") {
+    return wrap(voxBox(10, 15, 25, 14, c, 7, 5) + voxBox(5, 29, 27, 4.5, voxDark(c, 0.16), 4, 2.8) + voxBox(21, 13, 4, 2, voxLight(c, 0.45), 2.5, 1.8));
+  }
+  if (cat === "hat" && item.type === "party") {
+    return wrap(voxBox(9, 29, 26, 11, c, 5, 3.8) + voxBox(14, 19, 16, 10, voxLight(c, 0.62), 4.5, 3.4) +
+      voxBox(18, 11, 8, 8, c, 4, 3) + voxBox(20, 5.5, 4, 4, "#FFFFFF", 2.5, 1.9));
+  }
+  if (cat === "backpack" && c) {
+    return wrap(
+      `<path d="M18 11 v-3.5 a3 3 0 0 1 3 -3 h6 a3 3 0 0 1 3 3 V11" fill="none" stroke="${voxDark(c, 0.3)}" stroke-width="2.6" stroke-linecap="round"/>` +
+      voxBox(10, 12, 25, 28, c, 6, 4.5) +
+      `<rect x="10" y="12" width="25" height="9.5" rx="1.2" fill="${voxLight(c, 0.22)}"/>` +
+      `<rect x="14" y="26.5" width="17" height="9.5" rx="2" fill="${voxDark(c, 0.16)}"/>` +
+      `<rect x="20.5" y="19" width="4" height="5" rx="1" fill="${voxLight(c, 0.6)}"/>`
+    );
+  }
+  // "sem item": contorno tracejado com um traço — lê como "nada", sem ícone confuso
+  return wrap('<circle cx="24" cy="24" r="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="4.5 4.5" stroke-linecap="round" opacity="0.55"/><path d="M16 32 L32 16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.55"/>');
 }
 function renderAllAvatarMounts() {
   ["avatar-hero-mount", "home-avatar-mount"].forEach((id) => {
@@ -195,26 +296,40 @@ function avatarItemVisible(item) {
   return !item.unlockedBy || profileCategoryIds().includes(item.unlockedBy);
 }
 
+// Cartão colecionável de um item: o desenho do item sobre um fundo tingido com a cor dele
+// (--item-color; "sem item" não tem cor e fica neutro). Usado no seletor e na celebração.
+function avatarItemCardHTML(cat, item, opts) {
+  opts = opts || {};
+  return avatarItemIcon(cat, item) +
+    (opts.locked ? `<span class="lock-badge">${icon("lock")}</span>` : "") +
+    (opts.selected ? `<span class="check-badge">${icon("check")}</span>` : "");
+}
+
 function renderAvatarScreen() {
   let totalUnlocked = 0, totalItems = 0;
+  const catLabels = { shirt: "Camiseta", hat: "Chapéu", backpack: "Mochila" };
   Object.keys(AVATAR_ITEMS).forEach((cat) => {
     const row = document.getElementById("row-" + cat);
     row.innerHTML = "";
+    let catUnlocked = 0, catTotal = 0;
     AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
       totalItems++;
+      catTotal++;
       const unlocked = isCategoryUnlockThresholdMet(item.unlockedBy);
-      if (unlocked) totalUnlocked++;
+      if (unlocked) { totalUnlocked++; catUnlocked++; }
+      const selected = avatarState[cat] === item.id;
       const btn = document.createElement("button");
-      btn.className = "item-swatch" + (unlocked ? "" : " locked") + (avatarState[cat] === item.id ? " selected" : "");
-      btn.style.background = item.color || "#EFE7DF";
-      btn.innerHTML = avatarItemIcon(cat, item);
-      if (!unlocked) btn.innerHTML += `<span class="lock-badge">${icon("lock")}</span>`;
+      btn.className = "item-swatch" + (unlocked ? "" : " locked") + (selected ? " selected" : "") + (item.color ? "" : " is-none");
+      if (item.color) btn.style.setProperty("--item-color", item.color);
+      btn.setAttribute("aria-label", `${catLabels[cat] || cat}: ${item.id}${unlocked ? "" : " (trancado)"}`);
+      btn.setAttribute("aria-pressed", selected ? "true" : "false");
+      btn.innerHTML = avatarItemCardHTML(cat, item, { locked: !unlocked, selected });
       btn.addEventListener("click", () => {
         const hintEl = document.getElementById("avatar-unlock-hint");
         if (!unlocked) {
           const catMeta = CATEGORY_META[item.unlockedBy];
           const catName = catMeta ? displayName(catMeta) : item.unlockedBy;
-          hintEl.textContent = tr(`🔒 Keep practising "${catName}" to unlock it!`, `🔒 Continue praticando "${catName}" pra desbloquear!`);
+          hintEl.textContent = tr(`Keep practising "${catName}" to unlock it!`, `Continue praticando "${catName}" pra desbloquear!`);
           btn.style.animation = "none";
           void btn.offsetWidth;
           btn.style.animation = "shake 0.4s";
@@ -228,6 +343,8 @@ function renderAvatarScreen() {
       });
       row.appendChild(btn);
     });
+    const countEl = document.getElementById("count-" + cat);
+    if (countEl) countEl.textContent = `${catUnlocked}/${catTotal}`;
   });
   document.getElementById("avatar-unlocked-count").textContent = `${totalUnlocked}/${totalItems} itens desbloqueados`;
   const homeHint = document.getElementById("avatar-unlock-hint-home");
@@ -240,27 +357,72 @@ document.getElementById("btn-avatar-hero").addEventListener("click", () => {
 });
 
 // ===================== My English World (mapa de situações + explorar por categoria) =====================
+// Trilha do mapa: liga os lugares do perfil ativo por uma árvore geradora mínima (os caminhos mais
+// curtos, sem cruzar) — funciona pra qualquer conjunto de `mapPos`, sem desenhar rota à mão por
+// perfil. Só decoração: não tem ordem nem bloqueio (todo lugar continua tocável a qualquer hora).
+// Coordenadas em % (viewBox 0..100, esticado pro tamanho do mapa; o traço não escala).
+function worldTrailPath(situations) {
+  const pts = situations.map((s) => ({ x: parseFloat(s.mapPos.left), y: parseFloat(s.mapPos.top) }));
+  if (pts.length < 2) return "";
+  // o mapa é mais alto que largo (3:5): distância medida na proporção real, não em % cru
+  const dist = (p, q) => Math.hypot((p.x - q.x) * 3, (p.y - q.y) * 5);
+  const inTree = [0];
+  const rest = pts.map((_, i) => i).slice(1);
+  let d = "";
+  let k = 0;
+  while (rest.length) {
+    let best = null;
+    inTree.forEach((i) => rest.forEach((j) => {
+      const dd = dist(pts[i], pts[j]);
+      if (!best || dd < best.dd) best = { i, j, dd };
+    }));
+    const p = pts[best.i], q = pts[best.j];
+    // curva leve (alternando o lado) pra trilha parecer desenhada à mão, não uma régua
+    const bend = (k++ % 2 ? 1 : -1) * 0.12;
+    const cx = (p.x + q.x) / 2 - (q.y - p.y) * bend, cy = (p.y + q.y) / 2 + (q.x - p.x) * bend * 0.36;
+    d += `M${p.x} ${p.y} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${q.x} ${q.y} `;
+    inTree.push(best.j);
+    rest.splice(rest.indexOf(best.j), 1);
+  }
+  return d;
+}
+
 function renderWorldMap() {
   const pinsWrap = document.getElementById("world-pins");
   pinsWrap.innerHTML = "";
   renderCategoryGrid();
-  profileSituations().forEach((situation) => {
+  const situations = profileSituations();
+  const trailEl = document.getElementById("world-trail-path");
+  if (trailEl) trailEl.setAttribute("d", worldTrailPath(situations));
+  situations.forEach((situation) => {
     const ratio = getSituationProgressRatio(situation);
+    const done = ratio >= UNLOCK_THRESHOLD;
+    // Nó de aventura em 3 estados: novo (anel vazio), em andamento (anel enchendo até o limiar de
+    // desbloqueio) e conquistado (anel dourado + estrela). O ícone é só o conteúdo do .pin-badge.
     const pin = document.createElement("button");
-    pin.className = "pin";
+    pin.className = "pin " + (done ? "is-done" : ratio > 0 ? "is-progress" : "is-new");
     pin.style.top = situation.mapPos.top;
     pin.style.left = situation.mapPos.left;
-    pin.innerHTML = `<div class="pin-badge">${emojiHtml(situation.icon)}${ratio >= UNLOCK_THRESHOLD ? '<div class="ring"></div>' : ""}</div><div class="label">${displayName(situation)}</div>`;
+    pin.style.setProperty("--pin-progress", Math.round(Math.min(1, ratio / UNLOCK_THRESHOLD) * 100) + "%");
+    pin.innerHTML = `<div class="pin-badge">${emojiHtml(situation.icon)}${done ? `<div class="ring">${icon("star")}</div>` : ""}</div><div class="label">${displayName(situation)}</div>`;
     pin.addEventListener("click", () => goToSituation(situation));
     pinsWrap.appendChild(pin);
   });
-  document.getElementById("world-avatar").innerHTML = avatarSVG(avatarState);
-  const hintEl = document.querySelector("#world-map .world-hint");
+  // O avatar sempre começa "em pé" num lugar do perfil ativo (o primeiro, se ainda não visitou
+  // nenhum ou se o perfil mudou) — nunca solto no meio do mapa, por cima de um nó de outro perfil.
+  const avatarEl = document.getElementById("world-avatar");
+  avatarEl.innerHTML = avatarSVG(avatarState);
+  const here = (s) => s.mapPos.top === avatarEl.style.top && s.mapPos.left === avatarEl.style.left;
+  if (situations.length && !situations.some(here)) {
+    avatarEl.style.top = situations[0].mapPos.top;
+    avatarEl.style.left = situations[0].mapPos.left;
+  }
+  const hintEl = document.querySelector("#screen-world .world-hint");
   if (hintEl) {
     const anyIntroduced = profileContent().some((it) => getState(it.id).introduced);
     hintEl.textContent = anyIntroduced
-      ? tr("👉 Tap a place to go and play there!", "👉 Toque num lugar pra ir e jogar lá!")
-      : tr("🌱 Your adventure starts here — tap a place!", "🌱 Sua aventura começa aqui — toque num lugar!");
+      ? tr("Tap a place to go and play there!", "Toque num lugar pra ir e jogar lá!")
+      : tr("Your adventure starts here — tap a place!", "Sua aventura começa aqui — toque num lugar!");
   }
 }
 
@@ -1180,8 +1342,12 @@ function showUnlockCelebration(newUnlockIds, onDone) {
     playUnlock();
     lockEl.style.display = "none";
     revealEl.style.display = "";
+    // recompensa concreta: o avatar aparece já vestindo o item novo (só na prévia — não troca o
+    // avatarState salvo), com o cartão do item ao lado
+    const previewState = Object.assign({}, avatarState, { [cat]: item.id });
     document.getElementById("unlock-item-preview").innerHTML =
-      `<div class="item-swatch selected" style="background:${item.color || "#EFE7DF"}">${avatarItemIcon(cat, item)}</div>`;
+      `<div class="unlock-burst"></div><div class="unlock-avatar">${avatarSVG(previewState)}</div>` +
+      `<div class="item-swatch${item.color ? "" : " is-none"}" style="${item.color ? `--item-color:${item.color}` : ""}">${avatarItemCardHTML(cat, item)}</div>`;
     document.getElementById("unlock-item-name").textContent = `Novo item de ${catLabel.toLowerCase()} desbloqueado!`;
   }, 900);
 }

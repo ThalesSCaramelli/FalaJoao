@@ -354,6 +354,35 @@ sobre algo já decidido sem motivo novo.
 - **Consequência**: emoji novo em `data.js` → rodar `python scripts/fetch_fluent_emoji.py`
   (`CONTENT_GUIDE.md` seção 3); se não resolver, ele aparece na lista de "SEM PNG" e o app usa o
   texto.
+### Identidade ilustrada (redesign, fase 4b): avatar voxel chibi, quokka de verdade e mapa-ilha
+
+- **Contexto**: o avatar era uma pilha de retângulos chapados, o mascote parecia um urso genérico e
+  o mapa era um gradiente com bolinhas; os itens do avatar eram bolinhas coloridas com emoji
+  (`DESIGN_BRIEF.md` §6, §9, §27).
+- **Alternativas consideradas**: imagens raster (PNG) pro avatar/mapa — mais ricas, mas pesam no
+  cache offline e não trocam de cor por item; rota do mapa desenhada à mão por perfil — quebraria a
+  cada `mapPos` novo.
+- **Escolha**:
+  - **Avatar**: SVG inline montado com um "kit voxel" (`voxBox`, app.js): cada peça é um bloco com
+    3 faces (frente, topo claro, lado escuro) derivadas da cor do item (`mixHex`). Proporção chibi,
+    olhos com brilho, bochechas, sombra no chão; idle (respirar/piscar) só em CSS, desligado em
+    `prefers-reduced-motion`. Mesmo `state` de sempre; viewBox fixo (124×168) com ou sem chapéu.
+  - **Itens**: `avatarItemIcon` desenha o próprio item em voxel; o seletor virou grade de cartões
+    colecionáveis (`.item-swatch` com `--item-color`), trancado = silhueta desbotada + cadeado.
+  - **Celebração**: mostra o avatar já vestindo o item novo (só prévia, não muda o `avatarState`).
+  - **Mascote**: quokka de corpo inteiro (pés grandes, rabo, folha nas patinhas, sorriso).
+  - **Mapa**: ilha ilustrada em SVG estático (index.html) com proporção fixa 3:5; a trilha tracejada
+    é gerada em `worldTrailPath` por árvore geradora mínima sobre os `mapPos` do perfil ativo. Pinos
+    viraram nós com anel de progresso (`--pin-progress`, enche até `UNLOCK_THRESHOLD`) e, passado o
+    limiar, anel dourado + medalha de estrela (`.ring`).
+- **Porquê**: SVG inline é leve, offline, recolore por item e escala de 46px (mapa) a 150px; a
+  árvore mínima nunca cruza caminhos e funciona pra qualquer conjunto de lugares sem manutenção.
+- **Consequência**: a trilha é só decoração — não cria ordem nem bloqueio (todo lugar continua
+  tocável). Nenhuma lógica do motor/progresso mudou. O ícone do lugar é um slot (conteúdo direto do
+  `.pin-badge`; `img`/`svg` filhos já são dimensionados). A dica do mapa (`.world-hint`) saiu de
+  dentro do mapa e ficou acima dele; o avatar do mapa fica em pé acima do nó (não sobre o ícone) e
+  começa no primeiro lugar do perfil. Item novo em `AVATAR_ITEMS` com `type` de chapéu novo precisa
+  de desenho em `svgHat` + `avatarItemIcon`.
 
 ---
 
