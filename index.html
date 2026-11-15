@@ -177,6 +177,8 @@
       <div id="quiz-progress" class="quiz-progress"></div>
     </header>
     <div class="quiz-body">
+      <!-- Palco "ouvir e escolher" (só na rodada choice): Quokka falando + balão de som que repete o áudio -->
+      <div id="quiz-listen" class="listen-stage" hidden></div>
       <button id="btn-repeat-word" class="repeat-btn">🔊 Ouvir de novo</button>
       <div id="quiz-options" class="quiz-options"></div>
     </div>
@@ -185,23 +187,35 @@
   <!-- TELA DESBLOQUEIO -->
   <section id="screen-unlock" class="screen">
     <div class="unlock-body">
-      <div class="unlock-lock" id="unlock-lock-icon">🔒</div>
+      <div class="unlock-lock" id="unlock-lock-icon"></div>
       <div class="unlock-reveal" id="unlock-reveal">
         <div id="unlock-item-preview"></div>
-        <h2>✨ Novo item! ✨</h2>
+        <h2 id="unlock-title">Novo item!</h2>
         <p id="unlock-item-name"></p>
       </div>
-      <button id="btn-unlock-continue" class="big-btn">Continuar</button>
+      <div class="unlock-actions" id="unlock-actions">
+        <button id="btn-unlock-wear" class="big-btn">Vestir</button>
+        <button id="btn-unlock-continue" class="big-btn secondary">Continuar</button>
+      </div>
     </div>
   </section>
 
   <!-- TELA FIM DE JOGO -->
   <section id="screen-result" class="screen">
-    <div class="result-body">
+    <!-- Montada por showResultScreen (app.js): herói (avatar comemorando), estrelas, o que foi
+         praticado, próximo prêmio do avatar e sequência de dias. O visual muda por perfil (body[data-mode]). -->
+    <div class="result-body" id="result-body">
+      <div id="result-hero" class="result-hero"></div>
       <div id="result-stars" class="result-stars"></div>
+      <h2 id="result-title" class="result-title"></h2>
       <p id="result-text"></p>
-      <button id="btn-play-again" class="big-btn">🔁 Jogar de novo</button>
-      <button class="big-btn secondary" id="btn-result-back">⬅️ Voltar</button>
+      <div id="result-streak" class="result-streak" hidden></div>
+      <div id="result-chips" class="result-chips"></div>
+      <div id="result-next" class="result-next" hidden></div>
+      <div class="result-actions">
+        <button id="btn-play-again" class="big-btn">Jogar de novo</button>
+        <button class="big-btn secondary" id="btn-result-back">Voltar</button>
+      </div>
     </div>
   </section>
 

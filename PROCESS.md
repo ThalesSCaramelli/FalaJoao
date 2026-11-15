@@ -384,6 +384,48 @@ sobre algo já decidido sem motivo novo.
   começa no primeiro lugar do perfil. Item novo em `AVATAR_ITEMS` com `type` de chapéu novo precisa
   de desenho em `svgHat` + `avatarItemIcon`.
 
+### Momentos de recompensa, Quokka falando e rodada de ouvir (redesign onda 2, fase 3)
+
+- **Contexto**: o fim de sessão era "⭐⭐☆ Você brincou com 2 palavras!" e dois botões com emoji; a
+  rodada `choice` (ouvir e tocar na imagem) tinha um vazio enorme em cima, só com o botão "Ouvir
+  de novo"; e o mascote ainda parecia um urso (`DESIGN_BRIEF.md` §7, §15–18, §35;
+  `LEARNING_PHILOSOPHY.md` §28–29, §35).
+- **Alternativas consideradas**: placar com acertos/percentual pras crianças — vira "nota" e
+  contraria "recompensa sem XP"; marcar nas fichas quais palavras a criança errou — punição
+  disfarçada (só o adulto vê "para rever"); vestir o item novo automaticamente ao desbloquear —
+  tira a escolha da criança; guardar um registro próprio de erros da sessão — duplicaria o motor
+  (bastou comparar `wrongCount` com uma foto tirada no `startQuiz`).
+- **Escolha**:
+  - **Fim de sessão** (`showResultScreen`, `#screen-result`): o avatar do perfil pula com os braços
+    pra cima (`.is-cheering` + `.av-cheer-arm` em `avatarSVG`), estrelas em SVG entram uma a uma
+    (`starSVG`, uma nota por estrela), as palavras da sessão viram fichas com emoji Fluent (tocar
+    repete o áudio), o **próximo prêmio** do avatar aparece com uma trilha de pontinhos até ele
+    (`nextAvatarReward` / `nextRewardHTML`: só leitura de `AVATAR_ITEMS`,
+    `isCategoryUnlockThresholdMet`, `getCategoryProgressRatio`; "Faltam N", nunca porcentagem), a
+    sequência de dias aparece só se aumentou hoje (uma vez por dia) e cai confete (`rainConfetti`).
+  - **Por perfil** (`body[data-mode]`): João = maior, festivo e falado (`speakPT` com o id estável
+    `result_congrats`, registrado em `EXTRA_LINES` de `scripts/generate_pt_audio.py`; sem arquivo
+    cai no TTS ao vivo); André = em inglês, título em caixa alta com relevo (arcade); Thales =
+    resumo sóbrio (praticadas / novas / revisadas + "Para rever" + "Praticou"), sem boneco, sem
+    estrelas, sem confete.
+  - **Desbloqueio** (`showUnlockCelebration`): anel dourado no cadeado, raios que abrem, item
+    "carimbado", `playUnlock` + `playFanfare` + confete na revelação; os botões só entram depois
+    da revelação. "Vestir!" já coloca o item (e é com ele que o avatar comemora no resultado, logo
+    em seguida); "Depois" só segue.
+  - **Quokka** (`mascotSVG(opts)`): redesenhado — pelo marrom-acinzentado, orelhas pequenas e
+    redondas, tufos nas bochechas, focinho curto com nariz escuro, o sorriso aberto, corpo em
+    pera, patas traseiras compridas e rabo fino. `mascotSVG({ talking: true })` é a variação de
+    boca aberta (`.q-mouth`).
+  - **Rodada `choice`**: `#quiz-listen` mostra o Quokka falando e um balão de som cujas barrinhas
+    pulsam enquanto o áudio toca (`trackListening` só observa `currentAudio`/`speechSynthesis`);
+    o balão é o "ouvir de novo". Quando o áudio termina, as imagens dão um pulinho em sequência
+    ("agora escolhe"). No perfil adulto fica o botão de texto de sempre.
+- **Consequência**: nenhuma lógica de motor, SRS ou desbloqueio mudou (`handleChoice`, `speak`,
+  `finishQuiz` intactos). `prefers-reduced-motion`: sem confete, animações desligadas pela regra
+  global, e o avatar fica na pose de braços erguidos. Falta gerar o áudio neural de
+  `result_congrats` (`python scripts/generate_pt_audio.py`). Item novo em `AVATAR_ITEMS` entra
+  sozinho no "próximo prêmio".
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)

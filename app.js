@@ -59,6 +59,9 @@ const ICONS = {
   book: '<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>',
   blocks: '<rect x="3" y="13" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="13" y="13" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="8" y="4" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="2.2"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.5 15.5L21 21" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
+  // Fase 3 (recompensas): jogar de novo e a chama da sequência de dias
+  replay: '<path d="M19.5 12a7.5 7.5 0 11-2.6-5.7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M17.6 2.8v4.4h-4.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  flame: '<path d="M12.4 2.5c.6 3.4 5.6 5.6 5.6 11.1a6 6 0 01-12 0c0-2.3 1-3.9 2.3-5.1.2 1.6.9 2.6 1.9 3.1-.3-3.6.4-6.9 2.2-9.1z" fill="currentColor"/><path d="M12 21a3 3 0 01-3-3c0-1.8 1.3-2.7 3-4.5 1.7 1.8 3 2.7 3 4.5a3 3 0 01-3 3z" fill="#FFD86B"/>',
   gap: '<path d="M8 8a4 4 0 118 0c0 2.6-4 3-4 6M12 17.4v.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M4 21h4M10 21h4M16 21h4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
 };
 function icon(name, extraClass) {
@@ -120,34 +123,47 @@ function initIcons() {
 initIcons();
 
 // ===================== Mascote (quokka) e avatar (voxel customizável) — SVG original =====================
-// Quokka de verdade (não um urso genérico): cabeça larga de bochechas cheias, orelhinhas redondas
-// no alto, focinho claro com nariz escuro e o sorriso famoso, patinhas no peito segurando uma
-// folha, pés grandes de canguruzinho e rabo grosso. Cores fixas dentro do desenho; a animação
-// (piscar + orelha) fica no CSS (.quokka) e respeita prefers-reduced-motion.
-function mascotSVG() {
-  return `<svg class="quokka" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quokka">
-    <ellipse cx="60" cy="124" rx="36" ry="6" fill="#3A2E27" opacity="0.12"/>
-    <path d="M78 102 C94 114 111 110 112 91 C112 87 106 87 105.5 91 C104 101 94 103 84 96Z" fill="#9C6B47"/>
-    <ellipse cx="41" cy="119" rx="15" ry="7" fill="#9C6B47"/>
-    <ellipse cx="79" cy="119" rx="15" ry="7" fill="#9C6B47"/>
-    <path d="M60 68 C82 68 90 84 88 100 C86 114 76 122 60 122 C44 122 34 114 32 100 C30 84 38 68 60 68Z" fill="#BE8A60"/>
-    <ellipse cx="60" cy="102" rx="17" ry="17" fill="#F6E1C5"/>
-    <g class="q-ear q-ear-l"><circle cx="31" cy="24" r="10.5" fill="#BE8A60"/><circle cx="32" cy="25" r="5.6" fill="#E3A189"/></g>
-    <g class="q-ear q-ear-r"><circle cx="89" cy="24" r="10.5" fill="#BE8A60"/><circle cx="88" cy="25" r="5.6" fill="#E3A189"/></g>
-    <path d="M60 11 C79 11 92 24 96 42 C102 66 85 81 60 81 C35 81 18 66 24 42 C28 24 41 11 60 11Z" fill="#BE8A60"/>
-    <path d="M53 12.5 Q56 6 60 11 Q64 5 67 12.5Z" fill="#BE8A60"/>
-    <path d="M60 47 C72 47 81 55 80 65 C79 74 71 78.5 60 78.5 C49 78.5 41 74 40 65 C39 55 48 47 60 47Z" fill="#F6E1C5"/>
-    <ellipse cx="32" cy="59" rx="6" ry="4" fill="#F0907C" opacity="0.5"/>
-    <ellipse cx="88" cy="59" rx="6" ry="4" fill="#F0907C" opacity="0.5"/>
-    <g class="q-eye"><circle cx="42.5" cy="42.5" r="4.6" fill="#3A2E27"/><circle cx="44.2" cy="40.8" r="1.7" fill="#fff"/></g>
-    <g class="q-eye"><circle cx="77.5" cy="42.5" r="4.6" fill="#3A2E27"/><circle cx="79.2" cy="40.8" r="1.7" fill="#fff"/></g>
-    <path d="M52.5 51.5 Q60 47 67.5 51.5 Q68 58 60 60.5 Q52 58 52.5 51.5Z" fill="#3A2E27"/>
-    <ellipse cx="57.5" cy="52.5" rx="2.4" ry="1.2" fill="#fff" opacity="0.55"/>
-    <path d="M60 60.5 V64 M45 61.5 Q52 73.5 60 64 Q68 73.5 75 61.5" fill="none" stroke="#3A2E27" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M60 104 C50 98 50 86 60 80 C70 86 70 98 60 104Z" fill="#6FBF73"/>
-    <path d="M60 83 V101" stroke="#4E9A58" stroke-width="1.6" stroke-linecap="round"/>
-    <ellipse cx="47" cy="95" rx="6.5" ry="9" transform="rotate(-38 47 95)" fill="#9C6B47"/>
-    <ellipse cx="73" cy="95" rx="6.5" ry="9" transform="rotate(38 73 95)" fill="#9C6B47"/>
+// Quokka de verdade, não um urso: pelo marrom-acinzentado, cabeça larga com bochechas cheias (tufos
+// de pelo dos lados), orelhas pequenas e redondas rentes à cabeça, focinho curto e claro com nariz
+// escuro, o "sorriso" famoso (cantos da boca subindo pras bochechas), corpo de marsupial em pera
+// com as patinhas no peito segurando uma folha, patas traseiras compridas e rabo fino e curto no
+// chão. Cores fixas dentro do desenho; a animação (piscar + orelha, e a boca quando fala) fica no
+// CSS (.quokka) e respeita prefers-reduced-motion.
+// opts.talking = variação "falando": boca aberta (classe .q-talk; o CSS mexe a boca enquanto um
+// pai tiver .is-playing) — usada na rodada de ouvir e escolher.
+function mascotSVG(opts) {
+  const talking = !!(opts && opts.talking);
+  const FUR = "#A68C74", FUR_DARK = "#86705D", EAR = "#957C67", CREAM = "#F1E6D4", INK = "#3A2E27";
+  const mouth = talking
+    ? `<g class="q-mouth"><path d="M47.5 63 C53 66.5 67 66.5 72.5 63 C72 74 67 78 60 78 C53 78 48 74 47.5 63Z" fill="#5E2B2A"/>
+        <path d="M53.5 74 Q60 69 66.5 74 Q64 77.6 60 77.6 Q56 77.6 53.5 74Z" fill="#F0857F"/></g>`
+    : `<path d="M48 63.2 C53 66.4 67 66.4 72 63.2 C70 70.5 65.5 72.6 60 72.6 C54.5 72.6 50 70.5 48 63.2Z" fill="#5E2B2A"/>
+       <path d="M55 70.6 Q60 67.6 65 70.6 Q63 72.4 60 72.4 Q57 72.4 55 70.6Z" fill="#F0857F"/>`;
+  return `<svg class="quokka${talking ? " q-talk" : ""}" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quokka">
+    <ellipse cx="60" cy="125" rx="37" ry="5.5" fill="${INK}" opacity="0.12"/>
+    <path d="M82 106 C94 110 101 121.5 116 120 C118.2 119.7 118 117.2 116 117.2 C105 118 99 105 86 100Z" fill="${FUR_DARK}"/>
+    <path d="M60 64 C81 64 93 82 93 100 C93 115 80 123.5 60 123.5 C40 123.5 27 115 27 100 C27 82 39 64 60 64Z" fill="${FUR}"/>
+    <ellipse cx="60" cy="103" rx="19" ry="18.5" fill="${CREAM}"/>
+    <path d="M29 124.5 C22 124.5 20.5 117.5 27.5 115.5 C34 114 44 114.5 49 118 C52 121 50 124.5 44 124.5Z" fill="${FUR_DARK}"/>
+    <path d="M91 124.5 C98 124.5 99.5 117.5 92.5 115.5 C86 114 76 114.5 71 118 C68 121 70 124.5 76 124.5Z" fill="${FUR_DARK}"/>
+    <path d="M24.5 119.2 h5.5 M25 122 h4.5 M95.5 119.2 h-5.5 M95 122 h-4.5" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+    <g class="q-ear q-ear-l"><ellipse cx="37.5" cy="16" rx="8.8" ry="9.6" fill="${EAR}"/><ellipse cx="38.5" cy="17.2" rx="4.8" ry="5.6" fill="#CFA092"/></g>
+    <g class="q-ear q-ear-r"><ellipse cx="82.5" cy="16" rx="8.8" ry="9.6" fill="${EAR}"/><ellipse cx="81.5" cy="17.2" rx="4.8" ry="5.6" fill="#CFA092"/></g>
+    <path d="M60 11 C77 11 90 21 94 37 L98.5 41.5 L95.8 44.5 L100 49 L95.5 51.5 C93 69 79 80 60 80 C41 80 27 69 24.5 51.5 L20 49 L24.2 44.5 L21.5 41.5 L26 37 C30 21 43 11 60 11Z" fill="${FUR}" stroke="${FUR}" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M60 48.5 C72.5 48.5 81.5 56 81.5 65.5 C81.5 74.5 72.5 80 60 80 C47.5 80 38.5 74.5 38.5 65.5 C38.5 56 47.5 48.5 60 48.5Z" fill="${CREAM}"/>
+    <ellipse cx="31.5" cy="60" rx="5.5" ry="3.6" fill="#E8958A" opacity="0.5"/>
+    <ellipse cx="88.5" cy="60" rx="5.5" ry="3.6" fill="#E8958A" opacity="0.5"/>
+    <g class="q-eye"><circle cx="41" cy="42" r="4.4" fill="${INK}"/><circle cx="42.6" cy="40.4" r="1.6" fill="#fff"/></g>
+    <g class="q-eye"><circle cx="79" cy="42" r="4.4" fill="${INK}"/><circle cx="80.6" cy="40.4" r="1.6" fill="#fff"/></g>
+    <path d="M52 52 Q60 47.5 68 52 Q68.8 57.8 60 60 Q51.2 57.8 52 52Z" fill="${INK}"/>
+    <ellipse cx="56.8" cy="52.3" rx="2.6" ry="1.2" fill="#fff" opacity="0.5"/>
+    <path d="M60 60 V64.8" stroke="${INK}" stroke-width="1.7" stroke-linecap="round"/>
+    <path d="M43.5 58.5 C45 64 50 65.6 60 65.6 C70 65.6 75 64 76.5 58.5" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    ${mouth}
+    <path d="M60 107 C51 101.5 51 90.5 60 85 C69 90.5 69 101.5 60 107Z" fill="#6FBF73"/>
+    <path d="M60 88 V104" stroke="#4E9A58" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="47.5" cy="97" rx="5.6" ry="8.6" transform="rotate(-40 47.5 97)" fill="${FUR_DARK}"/>
+    <ellipse cx="72.5" cy="97" rx="5.6" ry="8.6" transform="rotate(40 72.5 97)" fill="${FUR_DARK}"/>
   </svg>`;
 }
 
@@ -218,6 +234,8 @@ function svgBackpackStraps(item) {
 // corpinho pequeno e sombra no chão. Mesmo `state` de sempre ({ shirt, hat, backpack }), viewBox
 // fixo (o chapéu não faz o boneco pular de lugar) — funciona de 44px (mapa) a 150px (tela do avatar).
 // Idle (respirar + piscar) é CSS: .av-bob / .av-eye / .av-shadow.
+// Comemoração: dentro de um pai .is-cheering o CSS esconde os braços normais (.av-arm) e mostra
+// os mesmos braços levantados, na frente da cabeça (.av-cheer-arm) — fora dali ficam invisíveis.
 function avatarSVG(state) {
   const find = (cat) => AVATAR_ITEMS[cat].find((i) => i.id === state[cat]) || AVATAR_ITEMS[cat][0];
   const shirt = find("shirt"), hat = find("hat"), backpack = find("backpack");
@@ -234,11 +252,11 @@ function avatarSVG(state) {
       ${voxBox(43, 128, 15, 8, SHOE, 5, 3.8)}${voxBox(60, 128, 15, 8, SHOE, 5, 3.8)}
       <g class="av-bob">
         ${svgBackpack(backpack)}
-        ${voxBox(29, 88, 11, 12, sc, 6, 4.5)}${voxBox(29, 100, 11, 11, SKIN, 6, 4.5)}
+        <g class="av-arm av-arm-l">${voxBox(29, 88, 11, 12, sc, 6, 4.5)}${voxBox(29, 100, 11, 11, SKIN, 6, 4.5)}</g>
         ${voxBox(40, 84, 38, 32, sc)}
         <rect x="40" y="111.5" width="38" height="4.5" fill="${voxDark(sc, 0.14)}"/>
         ${svgBackpackStraps(backpack)}
-        ${voxBox(78, 100, 11, 11, SKIN, 6, 4.5)}${voxBox(78, 88, 11, 12, sc, 6, 4.5)}
+        <g class="av-arm av-arm-r">${voxBox(78, 100, 11, 11, SKIN, 6, 4.5)}${voxBox(78, 88, 11, 12, sc, 6, 4.5)}</g>
         ${voxBox(27, 30, 62, 54, SKIN, 10, 7.5)}
         ${voxBox(27, 24, 62, 27, HAIR, 10, 7.5)}
         <path d="M33 51.8 V39 H54 V36 H83 V51.8Z" fill="${SKIN}"/>
@@ -248,6 +266,8 @@ function avatarSVG(state) {
         <path d="M52 67.5 h12 a6 6 0 0 1 -12 0z" fill="#7A2E2A"/>
         <ellipse cx="58" cy="72" rx="3.2" ry="1.5" fill="#F58A84"/>
         ${svgHat(hat)}
+        <g class="av-cheer-arm av-cheer-arm-l">${voxBox(29, 88, 11, 12, sc, 6, 4.5)}${voxBox(29, 100, 11, 11, SKIN, 6, 4.5)}</g>
+        <g class="av-cheer-arm av-cheer-arm-r">${voxBox(78, 100, 11, 11, SKIN, 6, 4.5)}${voxBox(78, 88, 11, 12, sc, 6, 4.5)}</g>
       </g>
     </g>
   </svg>`;
@@ -789,12 +809,17 @@ function getUnlockedAvatarItemIds() {
 }
 
 let unlockedSnapshotAtSessionStart = [];
+// Foto da contagem de erros de cada item no começo da sessão (só leitura do motor): no fim, quem
+// subiu é o que vale "rever" no resumo do adulto.
+let sessionWrongSnapshot = {};
 
 function startQuiz(queue) {
   quizQueue = queue;
   quizIndex = 0;
   quizScore = { correct: 0, total: 0 };
   unlockedSnapshotAtSessionStart = getUnlockedAvatarItemIds();
+  sessionWrongSnapshot = {};
+  queue.forEach((r) => { if (r.item) sessionWrongSnapshot[r.item.id] = getState(r.item.id).wrongCount || 0; });
   showScreen("quiz");
   renderRound();
 }
@@ -815,7 +840,11 @@ function renderRound() {
   const repeatBtn = document.getElementById("btn-repeat-word");
   repeatBtn.innerHTML = icon("sound") + " " + tr("Listen again", "Ouvir de novo");
   container.innerHTML = "";
-  container.classList.remove("enter");
+  container.classList.remove("enter", "pick-now");
+  const listenStage = document.getElementById("quiz-listen");
+  listenStage.hidden = true;
+  listenStage.classList.remove("is-playing");
+  listenStage.innerHTML = "";
   void container.offsetWidth;
   container.classList.add("enter");
   choiceLocked = false;
@@ -1056,8 +1085,23 @@ function renderRound() {
     return;
   }
 
-  // choice
-  repeatBtn.style.display = "";
+  // choice: ouvir a palavra e tocar na imagem. Em cima fica o Quokka "falando" com um balão de
+  // som (as barrinhas pulsam enquanto o áudio toca): deixa claro, sem texto, que é pra OUVIR e
+  // escolher. O balão é o próprio "ouvir de novo". No adulto fica só o botão de sempre.
+  const useStage = getActiveProfile().mode !== "adult";
+  repeatBtn.style.display = useStage ? "none" : "";
+  if (useStage) {
+    listenStage.hidden = false;
+    listenStage.innerHTML =
+      `<button class="listen-quokka" id="listen-quokka" tabindex="-1" aria-hidden="true">${mascotSVG({ talking: true })}</button>` +
+      `<button class="listen-bubble" id="listen-bubble" aria-label="${tr("Listen again", "Ouvir de novo")}">${icon("sound")}<span class="listen-waves" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>`;
+    const replay = () => {
+      speak(round.item.en, round.item.id);
+      trackListening();
+    };
+    document.getElementById("listen-bubble").addEventListener("click", replay);
+    document.getElementById("listen-quokka").addEventListener("click", replay);
+  }
   wrongAttemptsThisRound = 0;
   const distractors = getDistractors(round.item, 2);
   const options = shuffle([round.item, ...distractors]);
@@ -1070,6 +1114,30 @@ function renderRound() {
     container.appendChild(btn);
   });
   speak(round.item.en, round.item.id);
+  if (useStage) trackListening();
+}
+
+// Liga a animação de "falando" do palco de ouvir enquanto o áudio (gravado ou TTS) está tocando.
+// Só observa currentAudio / speechSynthesis — não mexe em speak(). Quando o áudio termina, as
+// imagens dão um pulinho em sequência (uma vez por rodada): "agora escolhe".
+let listenTimer = null;
+function trackListening() {
+  const stage = document.getElementById("quiz-listen");
+  if (!stage || stage.hidden) return;
+  clearInterval(listenTimer);
+  stage.classList.add("is-playing");
+  const started = Date.now();
+  listenTimer = setInterval(() => {
+    const elapsed = Date.now() - started;
+    const playing =
+      (currentAudio && !currentAudio.paused && !currentAudio.ended) ||
+      (window.speechSynthesis && window.speechSynthesis.speaking);
+    if ((elapsed > 900 && !playing) || elapsed > 6000 || stage.hidden) {
+      clearInterval(listenTimer);
+      stage.classList.remove("is-playing");
+      if (!stage.hidden) document.getElementById("quiz-options").classList.add("pick-now");
+    }
+  }, 150);
 }
 
 // ---- Imersão (André, modo "literacy"): tudo do quiz em inglês ----
@@ -1293,6 +1361,94 @@ function startSpeakAttempt(item) {
   }
 }
 
+// ===================== Fim de sessão: comemoração (LEARN → COMPLETE → REWARD) =====================
+// A sessão termina num momento de recompensa, não num placar: o avatar comemora, as estrelas
+// entram uma a uma, as palavras praticadas aparecem como fichas, e o PRÓXIMO item de avatar mostra
+// quanto falta (em pontinhos, nunca em porcentagem). Tudo aqui é só leitura do motor: nada de
+// SRS/desbloqueio muda nesta tela.
+// Por perfil (body[data-mode]): João = grande, festivo e falado; André = em inglês, cara de
+// arcade; Thales = resumo sóbrio (praticou / novas / revisou / pra rever), sem avatar nem confete.
+let resultRunId = 0; // invalida timers (estrelas, fala, confete) se a tela mudar antes de dispararem
+const streakCelebratedOn = {}; // perfil -> dia em que a sequência já foi comemorada (uma vez por dia)
+
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+
+// Chuva de confete (conquista de verdade: fim de sessão e desbloqueio). CSS puro, some sozinha.
+// Com prefers-reduced-motion não aparece.
+const CONFETTI_RAIN_COLORS = CONFETTI_COLORS.concat(["#B18CD9", "#FFD86B"]);
+function rainConfetti(count) {
+  if (prefersReducedMotion()) return;
+  const layer = document.createElement("div");
+  layer.className = "confetti-layer confetti-rain";
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-drop" + (i % 3 === 0 ? " round" : i % 3 === 1 ? " strip" : "");
+    piece.style.left = Math.random() * 100 + "%";
+    piece.style.background = CONFETTI_RAIN_COLORS[i % CONFETTI_RAIN_COLORS.length];
+    piece.style.setProperty("--sway", (Math.random() * 120 - 60) + "px");
+    piece.style.setProperty("--rot", Math.round(Math.random() * 900 - 450) + "deg");
+    piece.style.animationDelay = (Math.random() * 0.9).toFixed(2) + "s";
+    piece.style.animationDuration = (1.9 + Math.random() * 1.4).toFixed(2) + "s";
+    layer.appendChild(piece);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 4600);
+}
+
+// Estrela desenhada (não emoji): cantos arredondados pelo stroke, brilho no alto.
+function starSVG() {
+  const d = "M24 5.5l5.6 11.6 12.7 1.7-9.3 8.9 2.3 12.6L24 34.2l-11.3 6.1 2.3-12.6-9.3-8.9 12.7-1.7z";
+  const j = 'stroke-width="4" stroke-linejoin="round"';
+  return `<svg viewBox="0 0 48 50" aria-hidden="true"><path class="star-slot" d="${d}" ${j}/>` +
+    `<g class="star-gold"><path class="star-edge" d="${d}" ${j} transform="translate(0 3.5)"/><path class="star-body" d="${d}" ${j}/>` +
+    '<path class="star-shine" d="M17.5 19.5c1.2-2.6 2.6-4.6 4.4-6.4" fill="none" stroke-width="2.6" stroke-linecap="round"/></g></svg>';
+}
+
+// Itens únicos da sessão, na ordem em que apareceram (o mesmo item pode ter várias rodadas).
+function sessionItems() {
+  const seen = new Set();
+  return quizQueue.map((r) => r.item).filter((it) => it && !seen.has(it.id) && seen.add(it.id));
+}
+
+// Próximo item de avatar a destravar: o item ainda trancado cuja categoria está mais perto do
+// limiar. needed = quantas palavras da categoria precisam estar firmes; have = quantas já estão.
+function nextAvatarReward() {
+  let best = null;
+  Object.keys(AVATAR_ITEMS).forEach((cat) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
+      if (!item.unlockedBy || isCategoryUnlockThresholdMet(item.unlockedBy)) return;
+      const ratio = getCategoryProgressRatio(item.unlockedBy);
+      if (!best || ratio > best.ratio) best = { cat, item, ratio };
+    });
+  });
+  if (!best) return null;
+  const total = CONTENT.filter((it) => it.category === best.item.unlockedBy).length;
+  best.needed = Math.max(1, Math.ceil(UNLOCK_THRESHOLD * total - 1e-9));
+  best.have = Math.min(best.needed - 1, Math.round(best.ratio * total));
+  return best;
+}
+
+// Cartão "próximo prêmio": o item (ainda trancado), a categoria que destrava e uma trilha de
+// pontinhos até ele — o último pontinho é o próprio prêmio.
+function nextRewardHTML(next) {
+  const meta = CATEGORY_META[next.item.unlockedBy];
+  const MAX_PIPS = 8;
+  const shown = Math.min(next.needed, MAX_PIPS);
+  const filled = Math.min(shown - 1, Math.round((next.have / next.needed) * shown));
+  let pips = "";
+  for (let i = 0; i < shown; i++) pips += `<span class="pip${i < filled ? " filled" : ""}" style="--i:${i}"></span>`;
+  const left = next.needed - next.have;
+  return `
+    <div class="next-item item-swatch locked${next.item.color ? "" : " is-none"}" style="${next.item.color ? `--item-color:${next.item.color}` : ""}">${avatarItemCardHTML(next.cat, next.item, { locked: true })}</div>
+    <div class="next-info">
+      <span class="next-label">${tr("Next prize", "Próximo prêmio")}</span>
+      <span class="next-cat">${meta ? emojiHtml(meta.icon) + " " + displayName(meta) : ""}</span>
+      <div class="next-track"><div class="reward-pips">${pips}</div><span class="next-left">${tr(`${left} to go`, left === 1 ? "Falta 1" : `Faltam ${left}`)}</span></div>
+    </div>`;
+}
+
 function finishQuiz() {
   const newUnlockIds = getUnlockedAvatarItemIds().filter((id) => !unlockedSnapshotAtSessionStart.includes(id));
   if (newUnlockIds.length > 0) {
@@ -1303,24 +1459,135 @@ function finishQuiz() {
 }
 
 function showResultScreen() {
+  const run = ++resultRunId;
+  const mode = getActiveProfile().mode;
+  const adult = mode === "adult";
+  const stillHere = () => run === resultRunId && document.getElementById("screen-result").classList.contains("active");
   showScreen("result");
-  playFanfare();
+
+  const items = sessionItems();
+  const n = items.length;
   const pct = quizScore.total ? quizScore.correct / quizScore.total : 1;
   const starCount = pct >= 0.85 ? 3 : pct >= 0.5 ? 2 : 1;
-  document.getElementById("result-stars").textContent = "⭐".repeat(starCount) + "☆".repeat(3 - starCount);
-  document.getElementById("result-text").textContent = tr(`You practised ${quizQueue.length} words!`, `Você brincou com ${quizQueue.length} palavras!`);
+
+  // Herói: o avatar do perfil pulando de alegria sobre os raios (crianças) ou um selo discreto (adulto).
+  document.getElementById("result-hero").innerHTML = adult
+    ? `<div class="result-check">${icon("check")}</div>`
+    : `<div class="result-burst"></div><div class="result-avatar is-cheering">${avatarSVG(avatarState)}</div>`;
+
+  // Estrelas desenhadas, entrando uma a uma (cada estrela ganha toca uma nota subindo).
+  const starsEl = document.getElementById("result-stars");
+  starsEl.hidden = adult;
+  starsEl.innerHTML = adult ? "" : [0, 1, 2]
+    .map((i) => `<span class="result-star${i < starCount ? " earned" : ""}" style="--i:${i}">${starSVG()}</span>`)
+    .join("");
+  starsEl.setAttribute("role", "img");
+  starsEl.setAttribute("aria-label", tr(`${starCount} of 3 stars`, `${starCount} de 3 estrelas`));
+  if (!adult) {
+    [523.25, 659.25, 783.99].slice(0, starCount).forEach((freq, i) => {
+      setTimeout(() => { if (stillHere()) playTone(freq, i === starCount - 1 ? 0.35 : 0.16, 0); }, 420 + i * 300);
+    });
+    setTimeout(() => { if (stillHere()) haptic("ok"); }, 420 + (starCount - 1) * 300);
+  } else {
+    playTone(659.25, 0.14, 0);
+    playTone(880, 0.26, 0.12);
+  }
+
+  document.getElementById("result-title").textContent = adult
+    ? "Sessão concluída"
+    : tr(["Nice try!", "Great job!", "Level clear!"][starCount - 1], ["Boa!", "Muito bem!", "Uau! Muito bem!"][starCount - 1]);
+
+  // O que foi praticado.
+  const textEl = document.getElementById("result-text");
+  const chipsEl = document.getElementById("result-chips");
+  if (adult) {
+    // Resumo sóbrio: praticou X (novas Y, revisou Z) e a lista do que vale rever — as que tiveram
+    // erro nesta sessão (contagem de erros do motor comparada com a foto tirada no startQuiz).
+    const introIds = new Set(quizQueue.filter((r) => r.roundType === "intro").map((r) => r.item.id));
+    const toReview = items.filter((it) => (getState(it.id).wrongCount || 0) > (sessionWrongSnapshot[it.id] || 0));
+    const fresh = items.filter((it) => introIds.has(it.id)).length;
+    const stat = (num, label) => `<div class="result-stat"><b>${num}</b><span>${label}</span></div>`;
+    textEl.innerHTML = `<span class="result-stats">${stat(n, n === 1 ? "praticada" : "praticadas")}${stat(fresh, fresh === 1 ? "nova" : "novas")}${stat(n - fresh, n - fresh === 1 ? "revisada" : "revisadas")}</span>`;
+    const row = (it) => `<li><span class="rv-en">${escapeHtml(it.en)}</span><span class="rv-pt">${escapeHtml(it.pt || "")}</span></li>`;
+    const rest = items.filter((it) => !toReview.includes(it));
+    const MAX_ROWS = 4;
+    chipsEl.innerHTML =
+      (toReview.length
+        ? `<section class="result-list is-review"><h3>Para rever</h3><ul>${toReview.slice(0, MAX_ROWS).map(row).join("")}</ul><p class="result-list-note">Voltam nas próximas sessões.</p></section>`
+        : `<p class="result-clean">${icon("check")} Nada pendente: tudo certo nesta sessão.</p>`) +
+      (rest.length
+        ? `<section class="result-list"><h3>Praticou</h3><ul>${rest.slice(0, MAX_ROWS).map(row).join("")}</ul>${rest.length > MAX_ROWS ? `<p class="result-list-note">+ ${rest.length - MAX_ROWS} outras</p>` : ""}</section>`
+        : "");
+  } else {
+    const isPhrase = items.some((it) => it.en.trim().split(/\s+/).length >= 3);
+    textEl.textContent = tr(
+      `You practised ${n} ${isPhrase ? (n === 1 ? "phrase" : "phrases") : n === 1 ? "word" : "words"}!`,
+      n === 1 ? "Você brincou com 1 palavra!" : `Você brincou com ${n} palavras!`
+    );
+    // Fichas das palavras da sessão (tocar numa ficha repete o áudio dela).
+    const MAX_CHIPS = 8;
+    chipsEl.innerHTML = "";
+    items.slice(0, MAX_CHIPS).forEach((it, i) => {
+      const chip = document.createElement("button");
+      chip.className = "result-chip";
+      chip.style.setProperty("--i", i);
+      chip.innerHTML = (it.emoji ? `<span class="chip-emo">${emojiHtml(it.emoji)}</span>` : "") + `<span class="chip-word">${escapeHtml(it.en)}</span>`;
+      chip.addEventListener("click", () => speak(it.en, it.id));
+      chipsEl.appendChild(chip);
+    });
+    if (n > MAX_CHIPS) chipsEl.insertAdjacentHTML("beforeend", `<span class="result-chip more" style="--i:${MAX_CHIPS}">+${n - MAX_CHIPS}</span>`);
+  }
+
+  // Sequência de dias: só se aumentou hoje (streakAtLoad é a foto de ANTES de abrir o app hoje) e
+  // só na primeira sessão do dia.
+  const streakEl = document.getElementById("result-streak");
+  const today = todayStr();
+  const streak = loadStreak();
+  const profileId = getActiveProfile().id;
+  const grewToday = streak.lastActiveDate === today && streakAtLoad.lastActiveDate !== today && streak.count >= 2;
+  if (grewToday && streakCelebratedOn[profileId] !== today) {
+    streakCelebratedOn[profileId] = today;
+    streakEl.hidden = false;
+    streakEl.innerHTML = `${icon("flame")}<b>${streak.count}</b><span>${tr("days in a row!", "dias seguidos!")}</span>`;
+  } else {
+    streakEl.hidden = true;
+    streakEl.innerHTML = "";
+  }
+
+  // Próximo prêmio do avatar (não aparece pro adulto: a trilha dele não usa o boneco).
+  const nextEl = document.getElementById("result-next");
+  const next = adult ? null : nextAvatarReward();
+  nextEl.hidden = !next;
+  nextEl.innerHTML = next ? nextRewardHTML(next) : "";
+
+  document.getElementById("btn-play-again").innerHTML = icon("replay") + " " + (adult ? "Mais uma sessão" : tr("Play again", "Jogar de novo"));
+  document.getElementById("btn-result-back").innerHTML = icon("back") + " " + tr("Back", "Voltar");
+
+  if (!adult) {
+    setTimeout(() => { if (stillHere()) rainConfetti(mode === "oral" ? 70 : 40); }, 350);
+  }
+  // João não lê: o parabéns é falado (id estável; sem arquivo gravado, cai no TTS ao vivo).
+  if (mode === "oral") {
+    setTimeout(() => { if (stillHere()) speakPT("Muito bem! Você conseguiu!", "result_congrats"); }, 420 + starCount * 300 + 250);
+  }
   renderHome();
 }
 
-// Momento de celebração: 🔒 → ✨ → item revelado. Só aparece quando algo é desbloqueado de verdade
-// nesta sessão (loop LEARN → COMPLETE → REWARD do LEARNING_PHILOSOPHY.md, seção 28).
+// Momento de celebração: cadeado treme → abre → o avatar aparece vestindo o item novo, com raios,
+// confete e fanfarra. Só aparece quando algo é desbloqueado de verdade nesta sessão (loop
+// LEARN → COMPLETE → REWARD → CUSTOMIZE do LEARNING_PHILOSOPHY.md, seção 28). "Vestir" já coloca
+// o item no avatar — e é com ele que o boneco comemora na tela de resultado, logo em seguida.
+let unlockRunId = 0;
 function showUnlockCelebration(newUnlockIds, onDone) {
+  const run = ++unlockRunId;
   const [cat, itemId] = newUnlockIds[0].split(":");
   const item = AVATAR_ITEMS[cat].find((i) => i.id === itemId);
-  const catLabel = { shirt: "Camiseta", hat: "Chapéu", backpack: "Mochila" }[cat] || cat;
+  const catLabel = { shirt: tr("shirt", "camiseta"), hat: tr("hat", "chapéu"), backpack: tr("backpack", "mochila") }[cat] || cat;
   showScreen("unlock");
+  const body = document.querySelector("#screen-unlock .unlock-body");
   const lockEl = document.getElementById("unlock-lock-icon");
   const revealEl = document.getElementById("unlock-reveal");
+  body.classList.remove("is-revealed");
   lockEl.style.display = "";
   revealEl.style.display = "none";
   lockEl.innerHTML = icon("lock");
@@ -1328,27 +1595,43 @@ function showUnlockCelebration(newUnlockIds, onDone) {
   void lockEl.offsetWidth;
   lockEl.classList.add("sparkle");
 
-  const btn = document.getElementById("btn-unlock-continue");
-  btn.textContent = newUnlockIds.length > 1 ? `Continuar (+${newUnlockIds.length - 1})` : "Continuar";
-  btn.onclick = () => {
+  const next = () => {
     if (newUnlockIds.length > 1) {
       showUnlockCelebration(newUnlockIds.slice(1), onDone);
     } else {
       onDone();
     }
   };
+  const more = newUnlockIds.length > 1 ? ` (+${newUnlockIds.length - 1})` : "";
+  const wearBtn = document.getElementById("btn-unlock-wear");
+  const contBtn = document.getElementById("btn-unlock-continue");
+  wearBtn.innerHTML = icon("check") + " " + tr("Wear it!", "Vestir!") + more;
+  contBtn.innerHTML = tr("Later", "Depois") + " " + icon("arrow");
+  wearBtn.onclick = () => {
+    avatarState[cat] = item.id;
+    saveAvatarState();
+    renderAllAvatarMounts();
+    next();
+  };
+  contBtn.onclick = next;
 
   setTimeout(() => {
+    if (run !== unlockRunId) return;
     playUnlock();
+    haptic("ok");
+    setTimeout(() => { if (run === unlockRunId) playFanfare(); }, 420);
+    rainConfetti(getActiveProfile().mode === "oral" ? 60 : 36);
     lockEl.style.display = "none";
     revealEl.style.display = "";
-    // recompensa concreta: o avatar aparece já vestindo o item novo (só na prévia — não troca o
-    // avatarState salvo), com o cartão do item ao lado
+    body.classList.add("is-revealed");
+    // recompensa concreta: o avatar aparece já vestindo o item novo (só na prévia — o avatarState
+    // salvo só muda se tocar em "Vestir"), com o cartão do item "carimbado" ao lado
     const previewState = Object.assign({}, avatarState, { [cat]: item.id });
     document.getElementById("unlock-item-preview").innerHTML =
-      `<div class="unlock-burst"></div><div class="unlock-avatar">${avatarSVG(previewState)}</div>` +
+      `<div class="unlock-burst"></div><div class="unlock-avatar is-cheering">${avatarSVG(previewState)}</div>` +
       `<div class="item-swatch${item.color ? "" : " is-none"}" style="${item.color ? `--item-color:${item.color}` : ""}">${avatarItemCardHTML(cat, item)}</div>`;
-    document.getElementById("unlock-item-name").textContent = `Novo item de ${catLabel.toLowerCase()} desbloqueado!`;
+    document.getElementById("unlock-title").textContent = tr("New item!", "Novo item!");
+    document.getElementById("unlock-item-name").textContent = tr(`You unlocked a new ${catLabel}!`, `Você ganhou ${cat === "hat" ? "um chapéu novo" : `uma ${catLabel} nova`}!`);
   }, 900);
 }
 document.getElementById("btn-play-again").addEventListener("click", () => startQuiz(buildSession()));
