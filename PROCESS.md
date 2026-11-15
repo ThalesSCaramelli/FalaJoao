@@ -425,6 +425,58 @@ sobre algo já decidido sem motivo novo.
   global, e o avatar fica na pose de braços erguidos. Falta gerar o áudio neural de
   `result_congrats` (`python scripts/generate_pt_audio.py`). Item novo em `AVATAR_ITEMS` entra
   sozinho no "próximo prêmio".
+### Um tema por perfil, três Homes e respiro lateral global (redesign onda 2, fase 2)
+
+- **Contexto**: a Home era igual para os três perfis. O adulto via o mascote infantil, o boneco
+  ("3/3 itens") e um "Olá! 👋". A Home acabava na metade da tela, as telas encostavam nas bordas
+  (o padding era só `env(safe-area-inset-*)`, que vale 0 fora do iPhone) e no tablet o app era
+  uma coluna de 480px.
+- **Escolha: tema = só tokens em `body[data-mode]`** (style.css, seção "Fase 2"). Cada perfil
+  redefine cor primária, destaque, superfícies, sombra, radius e peso tipográfico; todas as telas
+  herdam. O mesmo universo (Quokka Bay, mesmas fontes, mesmos componentes) em três intensidades:
+  - **João (oral, base em `:root`)**: aventura colorida, quente, com sombra "física" de jogo.
+  - **André (literacy)**: arcade esportivo em azul-noite (fundo `#15133D`), CTA amarelo com texto
+    escuro, ciano de destaque; título do desafio em caixa alta. Tudo em inglês.
+  - **Thales (adult)**: neutros + um acento (teal), sombra fina, radius menor, Nunito também nos
+    títulos, cartões com borda.
+  - A **área dos pais**, o portão e o verbete do dicionário usam sempre a paleta adulta (o público
+    ali é adulto, em qualquer perfil). O **mapa** força nós/rótulos claros sobre a ilha (no tema
+    escuro, um nó azul-noite sobre a grama ficava pesado).
+- **Tokens novos**: `--color-on-primary`, `--color-on-secondary` (texto sobre o botão: amarelo do
+  André pede texto escuro), `--color-primary-shade`, `--color-backdrop`, `--color-theme-bar`
+  (vira o `meta theme-color`), `--color-ink-on-pastel` (categorias: branco sobre pastel dava
+  ~1.5:1), `--fw-display`, `--gutter`, `--app-max`, `--card-border`, `--mission-*`, `--games-*`,
+  `--map-grass/sand/node`. `--color-text-secondary` do João foi de 3.7:1 pra 4.7:1 (AA).
+  `:where(button) { color: var(--color-text) }`: botão sem cor própria herdava o preto do navegador.
+- **Regra pra CSS novo**: texto sobre fundo/superfície = `--color-text`/`--color-text-secondary`;
+  sobre botão primário = `--color-on-primary`. Nunca `#fff`/`#333`/`#555` direto: some no tema
+  escuro do André. (Ainda com cor fixa, fora deste escopo: `#result-text` e a celebração.)
+- **Três Homes, uma estrutura** (index.html): cada bloco tem `data-modes` e o CSS esconde o que
+  não é do perfil; `renderHome` preenche.
+  - **João**: missão como herói (cresce e ocupa a altura que sobra); avatar com o **próximo
+    prêmio** (`nextAvatarUnlock`: o item trancado que falta MENOS pra chegar a `UNLOCK_THRESHOLD`,
+    com "Faltam N pra ganhar" e barra); Quokka Bay como mini trilha de 3 nós.
+  - **André**: "Today's challenge"; Word Games grande; sequência da semana em 7 fichas
+    (`loadActivityLog`); avatar + "Next reward"; Quokka Bay.
+  - **Thales**: cartão **Hoje** (revisões / novas / minutos, contados na sessão que o próprio
+    `buildSession` montou); **Sua semana** (mini gráfico SVG à mão, 7 dias, com `aria-label`);
+    **Dictionary** em destaque, com termo do dia; **Situações** (os lugares de `profileSituations()`
+    em lista, com progresso; tocar abre a prática do lugar e volta pra Home). Sem avatar e sem
+    mascote: no lugar, um monograma.
+  - Cabeçalho dos três: saudação sem emoji ("Oi," / "Hey," / "Bom dia,"), nome e sequência com
+    ícone SVG de chama. `touchStreak` e o portão dos pais continuam iguais.
+- **Layout global**: `.screen` tem padding de `max(safe-area, 16–20px)` em todas as telas (o
+  override só de quiz/categoria saiu). A partir de 700px o app tem 640px (`--app-max`),
+  centralizado sobre `--color-backdrop`; na Home, os cartões secundários vão em pares, a categoria
+  tem 3 colunas e a ilha do mapa limita a largura pela altura da tela (não passa da dobra no
+  desktop).
+- **Código**: `goToSituation` foi separado em caminhar + `startSituationQuiz(situation, returnTo)`,
+  com o mesmo sorteio de antes. Ícones novos (`flame`, `gift`, `map`) entram por
+  `Object.assign(ICONS, …)`. Motor, dados e formato do `localStorage` não mudaram.
+- **Testado** (Playwright, 390×844, 768×1024 e 1280×800, nos três perfis, com dados e sem dados):
+  Home, mapa, quiz (choice, situation, dictation, meaning), categoria, Dictionary, Word Games,
+  avatar e área dos pais; uma varredura com 10.428 rodadas (todos os tipos × todos os itens de cada
+  perfil, com e sem dados), sem exceção e sem erro no console.
 
 ---
 

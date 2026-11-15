@@ -26,56 +26,74 @@
     </div>
   </section>
 
-  <!-- TELA INICIAL -->
+  <!-- TELA INICIAL — uma estrutura só, três Homes: cada bloco diz em data-modes em quais perfis
+       aparece (CSS esconde o resto) e o renderHome preenche o texto/conteúdo de cada um.
+       João (oral): missão + avatar com o próximo prêmio + Quokka Bay. André (literacy): Today's
+       challenge + Word Games + sequência da semana + avatar. Thales (adult): Hoje + semana +
+       Dictionary + situações. Ver PROCESS.md, "Temas por perfil e três Homes". -->
   <section id="screen-home" class="screen">
     <header class="home-header">
-      <div id="home-mascot" class="home-mascot"></div>
+      <div id="home-mascot" class="home-mascot" data-modes="oral" aria-hidden="true"></div>
+      <div id="home-avatar-badge" class="home-avatar-badge" data-modes="literacy" aria-hidden="true"></div>
+      <div id="home-monogram" class="home-monogram" data-modes="adult" aria-hidden="true"></div>
       <div class="greeting">
-        <div class="hello" id="home-greeting">Olá! 👋</div>
-        <h1>Meu Inglês</h1>
+        <div class="hello" id="home-greeting"></div>
+        <h1 id="home-name"></h1>
       </div>
       <div class="streak-badge" id="streak-badge"></div>
       <button id="btn-settings" class="icon-btn" aria-label="Configurações">⚙️</button>
     </header>
 
-    <button id="btn-session" class="mission-card">
-      <div class="eyebrow">Sua Missão</div>
-      <h2 id="mission-title">🎯 Vamos começar</h2>
-      <div class="meta" id="mission-meta"></div>
-      <span class="play-pill">▶ JOGAR</span>
-    </button>
+    <div class="home-body">
+      <!-- Ação principal (todos os perfis): a sessão adaptativa do dia. -->
+      <button id="btn-session" class="mission-card">
+        <span class="mission-art" id="mission-art" aria-hidden="true"></span>
+        <div class="eyebrow" id="mission-eyebrow">Sua Missão</div>
+        <h2 id="mission-title">Vamos começar</h2>
+        <div class="meta" id="mission-meta"></div>
+        <div class="mission-stats" id="mission-stats" data-modes="adult"></div>
+        <span class="play-pill" id="mission-cta">JOGAR</span>
+      </button>
 
-    <button id="btn-world-banner" class="world-banner">
-      <div class="world-banner-head">
-        <span class="ic">🏝️</span>
-        <div class="txt">Quokka Bay<small>Explore lugares e pratique lá</small></div>
-        <span>›</span>
-      </div>
-      <div class="world-banner-preview" id="world-banner-preview"></div>
-    </button>
+      <!-- Minigames de ortografia — só no perfil do André. -->
+      <button id="btn-games" class="home-card games-card" data-modes="literacy">
+        <span class="games-card-ic" aria-hidden="true"></span>
+        <span class="home-card-txt"><b>Word Games</b><small id="games-card-sub">Build, find and fix words</small></span>
+        <span class="games-card-chips" id="games-card-chips" aria-hidden="true"></span>
+      </button>
 
-    <!-- Minigames de ortografia — só aparece no perfil do André (renderHome). -->
-    <button id="btn-games" class="world-banner dict-banner" style="display:none">
-      <div class="world-banner-head">
-        <span class="ic">🎮</span>
-        <div class="txt">Word Games<small>Build, find and fix words</small></div>
-        <span>›</span>
-      </div>
-    </button>
+      <!-- Sequência: semana em pontinhos (André) ou mini gráfico de 7 dias (Thales). -->
+      <div class="home-card streak-card" id="home-week" data-modes="literacy adult"></div>
 
-    <!-- Dicionário — só aparece no perfil adulto (renderHome). -->
-    <button id="btn-dictionary" class="world-banner dict-banner" style="display:none">
-      <div class="world-banner-head">
-        <span class="ic">📖</span>
-        <div class="txt">Dictionary<small>Palavras e expressões explicadas</small></div>
-        <span>›</span>
-      </div>
-    </button>
+      <!-- Avatar + próximo item a destravar (crianças). -->
+      <button id="btn-avatar-hero" class="home-card avatar-card" data-modes="oral literacy">
+        <span class="avatar-card-stage"><span id="home-avatar-mount" class="voxel-avatar"></span></span>
+        <span class="avatar-card-next" id="avatar-next"></span>
+      </button>
 
-    <button id="btn-avatar-hero" class="avatar-hero-home">
-      <div id="home-avatar-mount" class="voxel-avatar"></div>
-      <span class="avatar-hero-hint" id="avatar-unlock-hint-home"></span>
-    </button>
+      <!-- Dicionário — só no perfil adulto, em destaque (com o termo do dia). -->
+      <button id="btn-dictionary" class="home-card dict-card" data-modes="adult">
+        <span class="dict-card-head">
+          <span class="dict-card-ic" aria-hidden="true"></span>
+          <span class="home-card-txt"><b>Dictionary</b><small id="dict-card-sub">Palavras e expressões explicadas</small></span>
+          <span class="dict-card-chev" aria-hidden="true"></span>
+        </span>
+        <span class="dict-card-word" id="dict-card-word"></span>
+      </button>
+
+      <!-- Situações (adulto): os lugares do mapa como lista, cada um abre a prática dele. -->
+      <div class="home-card situations-card" id="home-situations" data-modes="adult"></div>
+
+      <!-- Quokka Bay (crianças): mini trilha com os 3 lugares a explorar a seguir. -->
+      <button id="btn-world-banner" class="world-banner" data-modes="oral literacy">
+        <div class="world-banner-head">
+          <span class="ic">🏝️</span>
+          <div class="txt">Quokka Bay<small>Explore lugares e pratique lá</small></div>
+          <span>›</span>
+        </div>
+        <div class="world-banner-preview" id="world-banner-preview"></div>
+      </button>
+    </div>
   </section>
 
   <!-- TELA MINIGAMES (perfil do André) -->
