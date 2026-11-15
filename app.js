@@ -347,8 +347,6 @@ function renderAvatarScreen() {
     if (countEl) countEl.textContent = `${catUnlocked}/${catTotal}`;
   });
   document.getElementById("avatar-unlocked-count").textContent = `${totalUnlocked}/${totalItems} itens desbloqueados`;
-  const homeHint = document.getElementById("avatar-unlock-hint-home");
-  if (homeHint) homeHint.textContent = `${totalUnlocked}/${totalItems} itens`;
 }
 
 document.getElementById("btn-avatar-hero").addEventListener("click", () => {
@@ -436,22 +434,28 @@ function goToSituation(situation) {
   avatarEl.classList.add("walking");
   setTimeout(() => {
     avatarEl.classList.remove("walking");
-    const items = getSituationItems(situation);
-    // Adulto/André: usa o mesmo sorteio de atividade da sessão (pickRoundType, engine.js) — "choice"
-    // por imagem não carrega o sentido de uma frase longa, e "intro" seria condescendente pro André.
-    const queue = shuffle(items)
-      .slice(0, 7)
-      .map((it) => (getActiveProfile().mode !== "oral" ? makeRound(it) : { item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
-    // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
-    // do lugar vem depois, como prática complementar.
-    const scenario = getScenarioForSituation(situation.id);
-    // André: o cenário de abertura vira escrita (o foco dele), não o round "situation" de ouvir.
-    if (scenario) {
-      queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: isImmersion() ? "write" : "situation", scenario });
-    }
-    quizReturnScreen = "world";
-    startQuiz(queue);
+    startSituationQuiz(situation, "world");
   }, 900);
+}
+
+// Monta e começa a visita a um lugar (o mesmo sorteio de sempre). Separado do goToSituation pra
+// lista de situações da Home do adulto abrir o lugar direto, sem a caminhada do avatar no mapa.
+function startSituationQuiz(situation, returnTo) {
+  const items = getSituationItems(situation);
+  // Adulto/André: usa o mesmo sorteio de atividade da sessão (pickRoundType, engine.js) — "choice"
+  // por imagem não carrega o sentido de uma frase longa, e "intro" seria condescendente pro André.
+  const queue = shuffle(items)
+    .slice(0, 7)
+    .map((it) => (getActiveProfile().mode !== "oral" ? makeRound(it) : { item: it, roundType: getState(it.id).introduced ? "choice" : "intro" }));
+  // se esse lugar tem um cenário de problem-posing, ele abre a visita — o resto do vocabulário
+  // do lugar vem depois, como prática complementar.
+  const scenario = getScenarioForSituation(situation.id);
+  // André: o cenário de abertura vira escrita (o foco dele), não o round "situation" de ouvir.
+  if (scenario) {
+    queue.unshift({ item: CONTENT_BY_ID[scenario.correctId], roundType: isImmersion() ? "write" : "situation", scenario });
+  }
+  quizReturnScreen = returnTo;
+  startQuiz(queue);
 }
 
 document.getElementById("btn-world-banner").addEventListener("click", () => {
@@ -679,39 +683,238 @@ document.getElementById("btn-quiz-back").addEventListener("click", goToQuizRetur
 document.getElementById("btn-result-back").addEventListener("click", goToQuizReturnScreen);
 
 // ===================== Home =====================
+// Uma Home por perfil (redesign onda 2, fase 2). A estrutura do index.html é a mesma; cada bloco
+// diz em `data-modes` onde aparece e o tema (tokens em body[data-mode]) dá a cara de cada um:
+// João = aventura colorida, André = arcade em inglês, Thales = app de produtividade sóbrio.
+// Ícones de interface que só a Home usa (somados ao ICONS sem mexer na lista principal).
+Object.assign(ICONS, {
+  flame: '<path d="M12.5 1.5c1 4.2 7 6.4 7 13.2a7.5 7.5 0 01-15 0c0-3.6 1.9-5.9 3.8-7.6.1 2.5 1.2 4.1 2.7 4.6-.8-3.9-.1-7.3 1.5-10.2z" fill="currentColor"/><path d="M12 13.2c.4 1.9 3 2.8 3 5.4a3 3 0 01-6 0c0-1.9 1.4-3.3 3-5.4z" fill="#fff" opacity=".45"/>',
+  gift: '<rect x="3.5" y="9" width="17" height="11.5" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M2.5 9h19M12 9v11.5M12 9c-2-4-6.5-4.2-6.5-1.6C5.5 9 9 9 12 9zm0 0c2-4 6.5-4.2 6.5-1.6C18.5 9 15 9 12 9z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>',
+  map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5l-5.5 2.5-6-2.5-5.5 2.5V6.5zM9 4v13.5M15 6.5V20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/>',
+});
+
+// Saudação por hora do dia (só o adulto; criança recebe um "Oi" simples). Sem emoji.
+function homeGreeting(mode) {
+  if (mode === "oral") return "Oi,";
+  if (mode === "literacy") return "Hey,";
+  const h = new Date().getHours();
+  return h < 12 ? "Bom dia," : h < 18 ? "Boa tarde," : "Boa noite,";
+}
+
+// Próximo item do avatar a destravar: entre os trancados do perfil, o que falta MENOS pra chegar
+// no limiar (UNLOCK_THRESHOLD, a mesma regra de isCategoryUnlockThresholdMet — só leitura).
+// Responde "o que eu ganho se praticar X, e quanto falta" em vez de "3/13 itens".
+function nextAvatarUnlock() {
+  let best = null;
+  Object.keys(AVATAR_ITEMS).forEach((cat) => {
+    AVATAR_ITEMS[cat].filter(avatarItemVisible).forEach((item) => {
+      if (isCategoryUnlockThresholdMet(item.unlockedBy)) return;
+      const items = CONTENT.filter((it) => it.category === item.unlockedBy);
+      const progressed = items.filter((it) => ["consolidating", "mastered"].includes(getLearningStage(it.id))).length;
+      // -1e-9: 0.4 * 15 dá 6.000000000000001 em ponto flutuante
+      const needed = Math.max(1, Math.ceil(UNLOCK_THRESHOLD * items.length - 1e-9));
+      const left = Math.max(1, needed - progressed);
+      if (!best || left < best.left || (left === best.left && progressed > best.progressed)) {
+        best = { cat, item, catId: item.unlockedBy, progressed, needed, left };
+      }
+    });
+  });
+  return best;
+}
+
+function renderAvatarNext() {
+  const el = document.getElementById("avatar-next");
+  if (!el) return;
+  const next = nextAvatarUnlock();
+  if (!next) {
+    el.innerHTML = `<span class="an-eyebrow">${icon("star")} ${tr("Collection complete!", "Coleção completa!")}</span>
+      <span class="an-txt"><b>${tr("You unlocked every item", "Você ganhou todos os itens")}</b><small>${tr("Tap to dress up your avatar", "Toque pra vestir seu avatar")}</small></span>`;
+    return;
+  }
+  const meta = CATEGORY_META[next.catId];
+  const pct = Math.round((next.progressed / next.needed) * 100);
+  const color = next.item.color ? ` style="--item-color:${next.item.color}"` : "";
+  el.innerHTML = `<span class="an-eyebrow">${icon("gift")} ${tr("Next reward", "Próximo prêmio")}</span>
+    <span class="an-row">
+      <span class="an-item${next.item.color ? "" : " is-none"}"${color}>${avatarItemIcon(next.cat, next.item)}</span>
+      <span class="an-txt"><b>${meta ? emojiHtml(meta.icon) + " " + displayName(meta) : ""}</b>
+        <small>${next.left === 1 ? tr("1 more to unlock!", "Falta só 1!") : tr(`${next.left} more to unlock`, `Faltam ${next.left} pra ganhar`)}</small></span>
+    </span>
+    <span class="an-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${next.needed}" aria-valuenow="${next.progressed}"><span style="width:${Math.max(6, pct)}%"></span></span>`;
+}
+
+// Últimos 7 dias do log de atividade (loadActivityLog, engine.js) — total de interações por dia.
+function homeWeekDays() {
+  const log = loadActivityLog();
+  return lastNDays(7).map((date) => {
+    const d = log[date] || {};
+    const total = (d.seen || 0) + (d.correct || 0) + (d.wrong || 0) + (d.speech || 0);
+    return { date, total, dow: new Date(date + "T12:00:00Z").getUTCDay() };
+  });
+}
+
+// André: a sequência como 7 "fichas" da semana (acesas = praticou; hoje com contorno).
+function renderStreakWeek(streak) {
+  const days = homeWeekDays();
+  const letters = ["S", "M", "T", "W", "T", "F", "S"];
+  const today = days[days.length - 1];
+  const cells = days.map((d, i) => `<span class="wk-day${d.total ? " on" : ""}${i === days.length - 1 ? " today" : ""}">
+      <span class="wk-dot">${d.total ? icon("check") : ""}</span><span class="wk-l">${letters[d.dow]}</span></span>`).join("");
+  return `<div class="wk-head">
+      <span class="wk-flame">${icon("flame")}</span>
+      <span class="wk-title"><b>${streak.count}-day streak</b><small>${today.total ? "Great job today!" : "Play today to keep it going!"}</small></span>
+    </div>
+    <div class="wk-days" role="img" aria-label="${days.filter((d) => d.total).length} of the last 7 days played">${cells}</div>`;
+}
+
+// Thales: mini gráfico de barras dos 7 dias (SVG à mão, cor por classe → token), com a mesma
+// informação em texto no aria-label. Sem porcentagem nem acerto/erro: só "praticou quanto".
+function renderWeekChart(streak) {
+  const days = homeWeekDays();
+  const letters = ["D", "S", "T", "Q", "Q", "S", "S"];
+  const W = 280, H = 92, top = 16, bottom = 20;
+  const plotH = H - top - bottom;
+  const slot = W / days.length;
+  const barW = 22;
+  const max = Math.max(5, ...days.map((d) => d.total));
+  let bars = "";
+  days.forEach((d, i) => {
+    const x = i * slot + (slot - barW) / 2;
+    const isToday = i === days.length - 1;
+    const h = d.total ? Math.max(4, (d.total / max) * plotH) : 3;
+    bars += `<rect class="wc-bar${d.total ? "" : " empty"}${isToday ? " today" : ""}" x="${x}" y="${top + plotH - h}" width="${barW}" height="${h}" rx="4"/>`;
+    if (d.total) bars += `<text class="wc-val" x="${x + barW / 2}" y="${top + plotH - h - 4}" text-anchor="middle">${d.total}</text>`;
+    bars += `<text class="wc-x${isToday ? " today" : ""}" x="${x + barW / 2}" y="${H - 4}" text-anchor="middle">${letters[d.dow]}</text>`;
+  });
+  const sum = days.reduce((a, d) => a + d.total, 0);
+  const active = days.filter((d) => d.total).length;
+  const desc = `Últimos 7 dias: praticou em ${active} dias, ${sum} interações. ` + days.map((d) => `${d.date.slice(8, 10)}/${d.date.slice(5, 7)}: ${d.total}`).join("; ");
+  return `<div class="wc-head">
+      <span class="home-card-txt"><b>Sua semana</b><small>${sum ? `${sum} interações em ${active} ${active === 1 ? "dia" : "dias"}` : "Nenhuma prática ainda esta semana"}</small></span>
+      <span class="wc-streak">${icon("flame")} ${streak.count === 1 ? "1º dia" : `${streak.count} dias seguidos`}</span>
+    </div>
+    <svg class="wc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(desc)}"><title>${escapeHtml(desc)}</title>
+      <line class="wc-base" x1="0" x2="${W}" y1="${top + plotH + 0.5}" y2="${top + plotH + 0.5}"/>${bars}</svg>`;
+}
+
+// Thales: os lugares do mapa como "situações" — primeiro os começados (mais perto de concluir),
+// depois os novos; tocar abre a prática daquele lugar (startSituationQuiz) e volta pra Home.
+function renderHomeSituations() {
+  const el = document.getElementById("home-situations");
+  if (!el) return;
+  const all = profileSituations().map((s) => ({ s, ratio: getSituationProgressRatio(s), n: getSituationItems(s).length }));
+  const order = (r) => (r.ratio >= UNLOCK_THRESHOLD ? 2 : r.ratio > 0 ? 0 : 1);
+  const list = [...all].sort((a, b) => order(a) - order(b) || b.ratio - a.ratio).slice(0, 4);
+  el.innerHTML = `<div class="sit-head">
+      <span class="home-card-txt"><b>Situações</b><small>Pratique o inglês de cada lugar</small></span>
+      <button class="sit-map-btn" id="btn-home-map">${icon("map")} Mapa</button>
+    </div>
+    <div class="sit-list">${list.map(({ s, ratio, n }) => {
+      const done = Math.round(ratio * n);
+      return `<button class="sit-row" data-situation="${s.id}">
+        <span class="sit-ic">${emojiHtml(s.icon)}</span>
+        <span class="sit-main"><span class="sit-name">${escapeHtml(displayName(s))}</span>
+          <span class="sit-meter"><span style="width:${Math.round(Math.min(1, ratio) * 100)}%"></span></span></span>
+        <span class="sit-num">${done}/${n}</span>
+        ${icon("chevron", "sit-chev")}
+      </button>`;
+    }).join("")}</div>`;
+  el.querySelectorAll(".sit-row").forEach((row) =>
+    row.addEventListener("click", () => {
+      const s = profileSituations().find((x) => x.id === row.dataset.situation);
+      if (s) startSituationQuiz(s, "home");
+    })
+  );
+  document.getElementById("btn-home-map").addEventListener("click", () => {
+    renderWorldMap();
+    showScreen("world");
+  });
+}
+
+// Thales: Dictionary em destaque, com um "termo do dia" (fixo no dia, muda à meia-noite UTC).
+function renderDictCard() {
+  const dict = typeof ADULT_DICTIONARY !== "undefined" ? ADULT_DICTIONARY : [];
+  document.getElementById("dict-card-sub").textContent = `${dict.length} termos explicados, com exemplo`;
+  const wordEl = document.getElementById("dict-card-word");
+  if (!dict.length) { wordEl.innerHTML = ""; return; }
+  const e = dict[Math.floor(Date.now() / 86400000) % dict.length];
+  wordEl.innerHTML = `<span class="dw-label">Termo do dia</span><span class="dw-term">${escapeHtml(e.term)}</span><span class="dw-pt">${escapeHtml(e.pt)}</span>`;
+}
+
+// Quokka Bay (crianças): os 3 lugares com menos progresso como uma mini trilha de nós (mesmo
+// anel de progresso dos pinos do mapa), sugestão do que explorar a seguir.
+function renderBayPreview() {
+  const next = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
+  document.getElementById("world-banner-preview").innerHTML = next
+    .map((s) => {
+      const p = Math.round(Math.min(1, getSituationProgressRatio(s) / UNLOCK_THRESHOLD) * 100);
+      return `<span class="bay-node"><span class="bay-node-badge" style="--pin-progress:${p}%">${emojiHtml(s.icon)}</span><span class="bay-node-label">${escapeHtml(displayName(s))}</span></span>`;
+    })
+    .join("");
+}
+
 function renderHome() {
-  // CSS por modo (ex. frase longa do adulto não pode vir em CAIXA ALTA gigante no card de intro).
-  document.body.dataset.mode = getActiveProfile().mode;
-  document.getElementById("home-mascot").innerHTML = mascotSVG();
+  // Tema e Home por modo: os tokens de cor/radius/sombra/fonte trocam em body[data-mode] (style.css).
+  const profile = getActiveProfile();
+  const mode = profile.mode;
+  document.body.dataset.mode = mode;
+  // barra do sistema (PWA) na cor do fundo do tema
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute("content", getComputedStyle(document.body).getPropertyValue("--color-theme-bar").trim() || "#FDF3E1");
+  document.getElementById("home-mascot").innerHTML = mode === "oral" ? mascotSVG() : "";
+  document.getElementById("home-avatar-badge").innerHTML = mode === "literacy" ? avatarSVG(avatarState) : "";
+  document.getElementById("home-monogram").textContent = mode === "adult" ? profile.name.charAt(0) : "";
   renderAllAvatarMounts();
   renderAvatarScreen();
 
-  // streak
+  // cabeçalho: saudação + nome + sequência (touchStreak marca o dia de hoje — mesma lógica de antes)
   const streak = touchStreak();
-  document.getElementById("streak-badge").innerHTML = streak.count > 0 ? `🔥 ${streak.count}` : "👋";
-  document.getElementById("home-greeting").textContent =
-    streak.count > 1 ? tr(`${streak.count} days in a row!`, `${streak.count} dias seguidos!`) : tr("Hi! 👋", "Olá! 👋");
+  document.getElementById("home-greeting").textContent = homeGreeting(mode);
+  document.getElementById("home-name").textContent = profile.name;
+  const badge = document.getElementById("streak-badge");
+  const days = streak.count === 1 ? tr("day", "dia") : tr("days", "dias");
+  badge.innerHTML = `${icon("flame")}<b>${streak.count}</b>${mode === "adult" ? `<span>${days}</span>` : ""}`;
+  badge.setAttribute("aria-label", tr(`${streak.count} ${days} in a row`, `${streak.count} ${days} seguidos`));
+  badge.setAttribute("role", "img");
   renderHomeStaticTexts();
-  document.getElementById("btn-dictionary").style.display = getActiveProfile().mode === "adult" ? "" : "none";
-  document.getElementById("btn-games").style.display = getActiveProfile().mode === "literacy" ? "" : "none";
 
-  // missão do dia (sessão adaptativa, com carinha de missão)
+  // missão do dia (sessão adaptativa): o tema que mais aparece na sessão vira o título
   const session = buildSession();
   const catCounts = {};
   session.forEach((r) => { catCounts[r.item.category] = (catCounts[r.item.category] || 0) + 1; });
   const topCatId = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a])[0];
   const topCat = topCatId ? CATEGORY_META[topCatId] : null;
   const estMinutes = Math.max(1, Math.round(session.length / 3));
-  document.getElementById("mission-title").innerHTML = topCat ? `${emojiHtml(topCat.icon)} ${displayName(topCat)}` : tr("🎉 All done!", "🎉 Tudo em dia!");
-  document.getElementById("mission-meta").innerHTML = session.length
-    ? icon("clock") + " " + tr(`~${estMinutes} min · ${session.length} activities`, `~${estMinutes} min · ${session.length} atividades`)
-    : tr("Come back later to review!", "Volta mais tarde pra revisar!");
+  const reviews = session.filter((r) => getState(r.item.id).introduced).length;
+  const fresh = session.length - reviews;
+  document.getElementById("mission-art").innerHTML = topCat && mode !== "adult" ? emojiHtml(topCat.icon) : "";
+  if (mode === "adult") {
+    document.getElementById("mission-title").textContent = session.length ? "Sessão do dia" : "Tudo em dia";
+    document.getElementById("mission-meta").textContent = session.length && topCat ? `Foco: ${topCat.namePt}` : "Volte mais tarde pra revisar.";
+    document.getElementById("mission-stats").innerHTML = session.length
+      ? `<span class="ms"><b>${reviews}</b>${reviews === 1 ? "revisão" : "revisões"}</span><span class="ms"><b>${fresh}</b>${fresh === 1 ? "nova" : "novas"}</span><span class="ms"><b>~${estMinutes}</b>min</span>`
+      : "";
+  } else {
+    document.getElementById("mission-title").innerHTML = topCat ? displayName(topCat) : tr("All done!", "Tudo em dia!");
+    document.getElementById("mission-meta").innerHTML = session.length
+      ? icon("clock") + " " + tr(`${session.length} rounds · ~${estMinutes} min`, `~${estMinutes} min · ${session.length} atividades`)
+      : tr("Come back later to review!", "Volta mais tarde pra revisar!");
+    document.getElementById("mission-stats").innerHTML = "";
+  }
 
-  // prévia de Quokka Bay: 3 lugares com menos progresso, como sugestão do que explorar a seguir
-  const nextSituations = profileSituations().sort((a, b) => getSituationProgressRatio(a) - getSituationProgressRatio(b)).slice(0, 3);
-  document.getElementById("world-banner-preview").innerHTML = nextSituations
-    .map((s) => `<div class="chip"><span class="chip-ic">${emojiHtml(s.icon)}</span>${displayName(s)}</div>`)
-    .join("");
+  // blocos por perfil
+  const week = document.getElementById("home-week");
+  week.innerHTML = mode === "literacy" ? renderStreakWeek(streak) : mode === "adult" ? renderWeekChart(streak) : "";
+  if (mode !== "adult") renderAvatarNext();
+  if (mode === "literacy") {
+    document.getElementById("games-card-chips").innerHTML = SPELLING_GAMES.map((g) => `<span>${icon(g.icon)}</span>`).join("");
+  }
+  if (mode === "adult") {
+    renderDictCard();
+    renderHomeSituations();
+  } else {
+    renderBayPreview();
+  }
 }
 
 // Grade de categorias (explorar livre) — mora dentro de Adventure/My English World, não na Home.
@@ -1090,11 +1293,25 @@ function renderHomeStaticTexts() {
     const el = document.querySelector(sel);
     if (el) el.textContent = text;
   };
-  set("#btn-session .eyebrow", tr("Your mission", "Sua Missão"));
+  const adult = getActiveProfile().mode === "adult";
+  // eyebrow da ação principal: missão (João), desafio do dia (André), "Hoje" (Thales)
+  set("#mission-eyebrow", adult ? "Hoje" : tr("Today's challenge", "Sua missão"));
   set("#btn-world-banner .txt small", tr("Explore places and practise there", "Explore lugares e pratique lá"));
+  set("#games-card-sub", "3 games · build, find and fix words");
   set("#screen-world .section-title", tr("Explore by category", "Explorar por categoria"));
-  const pill = document.querySelector("#btn-session .play-pill");
-  if (pill) pill.innerHTML = icon("play") + " " + tr("PLAY", "JOGAR");
+  const pill = document.getElementById("mission-cta");
+  if (pill) pill.innerHTML = adult ? "Começar sessão " + icon("arrow") : icon("play") + " " + tr("PLAY", "JOGAR");
+  const gamesIc = document.querySelector("#btn-games .games-card-ic");
+  if (gamesIc) gamesIc.innerHTML = icon("gamepad");
+  const dictIc = document.querySelector("#btn-dictionary .dict-card-ic");
+  if (dictIc) dictIc.innerHTML = icon("book");
+  const dictChev = document.querySelector("#btn-dictionary .dict-card-chev");
+  if (dictChev) dictChev.innerHTML = icon("chevron");
+  const bayIc = document.querySelector("#btn-world-banner .ic");
+  if (bayIc) bayIc.innerHTML = icon("map");
+  // mapa: título e dica no idioma do perfil (o título tinha emoji de cromo 🏝️)
+  const worldTitle = document.querySelector("#screen-world .sub-header h2");
+  if (worldTitle) worldTitle.innerHTML = icon("map") + " Quokka Bay";
   const playQuizBtn = document.getElementById("btn-play-quiz");
   if (playQuizBtn) playQuizBtn.innerHTML = icon("play") + " " + tr("Play", "Jogar");
 }
