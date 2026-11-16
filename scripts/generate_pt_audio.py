@@ -31,6 +31,8 @@ OUT_DIR = os.path.join(ROOT, "assets", "audio", "pt")
 # escolhido a mao — mesma regra de ouro dos ids de CONTENT_GUIDE.md: uma vez criado, nao muda.
 EXTRA_LINES = {
     "onboarding_greeting": "Oi! Eu sou o Quokka! Vamos aprender inglês brincando?",
+    # parabens falado no fim da sessao do Joao (showResultScreen, app.js)
+    "result_congrats": "Muito bem! Você conseguiu!",
 }
 
 

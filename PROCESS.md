@@ -289,6 +289,220 @@ sobre algo já decidido sem motivo novo.
   tradução aparece como apoio.
 - Só pra frases de 3+ palavras, já vistas; o João não usa (ainda não lê).
 
+### Área dos pais: portão de "segurar 3 s" + painel de parceria (redesign, fase 5)
+
+- **Contexto**: a tela de Configurações misturava perfil, voz, atualização, tema do mês, um
+  resumo em texto, compartilhar, zerar progresso e botões de debug — com slider/select nativos e
+  `<hr>` quebrados — e abria com um toque na engrenagem da Home, ao alcance das crianças.
+- **Portão**: a engrenagem abre um diálogo "segure o botão por 3 segundos", com anel de
+  progresso (`openParentGate`, app.js). Escolhido em vez de uma continha: criança de 4 anos toca,
+  não segura; a instrução é texto (quem não lê não descobre); não há resposta pra acertar no
+  chute; e continha vira desafio pro André (8 anos). Toque curto ou soltar antes da hora não abre
+  (o anel volta e repete a instrução, sem bronca). Teclado: segurar Espaço/Enter; Esc fecha. Não é
+  segurança — é pra ninguém trocar de perfil ou zerar sem querer.
+- **Painel do perfil ativo** (`renderParentDashboard`): números de cabeçalho (última vez,
+  sequência, já sabe), atividade de 14 dias em barras empilhadas, estágios dos itens já vistos,
+  "pra usar em casa" (o que praticou por último), "onde dá pra ajudar", padrões de grafia (só
+  André) e progresso por tema. Gráficos em SVG à mão, cor por classe → token, cada um com
+  `aria-label`/`<title>` com o mesmo dado em texto.
+- **Linguagem de parceria** (LEARNING_PHILOSOPHY.md §32-34): nenhuma porcentagem, nenhuma
+  "nota". Acerto e erro **não** aparecem separados no gráfico de atividade — viram "respostas":
+  o que importa pro pai é que praticou, não a taxa de acerto. Itens difíceis aparecem como
+  "onde dá pra ajudar", com sugestão de usar em casa.
+- **Preservado**: "última vez" e sequência continuam lendo `streakAtLoad` (nunca `loadStreak()`
+  depois do touch); `buildProgressSummary`/`buildStructuredReportData` geram o mesmo relatório
+  (o critério de "com mais dificuldade" virou `getStrugglingItems`, igual ao de antes, usado nos
+  três lugares); chaves `profileKey('meuIngles_rate')`/`('meuIngles_voice')` e formato dos dados
+  intactos; motor não mudou.
+- **Voz**: slider vira 3 botões (Devagar 0.65 · Normal 0.85 · Rápido 1.05 — mesma escala de
+  `speechRate`); valor antigo fora desses três continua valendo, só destaca o mais próximo.
+- **Zerar progresso** foi pra "Zona de perigo": em vez de `confirm()`, digitar o nome do perfil
+  (sem acento/maiúscula). Apaga o mesmo que antes (só o `learningState`).
+- **Debug** (simular dificuldade, log de adaptação) dentro de "Avançado", um `<details>` recolhido.
+- **Tema do mês**: sem tema começado ainda, mostra o próximo como prévia ("começa em dezembro");
+  o relatório compartilhado continua só com o tema atual.
+- **Testado** (Playwright, 390×844 e 768×1024): toque curto e 1,5 s não abrem, 3 s abre; troca
+  de perfil; velocidade/voz salvando no perfil certo; compartilhar (mock de `navigator.share` e
+  fallback de clipboard); zerar com nome errado (bloqueado), cancelar, nome certo (só o perfil
+  ativo); debug escondido e acessível; estado vazio (Thales sem dados); sem erro no console.
+
+---
+
+### Emoji de conteúdo em PNG Fluent 3D, e fotos só quando claramente boas (Fase 4a, nov/2026)
+
+- **Contexto**: emoji de texto é desenhado de um jeito diferente em cada celular, e as fotos de
+  `assets/images` misturavam estilos (gravura, desenho com fundo xadrez de transparência colado no
+  JPG, foto). Numa mesma pergunta aparecia uma borboleta de desenho, um leão xadrez e um cachorro
+  em gravura; o app perdia a cara de premium (`DESIGN_BRIEF.md`).
+- **Escolha**: os emoji de conteúdo viram PNG do Fluent Emoji 3D (Microsoft, MIT), 160x160, em
+  `assets/emoji/<codepoints>.png`, baixados por `scripts/fetch_fluent_emoji.py`. `emojiHtml()`
+  (app.js) troca cada emoji da string por `<img class="emo">` e cai no texto quando não há PNG;
+  `.emo` tem `height: 1em`, então cada tela mantém o tamanho que já tinha. A lista de PNGs
+  (`EMOJI_ASSETS`) fica inline em `data.js`, gerada pelo script (funciona offline, sem fetch extra).
+  `renderMedia` pula a foto dos ids em `PHOTO_SKIP` (data.js, lista comentada por motivo) quando o
+  emoji do item tem PNG.
+- **Fotos**: revisão visual das 71. 33 vão pro Fluent: todos os animais e todo o corpo (pra um
+  conjunto inteiro não misturar foto + gravura + desenho), mais as fora de contexto, desenhadas ou
+  com marca d'água. As 38 que ficam são fotos limpas. Nenhum arquivo foi apagado.
+- **Porquê**: um estilo único e reconhecível vale mais que a foto "real" em itens que o aluno tem
+  só que identificar. Fluent é MIT e vem como PNG (sem depender da fonte do aparelho).
+- **Limites**: o Fluent 3D não tem família, "pessoas de mãos dadas" nem bandeiras. As três
+  primeiras o script monta juntando emoji (`COMPOSE`); as bandeiras (🇧🇷, 🇦🇺) ficam em texto.
+  Perguntas de comida/escola ainda podem misturar uma foto mantida com um Fluent. Os PNGs pesam
+  ~5,8 MB no total, mas só são baixados sob demanda (entram no `MEDIA_CACHE` do `sw.js` via
+  `/assets/emoji/`).
+- **Consequência**: emoji novo em `data.js` → rodar `python scripts/fetch_fluent_emoji.py`
+  (`CONTENT_GUIDE.md` seção 3); se não resolver, ele aparece na lista de "SEM PNG" e o app usa o
+  texto.
+### Identidade ilustrada (redesign, fase 4b): avatar voxel chibi, quokka de verdade e mapa-ilha
+
+- **Contexto**: o avatar era uma pilha de retângulos chapados, o mascote parecia um urso genérico e
+  o mapa era um gradiente com bolinhas; os itens do avatar eram bolinhas coloridas com emoji
+  (`DESIGN_BRIEF.md` §6, §9, §27).
+- **Alternativas consideradas**: imagens raster (PNG) pro avatar/mapa — mais ricas, mas pesam no
+  cache offline e não trocam de cor por item; rota do mapa desenhada à mão por perfil — quebraria a
+  cada `mapPos` novo.
+- **Escolha**:
+  - **Avatar**: SVG inline montado com um "kit voxel" (`voxBox`, app.js): cada peça é um bloco com
+    3 faces (frente, topo claro, lado escuro) derivadas da cor do item (`mixHex`). Proporção chibi,
+    olhos com brilho, bochechas, sombra no chão; idle (respirar/piscar) só em CSS, desligado em
+    `prefers-reduced-motion`. Mesmo `state` de sempre; viewBox fixo (124×168) com ou sem chapéu.
+  - **Itens**: `avatarItemIcon` desenha o próprio item em voxel; o seletor virou grade de cartões
+    colecionáveis (`.item-swatch` com `--item-color`), trancado = silhueta desbotada + cadeado.
+  - **Celebração**: mostra o avatar já vestindo o item novo (só prévia, não muda o `avatarState`).
+  - **Mascote**: quokka de corpo inteiro (pés grandes, rabo, folha nas patinhas, sorriso).
+  - **Mapa**: ilha ilustrada em SVG estático (index.html) com proporção fixa 3:5; a trilha tracejada
+    é gerada em `worldTrailPath` por árvore geradora mínima sobre os `mapPos` do perfil ativo. Pinos
+    viraram nós com anel de progresso (`--pin-progress`, enche até `UNLOCK_THRESHOLD`) e, passado o
+    limiar, anel dourado + medalha de estrela (`.ring`).
+- **Porquê**: SVG inline é leve, offline, recolore por item e escala de 46px (mapa) a 150px; a
+  árvore mínima nunca cruza caminhos e funciona pra qualquer conjunto de lugares sem manutenção.
+- **Consequência**: a trilha é só decoração — não cria ordem nem bloqueio (todo lugar continua
+  tocável). Nenhuma lógica do motor/progresso mudou. O ícone do lugar é um slot (conteúdo direto do
+  `.pin-badge`; `img`/`svg` filhos já são dimensionados). A dica do mapa (`.world-hint`) saiu de
+  dentro do mapa e ficou acima dele; o avatar do mapa fica em pé acima do nó (não sobre o ícone) e
+  começa no primeiro lugar do perfil. Item novo em `AVATAR_ITEMS` com `type` de chapéu novo precisa
+  de desenho em `svgHat` + `avatarItemIcon`.
+
+### Momentos de recompensa, Quokka falando e rodada de ouvir (redesign onda 2, fase 3)
+
+- **Contexto**: o fim de sessão era "⭐⭐☆ Você brincou com 2 palavras!" e dois botões com emoji; a
+  rodada `choice` (ouvir e tocar na imagem) tinha um vazio enorme em cima, só com o botão "Ouvir
+  de novo"; e o mascote ainda parecia um urso (`DESIGN_BRIEF.md` §7, §15–18, §35;
+  `LEARNING_PHILOSOPHY.md` §28–29, §35).
+- **Alternativas consideradas**: placar com acertos/percentual pras crianças — vira "nota" e
+  contraria "recompensa sem XP"; marcar nas fichas quais palavras a criança errou — punição
+  disfarçada (só o adulto vê "para rever"); vestir o item novo automaticamente ao desbloquear —
+  tira a escolha da criança; guardar um registro próprio de erros da sessão — duplicaria o motor
+  (bastou comparar `wrongCount` com uma foto tirada no `startQuiz`).
+- **Escolha**:
+  - **Fim de sessão** (`showResultScreen`, `#screen-result`): o avatar do perfil pula com os braços
+    pra cima (`.is-cheering` + `.av-cheer-arm` em `avatarSVG`), estrelas em SVG entram uma a uma
+    (`starSVG`, uma nota por estrela), as palavras da sessão viram fichas com emoji Fluent (tocar
+    repete o áudio), o **próximo prêmio** do avatar aparece com uma trilha de pontinhos até ele
+    (`nextAvatarReward` / `nextRewardHTML`: só leitura de `AVATAR_ITEMS`,
+    `isCategoryUnlockThresholdMet`, `getCategoryProgressRatio`; "Faltam N", nunca porcentagem), a
+    sequência de dias aparece só se aumentou hoje (uma vez por dia) e cai confete (`rainConfetti`).
+  - **Por perfil** (`body[data-mode]`): João = maior, festivo e falado (`speakPT` com o id estável
+    `result_congrats`, registrado em `EXTRA_LINES` de `scripts/generate_pt_audio.py`; sem arquivo
+    cai no TTS ao vivo); André = em inglês, título em caixa alta com relevo (arcade); Thales =
+    resumo sóbrio (praticadas / novas / revisadas + "Para rever" + "Praticou"), sem boneco, sem
+    estrelas, sem confete.
+  - **Desbloqueio** (`showUnlockCelebration`): anel dourado no cadeado, raios que abrem, item
+    "carimbado", `playUnlock` + `playFanfare` + confete na revelação; os botões só entram depois
+    da revelação. "Vestir!" já coloca o item (e é com ele que o avatar comemora no resultado, logo
+    em seguida); "Depois" só segue.
+  - **Quokka** (`mascotSVG(opts)`): redesenhado — pelo marrom-acinzentado, orelhas pequenas e
+    redondas, tufos nas bochechas, focinho curto com nariz escuro, o sorriso aberto, corpo em
+    pera, patas traseiras compridas e rabo fino. `mascotSVG({ talking: true })` é a variação de
+    boca aberta (`.q-mouth`).
+  - **Rodada `choice`**: `#quiz-listen` mostra o Quokka falando e um balão de som cujas barrinhas
+    pulsam enquanto o áudio toca (`trackListening` só observa `currentAudio`/`speechSynthesis`);
+    o balão é o "ouvir de novo". Quando o áudio termina, as imagens dão um pulinho em sequência
+    ("agora escolhe"). No perfil adulto fica o botão de texto de sempre.
+- **Consequência**: nenhuma lógica de motor, SRS ou desbloqueio mudou (`handleChoice`, `speak`,
+  `finishQuiz` intactos). `prefers-reduced-motion`: sem confete, animações desligadas pela regra
+  global, e o avatar fica na pose de braços erguidos. Falta gerar o áudio neural de
+  `result_congrats` (`python scripts/generate_pt_audio.py`). Item novo em `AVATAR_ITEMS` entra
+  sozinho no "próximo prêmio".
+### Um tema por perfil, três Homes e respiro lateral global (redesign onda 2, fase 2)
+
+- **Contexto**: a Home era igual para os três perfis. O adulto via o mascote infantil, o boneco
+  ("3/3 itens") e um "Olá! 👋". A Home acabava na metade da tela, as telas encostavam nas bordas
+  (o padding era só `env(safe-area-inset-*)`, que vale 0 fora do iPhone) e no tablet o app era
+  uma coluna de 480px.
+- **Escolha: tema = só tokens em `body[data-mode]`** (style.css, seção "Fase 2"). Cada perfil
+  redefine cor primária, destaque, superfícies, sombra, radius e peso tipográfico; todas as telas
+  herdam. O mesmo universo (Quokka Bay, mesmas fontes, mesmos componentes) em três intensidades:
+  - **João (oral, base em `:root`)**: aventura colorida, quente, com sombra "física" de jogo.
+  - **André (literacy)**: arcade esportivo em azul-noite (fundo `#15133D`), CTA amarelo com texto
+    escuro, ciano de destaque; título do desafio em caixa alta. Tudo em inglês.
+  - **Thales (adult)**: neutros + um acento (teal), sombra fina, radius menor, Nunito também nos
+    títulos, cartões com borda.
+  - A **área dos pais**, o portão e o verbete do dicionário usam sempre a paleta adulta (o público
+    ali é adulto, em qualquer perfil). O **mapa** força nós/rótulos claros sobre a ilha (no tema
+    escuro, um nó azul-noite sobre a grama ficava pesado).
+- **Tokens novos**: `--color-on-primary`, `--color-on-secondary` (texto sobre o botão: amarelo do
+  André pede texto escuro), `--color-primary-shade`, `--color-backdrop`, `--color-theme-bar`
+  (vira o `meta theme-color`), `--color-ink-on-pastel` (categorias: branco sobre pastel dava
+  ~1.5:1), `--fw-display`, `--gutter`, `--app-max`, `--card-border`, `--mission-*`, `--games-*`,
+  `--map-grass/sand/node`. `--color-text-secondary` do João foi de 3.7:1 pra 4.7:1 (AA).
+  `:where(button) { color: var(--color-text) }`: botão sem cor própria herdava o preto do navegador.
+- **Regra pra CSS novo**: texto sobre fundo/superfície = `--color-text`/`--color-text-secondary`;
+  sobre botão primário = `--color-on-primary`. Nunca `#fff`/`#333`/`#555` direto: some no tema
+  escuro do André. (Ainda com cor fixa, fora deste escopo: `#result-text` e a celebração.)
+- **Três Homes, uma estrutura** (index.html): cada bloco tem `data-modes` e o CSS esconde o que
+  não é do perfil; `renderHome` preenche.
+  - **João**: missão como herói (cresce e ocupa a altura que sobra); avatar com o **próximo
+    prêmio** (`nextAvatarUnlock`: o item trancado que falta MENOS pra chegar a `UNLOCK_THRESHOLD`,
+    com "Faltam N pra ganhar" e barra); Quokka Bay como mini trilha de 3 nós.
+  - **André**: "Today's challenge"; Word Games grande; sequência da semana em 7 fichas
+    (`loadActivityLog`); avatar + "Next reward"; Quokka Bay.
+  - **Thales**: cartão **Hoje** (revisões / novas / minutos, contados na sessão que o próprio
+    `buildSession` montou); **Sua semana** (mini gráfico SVG à mão, 7 dias, com `aria-label`);
+    **Dictionary** em destaque, com termo do dia; **Situações** (os lugares de `profileSituations()`
+    em lista, com progresso; tocar abre a prática do lugar e volta pra Home). Sem avatar e sem
+    mascote: no lugar, um monograma.
+  - Cabeçalho dos três: saudação sem emoji ("Oi," / "Hey," / "Bom dia,"), nome e sequência com
+    ícone SVG de chama. `touchStreak` e o portão dos pais continuam iguais.
+- **Layout global**: `.screen` tem padding de `max(safe-area, 16–20px)` em todas as telas (o
+  override só de quiz/categoria saiu). A partir de 700px o app tem 640px (`--app-max`),
+  centralizado sobre `--color-backdrop`; na Home, os cartões secundários vão em pares, a categoria
+  tem 3 colunas e a ilha do mapa limita a largura pela altura da tela (não passa da dobra no
+  desktop).
+- **Código**: `goToSituation` foi separado em caminhar + `startSituationQuiz(situation, returnTo)`,
+  com o mesmo sorteio de antes. Ícones novos (`flame`, `gift`, `map`) entram por
+  `Object.assign(ICONS, …)`. Motor, dados e formato do `localStorage` não mudaram.
+- **Testado** (Playwright, 390×844, 768×1024 e 1280×800, nos três perfis, com dados e sem dados):
+  Home, mapa, quiz (choice, situation, dictation, meaning), categoria, Dictionary, Word Games,
+  avatar e área dos pais; uma varredura com 10.428 rodadas (todos os tipos × todos os itens de cada
+  perfil, com e sem dados), sem exceção e sem erro no console.
+
+### Redesign premium: orquestração por agentes, QA e contraste final
+
+- **Contexto**: o usuário pediu as 5 fases do redesign ("cara de app premium"), testadas antes de
+  publicar, com subagentes e um orquestrador. Cada fase foi feita por um agente numa cópia isolada
+  do repositório (worktree), dona de telas diferentes pra não editarem o mesmo trecho; o
+  orquestrador juntou em ondas, resolveu os conflitos (todos de junção: as duas versões ficaram) e
+  testou o conjunto a cada onda. Modelos por tipo de trabalho: Fable pro mais criativo/visual
+  (avatar, mascote e mapa; momentos de recompensa), Opus pro estrutural (temas e Homes; área dos
+  pais), Sonnet pro bem definido (acabamento, pipeline de imagens, QA). As decisões de cada fase
+  estão nas entradas próprias acima.
+- **QA final** (agente dedicado): fluxos completos nos 3 perfis e 3 tamanhos de tela, varredura de
+  todas as rodadas, contraste por tema, offline com o Service Worker ativo. Corrigiu 5 problemas
+  (título do portão ilegível no tema escuro, dois textos abaixo de AA, 🙏 trocado pela variante
+  Medium-Light do Fluent, emoji de texto esquecidos nos feedbacks, e emoji/fotos sem pré-carga
+  offline).
+- **Contraste do tema do João** (pendência do QA, corrigida pelo orquestrador): texto branco sobre
+  o coral #FF7A52 dava 2,6:1 e sobre o teal #1CA7B0, 2,9:1. Agora #E0552F (3,8:1, AA pra texto
+  grande e em negrito, que é o caso dos botões) e #137F86 (4,8:1); o gradiente da missão escureceu
+  junto, e o texto pequeno branco do cartão ganhou uma sombra sutil.
+- **Categoria → voltar** agora leva ao mapa (a grade de categorias mora dentro dele), não à Home.
+- **Pendências registradas** (opcionais): o mascote ainda pode ficar mais "quokka" (bochechas mais
+  altas, orelhas menores e mais afastadas, nariz mais largo); o 🙏 do Fluent continua pouco claro
+  em tamanho pequeno — trocar o emoji dos itens de "thank you"/"please" por outro é mudança de
+  conteúdo, fica pra decidir com o usuário.
+
 ---
 
 ## Arquitetura de conteúdo (5 camadas)
@@ -362,9 +576,9 @@ Prioridade: P0 (integridade/correção) / P1 (aprendizagem/produto core) / P2 (q
   possam estar fora de contexto (usuário mencionou isso, nunca chegamos a fazer a revisão
   completa — só corrigimos `animals_bird.jpg` pontualmente) + buscar fotos pra `hello`/`bye_bye`/
   `see_you_later` (hoje só emoji, a solução definitiva é foto contextual) e `school_glue`.
-- Telas "menos glamurosas" (Configurações, Resultado, celebração de desbloqueio) ainda não
-  receberam nenhum tratamento visual da paleta/identidade Quokka Bay — continuam com a cara
-  antiga (sliders/combobox padrão de navegador).
+- Telas "menos glamurosas" (Resultado, celebração de desbloqueio) ainda não receberam
+  tratamento visual da paleta/identidade Quokka Bay. (Configurações virou a Área dos pais —
+  ver decisão "Área dos pais: portão de 'segurar 3 s'".)
 
 ### LATER
 

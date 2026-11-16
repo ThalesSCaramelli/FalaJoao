@@ -26,56 +26,74 @@
     </div>
   </section>
 
-  <!-- TELA INICIAL -->
+  <!-- TELA INICIAL — uma estrutura só, três Homes: cada bloco diz em data-modes em quais perfis
+       aparece (CSS esconde o resto) e o renderHome preenche o texto/conteúdo de cada um.
+       João (oral): missão + avatar com o próximo prêmio + Quokka Bay. André (literacy): Today's
+       challenge + Word Games + sequência da semana + avatar. Thales (adult): Hoje + semana +
+       Dictionary + situações. Ver PROCESS.md, "Temas por perfil e três Homes". -->
   <section id="screen-home" class="screen">
     <header class="home-header">
-      <div id="home-mascot" class="home-mascot"></div>
+      <div id="home-mascot" class="home-mascot" data-modes="oral" aria-hidden="true"></div>
+      <div id="home-avatar-badge" class="home-avatar-badge" data-modes="literacy" aria-hidden="true"></div>
+      <div id="home-monogram" class="home-monogram" data-modes="adult" aria-hidden="true"></div>
       <div class="greeting">
-        <div class="hello" id="home-greeting">Olá! 👋</div>
-        <h1>Meu Inglês</h1>
+        <div class="hello" id="home-greeting"></div>
+        <h1 id="home-name"></h1>
       </div>
       <div class="streak-badge" id="streak-badge"></div>
       <button id="btn-settings" class="icon-btn" aria-label="Configurações">⚙️</button>
     </header>
 
-    <button id="btn-session" class="mission-card">
-      <div class="eyebrow">Sua Missão</div>
-      <h2 id="mission-title">🎯 Vamos começar</h2>
-      <div class="meta" id="mission-meta"></div>
-      <span class="play-pill">▶ JOGAR</span>
-    </button>
+    <div class="home-body">
+      <!-- Ação principal (todos os perfis): a sessão adaptativa do dia. -->
+      <button id="btn-session" class="mission-card">
+        <span class="mission-art" id="mission-art" aria-hidden="true"></span>
+        <div class="eyebrow" id="mission-eyebrow">Sua Missão</div>
+        <h2 id="mission-title">Vamos começar</h2>
+        <div class="meta" id="mission-meta"></div>
+        <div class="mission-stats" id="mission-stats" data-modes="adult"></div>
+        <span class="play-pill" id="mission-cta">JOGAR</span>
+      </button>
 
-    <button id="btn-world-banner" class="world-banner">
-      <div class="world-banner-head">
-        <span class="ic">🏝️</span>
-        <div class="txt">Quokka Bay<small>Explore lugares e pratique lá</small></div>
-        <span>›</span>
-      </div>
-      <div class="world-banner-preview" id="world-banner-preview"></div>
-    </button>
+      <!-- Minigames de ortografia — só no perfil do André. -->
+      <button id="btn-games" class="home-card games-card" data-modes="literacy">
+        <span class="games-card-ic" aria-hidden="true"></span>
+        <span class="home-card-txt"><b>Word Games</b><small id="games-card-sub">Build, find and fix words</small></span>
+        <span class="games-card-chips" id="games-card-chips" aria-hidden="true"></span>
+      </button>
 
-    <!-- Minigames de ortografia — só aparece no perfil do André (renderHome). -->
-    <button id="btn-games" class="world-banner dict-banner" style="display:none">
-      <div class="world-banner-head">
-        <span class="ic">🎮</span>
-        <div class="txt">Word Games<small>Build, find and fix words</small></div>
-        <span>›</span>
-      </div>
-    </button>
+      <!-- Sequência: semana em pontinhos (André) ou mini gráfico de 7 dias (Thales). -->
+      <div class="home-card streak-card" id="home-week" data-modes="literacy adult"></div>
 
-    <!-- Dicionário — só aparece no perfil adulto (renderHome). -->
-    <button id="btn-dictionary" class="world-banner dict-banner" style="display:none">
-      <div class="world-banner-head">
-        <span class="ic">📖</span>
-        <div class="txt">Dictionary<small>Palavras e expressões explicadas</small></div>
-        <span>›</span>
-      </div>
-    </button>
+      <!-- Avatar + próximo item a destravar (crianças). -->
+      <button id="btn-avatar-hero" class="home-card avatar-card" data-modes="oral literacy">
+        <span class="avatar-card-stage"><span id="home-avatar-mount" class="voxel-avatar"></span></span>
+        <span class="avatar-card-next" id="avatar-next"></span>
+      </button>
 
-    <button id="btn-avatar-hero" class="avatar-hero-home">
-      <div id="home-avatar-mount" class="voxel-avatar"></div>
-      <span class="avatar-hero-hint" id="avatar-unlock-hint-home"></span>
-    </button>
+      <!-- Dicionário — só no perfil adulto, em destaque (com o termo do dia). -->
+      <button id="btn-dictionary" class="home-card dict-card" data-modes="adult">
+        <span class="dict-card-head">
+          <span class="dict-card-ic" aria-hidden="true"></span>
+          <span class="home-card-txt"><b>Dictionary</b><small id="dict-card-sub">Palavras e expressões explicadas</small></span>
+          <span class="dict-card-chev" aria-hidden="true"></span>
+        </span>
+        <span class="dict-card-word" id="dict-card-word"></span>
+      </button>
+
+      <!-- Situações (adulto): os lugares do mapa como lista, cada um abre a prática dele. -->
+      <div class="home-card situations-card" id="home-situations" data-modes="adult"></div>
+
+      <!-- Quokka Bay (crianças): mini trilha com os 3 lugares a explorar a seguir. -->
+      <button id="btn-world-banner" class="world-banner" data-modes="oral literacy">
+        <div class="world-banner-head">
+          <span class="ic">🏝️</span>
+          <div class="txt">Quokka Bay<small>Explore lugares e pratique lá</small></div>
+          <span>›</span>
+        </div>
+        <div class="world-banner-preview" id="world-banner-preview"></div>
+      </button>
+    </div>
   </section>
 
   <!-- TELA MINIGAMES (perfil do André) -->
@@ -104,12 +122,30 @@
       <button class="back-btn" data-back="home">⬅️</button>
       <h2>🏝️ Quokka Bay</h2>
     </header>
+    <div class="world-hint">Toque num lugar pra ir e jogar lá!</div>
     <div class="world-map" id="world-map">
-      <div class="bay-sun"></div>
-      <div class="bay-hill" style="width:140px;height:140px;top:50px;left:-40px;"></div>
-      <div class="bay-hill" style="width:100px;height:100px;top:90px;right:-25px;"></div>
-      <div class="bay-sand"></div>
-      <div class="world-hint">👉 Toque num lugar pra ir e jogar lá!</div>
+      <!-- Ilha de Quokka Bay: ilustração de fundo (mar, espuma, praia, grama, árvores). Só cenário —
+           os lugares (#world-pins) e a trilha (#world-trail-path) são desenhados pelo renderWorldMap. -->
+      <svg class="bay-art" viewBox="0 0 360 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="bay-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#63C9D6"/><stop offset="1" stop-color="#3FB3C6"/></linearGradient>
+          <path id="bay-island" d="M70 26 C130 8 240 10 300 28 C338 40 350 90 346 150 C344 200 350 240 344 268 C340 284 318 286 318 298 C318 312 342 312 346 332 C352 400 350 500 336 548 C322 584 240 590 180 588 C110 586 40 590 22 540 C8 500 12 430 12 380 C12 300 8 230 14 204 C20 186 62 188 62 166 C62 146 20 146 14 128 C6 90 20 40 70 26Z"/>
+          <g id="bay-tree"><ellipse cx="0" cy="1" rx="13" ry="4" fill="#3A2E27" opacity="0.14"/><rect x="-2.5" y="-12" width="5" height="13" rx="2" fill="#9A6B45"/><circle cx="0" cy="-22" r="14" fill="#4FA862"/><circle cx="-9" cy="-15" r="9" fill="#4FA862"/><circle cx="9" cy="-15" r="9" fill="#4FA862"/><circle cx="-3" cy="-26" r="8" fill="#74C47A"/><circle cx="6" cy="-20" r="5" fill="#74C47A"/></g>
+          <g id="bay-palm"><ellipse cx="0" cy="1" rx="11" ry="3.5" fill="#3A2E27" opacity="0.14"/><path d="M0 0 Q-3 -14 3 -27" fill="none" stroke="#B48655" stroke-width="4.5" stroke-linecap="round"/><g fill="none" stroke="#3F9E5C" stroke-width="4.5" stroke-linecap="round"><path d="M3 -27 Q-6 -36 -16 -30"/><path d="M3 -27 Q12 -37 21 -30"/><path d="M3 -27 Q-4 -28 -12 -19"/><path d="M3 -27 Q11 -28 17 -19"/></g><path d="M3 -27 Q3 -38 4 -41" fill="none" stroke="#5FBE74" stroke-width="4.5" stroke-linecap="round"/><circle cx="1.5" cy="-25" r="2.4" fill="#8A5A3C"/></g>
+          <g id="bay-bush"><ellipse cx="0" cy="1" rx="14" ry="3.5" fill="#3A2E27" opacity="0.12"/><circle cx="-7" cy="-4" r="7" fill="#5DB56C"/><circle cx="6" cy="-5" r="8" fill="#5DB56C"/><circle cx="0" cy="-9" r="7" fill="#7BCB80"/></g>
+          <path id="bay-wave" d="M0 0 q4 -4 8 0 t8 0 t8 0" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+        </defs>
+        <rect width="360" height="600" fill="url(#bay-sea)"/>
+        <use href="#bay-island" fill="#8FDDE3" stroke="#8FDDE3" stroke-width="46" stroke-linejoin="round" opacity="0.75"/>
+        <use href="#bay-island" fill="#EAFBF8" stroke="#EAFBF8" stroke-width="20" stroke-linejoin="round"/>
+        <use href="#bay-island" fill="#FBE7B2" stroke="#FBE7B2" stroke-width="8" stroke-linejoin="round"/>
+        <use href="#bay-island" fill="#F3D793" transform="translate(180 300) scale(0.955 0.972) translate(-180 -300)"/>
+        <use href="#bay-island" fill="#BFE5A0" transform="translate(180 300) scale(0.9 0.94) translate(-180 -300)"/>
+        <g fill="#ACDB8E"><ellipse cx="110" cy="120" rx="52" ry="30"/><ellipse cx="262" cy="232" rx="46" ry="34"/><ellipse cx="96" cy="430" rx="50" ry="36"/><ellipse cx="250" cy="520" rx="56" ry="26"/><ellipse cx="190" cy="300" rx="34" ry="22"/></g>
+        <use href="#bay-wave" transform="translate(8 22) scale(1)"/><use href="#bay-wave" transform="translate(326 10) scale(0.9)"/><use href="#bay-wave" transform="translate(330 590) scale(0.9)"/><use href="#bay-wave" transform="translate(4 588) scale(1)"/><use href="#bay-wave" transform="translate(26 160) scale(0.8)"/><use href="#bay-wave" transform="translate(326 304) scale(0.7)"/><g transform="translate(22 168)"><path d="M0 8 H26 L21 15 H5Z" fill="#FF7A52"/><path d="M12 8 V-12" stroke="#8A5A3C" stroke-width="2" stroke-linecap="round"/><path d="M14 -11 L25 5 H14Z" fill="#FFFFFF"/><path d="M10 -8 L3 5 H10Z" fill="#FFE9B8"/></g><path d="M14 548 q6 -9 14 -3 q5 5 -1 9 q-9 3 -13 -6Z" fill="#B9B4AC"/><path d="M336 126 q5 -7 11 -2 q3 5 -2 7 q-7 2 -9 -5Z" fill="#B9B4AC"/><ellipse cx="160" cy="364" rx="27" ry="14" fill="#8DD7E4"/><ellipse cx="160" cy="364" rx="27" ry="14" fill="none" stroke="#C9EFA9" stroke-width="3"/><path d="M148 361 q5 -3 10 0 M162 368 q5 -3 10 0" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/><g fill="#FFFFFF"><circle cx="120" cy="232" r="2"/><circle cx="129" cy="237" r="2"/><circle cx="114" cy="240" r="2"/></g><g fill="#FFD36B"><circle cx="238" cy="150" r="2"/><circle cx="247" cy="155" r="2"/><circle cx="232" cy="158" r="2"/></g><g fill="#FFFFFF"><circle cx="240" cy="470" r="2"/><circle cx="249" cy="475" r="2"/><circle cx="234" cy="478" r="2"/></g><g fill="#FF9E8A"><circle cx="96" cy="470" r="2"/><circle cx="105" cy="475" r="2"/><circle cx="90" cy="478" r="2"/></g><g fill="#FFD36B"><circle cx="300" cy="395" r="2"/><circle cx="309" cy="400" r="2"/><circle cx="294" cy="403" r="2"/></g><use href="#bay-palm" transform="translate(326 440) scale(1 1)"/><use href="#bay-palm" transform="translate(30 462) scale(-0.95 0.95)"/><use href="#bay-palm" transform="translate(124 48) scale(-0.85 0.85)"/><use href="#bay-palm" transform="translate(226 44) scale(0.85 0.85)"/><use href="#bay-palm" transform="translate(336 214) scale(0.8 0.8)"/><use href="#bay-palm" transform="translate(30 318) scale(-0.8 0.8)"/><use href="#bay-bush" transform="translate(116 562) scale(1)"/><use href="#bay-bush" transform="translate(244 566) scale(0.9)"/><use href="#bay-bush" transform="translate(206 152) scale(0.9)"/><use href="#bay-bush" transform="translate(286 300) scale(0.8)"/><use href="#bay-bush" transform="translate(134 452) scale(0.8)"/><use href="#bay-tree" transform="translate(316 158) scale(1)"/><use href="#bay-tree" transform="translate(298 172) scale(0.75)"/><use href="#bay-tree" transform="translate(118 168) scale(0.9)"/><use href="#bay-tree" transform="translate(244 300) scale(0.9)"/><use href="#bay-tree" transform="translate(196 352) scale(0.85)"/><use href="#bay-tree" transform="translate(124 372) scale(0.8)"/><use href="#bay-tree" transform="translate(328 478) scale(0.8)"/><use href="#bay-tree" transform="translate(214 500) scale(0.75)"/><use href="#bay-tree" transform="translate(84 196) scale(0.7)"/>
+      </svg>
+      <svg class="world-trail" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path id="world-trail-path" d=""/></svg>
+      
       <div id="world-pins"></div>
       <div class="world-avatar" id="world-avatar" style="top:55%;left:45%;"></div>
     </div>
@@ -124,20 +160,20 @@
       <h2>Meu Avatar</h2>
     </header>
     <div class="avatar-hero">
-      <div id="avatar-hero-mount" class="voxel-avatar"></div>
+      <div class="avatar-stage"><div id="avatar-hero-mount" class="voxel-avatar"></div></div>
       <div class="unlocked-count" id="avatar-unlocked-count"></div>
     </div>
     <div class="unlock-hint" id="avatar-unlock-hint">&nbsp;</div>
     <div class="item-group">
-      <div class="label">👕 Camiseta</div>
+      <div class="label"><span>Camiseta</span><span class="count" id="count-shirt"></span></div>
       <div class="item-row" id="row-shirt"></div>
     </div>
     <div class="item-group">
-      <div class="label">🧢 Chapéu</div>
+      <div class="label"><span>Chapéu</span><span class="count" id="count-hat"></span></div>
       <div class="item-row" id="row-hat"></div>
     </div>
     <div class="item-group">
-      <div class="label">🎒 Mochila</div>
+      <div class="label"><span>Mochila</span><span class="count" id="count-backpack"></span></div>
       <div class="item-row" id="row-backpack"></div>
     </div>
   </section>
@@ -145,7 +181,8 @@
   <!-- TELA CATEGORIA: explorar palavras -->
   <section id="screen-category" class="screen">
     <header class="sub-header">
-      <button class="back-btn" data-back="home">⬅️</button>
+      <!-- a grade de categorias mora dentro do mapa (Quokka Bay): voltar leva pro mapa, não pra Home -->
+      <button class="back-btn" data-back="world">⬅️</button>
       <h2 id="category-title"></h2>
       <button id="btn-play-quiz" class="play-btn">🎮 Jogar</button>
     </header>
@@ -154,11 +191,13 @@
 
   <!-- TELA JOGO: quiz de escuta -->
   <section id="screen-quiz" class="screen">
-    <header class="sub-header">
+    <header class="sub-header quiz-header">
       <button class="back-btn" id="btn-quiz-back">⬅️</button>
       <div id="quiz-progress" class="quiz-progress"></div>
     </header>
     <div class="quiz-body">
+      <!-- Palco "ouvir e escolher" (só na rodada choice): Quokka falando + balão de som que repete o áudio -->
+      <div id="quiz-listen" class="listen-stage" hidden></div>
       <button id="btn-repeat-word" class="repeat-btn">🔊 Ouvir de novo</button>
       <div id="quiz-options" class="quiz-options"></div>
     </div>
@@ -167,64 +206,144 @@
   <!-- TELA DESBLOQUEIO -->
   <section id="screen-unlock" class="screen">
     <div class="unlock-body">
-      <div class="unlock-lock" id="unlock-lock-icon">🔒</div>
+      <div class="unlock-lock" id="unlock-lock-icon"></div>
       <div class="unlock-reveal" id="unlock-reveal">
         <div id="unlock-item-preview"></div>
-        <h2>✨ Novo item! ✨</h2>
+        <h2 id="unlock-title">Novo item!</h2>
         <p id="unlock-item-name"></p>
       </div>
-      <button id="btn-unlock-continue" class="big-btn">Continuar</button>
+      <div class="unlock-actions" id="unlock-actions">
+        <button id="btn-unlock-wear" class="big-btn">Vestir</button>
+        <button id="btn-unlock-continue" class="big-btn secondary">Continuar</button>
+      </div>
     </div>
   </section>
 
   <!-- TELA FIM DE JOGO -->
   <section id="screen-result" class="screen">
-    <div class="result-body">
+    <!-- Montada por showResultScreen (app.js): herói (avatar comemorando), estrelas, o que foi
+         praticado, próximo prêmio do avatar e sequência de dias. O visual muda por perfil (body[data-mode]). -->
+    <div class="result-body" id="result-body">
+      <div id="result-hero" class="result-hero"></div>
       <div id="result-stars" class="result-stars"></div>
+      <h2 id="result-title" class="result-title"></h2>
       <p id="result-text"></p>
-      <button id="btn-play-again" class="big-btn">🔁 Jogar de novo</button>
-      <button class="big-btn secondary" id="btn-result-back">⬅️ Voltar</button>
-    </div>
-  </section>
-
-  <!-- TELA CONFIGURAÇÕES (pais) -->
-  <section id="screen-settings" class="screen">
-    <header class="sub-header">
-      <button class="back-btn" data-back="home">⬅️</button>
-      <h2>Configurações</h2>
-    </header>
-    <div class="settings-body">
-      <div class="setting-row profile-row">
-        <span>👤 Perfil</span>
-        <div id="profile-switcher" class="profile-switcher"></div>
+      <div id="result-streak" class="result-streak" hidden></div>
+      <div id="result-chips" class="result-chips"></div>
+      <div id="result-next" class="result-next" hidden></div>
+      <div class="result-actions">
+        <button id="btn-play-again" class="big-btn">Jogar de novo</button>
+        <button class="big-btn secondary" id="btn-result-back">Voltar</button>
       </div>
-      <hr />
-      <label class="setting-row">
-        <span>Velocidade da voz</span>
-        <input type="range" id="rate-slider" min="0.5" max="1.2" step="0.05" value="0.85" />
-      </label>
-      <label class="setting-row">
-        <span>Voz em inglês</span>
-        <select id="voice-select"></select>
-      </label>
-      <button id="btn-test-voice" class="big-btn">🔊 Testar voz</button>
-      <hr />
-      <button id="btn-check-update" class="big-btn secondary">🔄 Verificar atualização</button>
-      <p class="update-status" id="update-status"></p>
-      <hr />
-      <div class="family-theme" id="family-theme"></div>
-      <hr />
-      <p class="progress-summary" id="progress-summary"></p>
-      <button id="btn-share-report" class="big-btn">📤 Compartilhar relatório</button>
-      <button id="btn-reset-progress" class="big-btn danger">Zerar progresso</button>
-      <hr />
-      <p class="debug-title">🔧 Debug do motor adaptativo</p>
-      <button id="btn-simulate-difficulty" class="big-btn secondary">🧪 Simular dificuldade (banheiro)</button>
-      <div id="adaptation-log" class="adaptation-log"></div>
-      <button id="btn-clear-log" class="big-btn danger">Limpar log</button>
     </div>
   </section>
 
+  <!-- TELA ÁREA DOS PAIS (só abre depois do portão — ver openParentGate em app.js) -->
+  <section id="screen-settings" class="screen parents-screen" aria-labelledby="parents-title">
+    <header class="sub-header parents-header">
+      <button class="back-btn" data-back="home">⬅️</button>
+      <h2 id="parents-title">Área dos pais</h2>
+      <span class="parents-header-spacer" aria-hidden="true"></span>
+    </header>
+    <div class="settings-body parents-body">
+
+      <section class="pa-section" aria-labelledby="pa-profiles-title">
+        <h3 class="pa-section-title" id="pa-profiles-title">Quem está usando</h3>
+        <div id="profile-switcher" class="profile-switcher pa-profiles" role="radiogroup" aria-labelledby="pa-profiles-title"></div>
+      </section>
+
+      <!-- Painel do perfil ativo: preenchido por renderParentDashboard (app.js). -->
+      <section class="pa-section" id="parent-dashboard" aria-labelledby="pa-dash-title"></section>
+
+      <section class="pa-section" aria-label="Tema do mês">
+        <div class="family-theme" id="family-theme"></div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-voice-title">
+        <h3 class="pa-section-title" id="pa-voice-title">Voz</h3>
+        <div class="pa-card pa-stack">
+          <div class="pa-field">
+            <span class="pa-label" id="rate-label">Velocidade da fala</span>
+            <div class="pa-segmented" id="rate-segmented" role="radiogroup" aria-labelledby="rate-label"></div>
+          </div>
+          <div class="pa-field">
+            <label class="pa-label" for="voice-select">Voz em inglês <small>(quando não há áudio gravado)</small></label>
+            <div class="pa-select-wrap">
+              <select id="voice-select" class="pa-select"></select>
+            </div>
+          </div>
+          <button id="btn-test-voice" class="pa-btn pa-btn-secondary">🔊 Testar voz</button>
+        </div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-share-title">
+        <h3 class="pa-section-title" id="pa-share-title">Relatório e app</h3>
+        <div class="pa-card pa-stack">
+          <div class="pa-row-text">
+            <strong>Compartilhar relatório</strong>
+            <span>Um resumo em texto, com os dados no fim — dá pra colar numa conversa com o Claude e pedir gráficos.</span>
+          </div>
+          <button id="btn-share-report" class="pa-btn pa-btn-primary">📤 Compartilhar relatório</button>
+          <div class="pa-divider" role="presentation"></div>
+          <div class="pa-row-text">
+            <strong>Atualização</strong>
+            <span>O app se atualiza sozinho; aqui dá pra forçar agora.</span>
+          </div>
+          <button id="btn-check-update" class="pa-btn pa-btn-secondary">🔄 Verificar atualização</button>
+          <p class="update-status" id="update-status" role="status"></p>
+        </div>
+      </section>
+
+      <section class="pa-section" aria-labelledby="pa-danger-title">
+        <h3 class="pa-section-title pa-danger-title" id="pa-danger-title">Zona de perigo</h3>
+        <div class="pa-card pa-danger-card pa-stack">
+          <div class="pa-row-text">
+            <strong id="reset-title">Zerar progresso</strong>
+            <span id="reset-desc">Apaga o que foi aprendido neste perfil. Não dá pra desfazer.</span>
+          </div>
+          <button id="btn-reset-progress" class="pa-btn pa-btn-danger-outline">Zerar progresso…</button>
+          <div class="pa-reset-confirm" id="reset-confirm" hidden>
+            <label class="pa-label" for="reset-confirm-input" id="reset-confirm-label"></label>
+            <input type="text" id="reset-confirm-input" class="pa-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            <div class="pa-btn-row">
+              <button id="btn-reset-cancel" class="pa-btn pa-btn-secondary">Cancelar</button>
+              <button id="btn-reset-confirm" class="pa-btn pa-btn-danger" disabled>Zerar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Debug do motor adaptativo: recolhido por padrão (não é coisa de rotina, nem pra criança). -->
+      <details class="pa-advanced" id="pa-advanced">
+        <summary>Avançado</summary>
+        <div class="pa-card pa-stack">
+          <p class="debug-title">🔧 Debug do motor adaptativo</p>
+          <button id="btn-simulate-difficulty" class="pa-btn pa-btn-secondary">🧪 Simular dificuldade (banheiro)</button>
+          <div id="adaptation-log" class="adaptation-log"></div>
+          <button id="btn-clear-log" class="pa-btn pa-btn-danger-outline">Limpar log</button>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</div>
+
+<!-- Portão dos pais: a engrenagem da Home abre isto, não a Área dos pais direto (openParentGate). -->
+<div id="parent-gate" class="parent-gate" hidden>
+  <div class="parent-gate-backdrop" data-gate-close></div>
+  <div class="parent-gate-card" role="dialog" aria-modal="true" aria-labelledby="parent-gate-title" aria-describedby="parent-gate-hint">
+    <button class="parent-gate-close" data-gate-close aria-label="Fechar">✕</button>
+    <h2 class="parent-gate-title" id="parent-gate-title">Área dos pais</h2>
+    <p class="parent-gate-hint" id="parent-gate-hint">Segure o botão por 3 segundos para entrar.</p>
+    <button id="parent-gate-hold" class="parent-gate-hold" aria-label="Segure por 3 segundos para entrar na área dos pais">
+      <svg class="parent-gate-ring" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="ring-track" cx="60" cy="60" r="52" />
+        <circle class="ring-fill" id="parent-gate-ring-fill" cx="60" cy="60" r="52" />
+      </svg>
+      <span class="parent-gate-lock" id="parent-gate-icon" aria-hidden="true"></span>
+    </button>
+    <p class="parent-gate-status" id="parent-gate-status" role="status" aria-live="polite"></p>
+  </div>
 </div>
 
 <!-- Verbete do dicionário (abre por cima de qualquer tela) -->
